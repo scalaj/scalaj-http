@@ -122,7 +122,9 @@ object Sh {
       is.close
     }
     
-    def apply[T](parser: InputStream => T): T = {
+    def apply[T](parser: InputStream => T): T = process((conn:HttpURLConnection) => tryParse(conn.getInputStream(), parser))
+    
+    def process[T](processor: HttpURLConnection => T): T = {
 
       url(this).openConnection match {
         case conn:HttpURLConnection =>
@@ -134,14 +136,15 @@ object Sh {
 
           exec(this, conn)
           try {
-            tryParse(conn.getInputStream(), parser)
+            processor(conn)
           } catch {
             case e: java.io.IOException =>
               throw new ShException(conn.getResponseCode, tryParse(conn.getErrorStream(), readString))
           }
-
       }
     }
+    
+    def responseCode = process((conn:HttpURLConnection) => conn.getResponseCode)
     
     def readString(is: InputStream) = {
       val sb = new StringBuilder()
