@@ -1,0 +1,11 @@
+.DS_Store
+lib_managed
+project/boot/*
+project/build/target/*
+target
+log/*
+.idea/*
+*.tmproj
+*.iml
+*.ipr
+
