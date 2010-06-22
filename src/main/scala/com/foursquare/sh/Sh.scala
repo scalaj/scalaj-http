@@ -29,7 +29,7 @@ object OAuth {
     
     val baseParams:List[(String,String)] = List(
       ("oauth_timestamp", (System.currentTimeMillis/1000).toString),
-      ("oauth_nonce",System.currentTimeMillis.toString)
+      ("oauth_nonce", System.currentTimeMillis.toString)
     )
     
     var (oauthParams, signature) = getSig(baseParams, req, consumer, token, verifier)
@@ -112,9 +112,10 @@ object Sh {
     
     def auth(user: String, password: String) = header("Authorization", "Basic " + base64(user + ":" + password))
     
-    def oauth(consumer: Token) = OAuth.sign(this, consumer, None, None)
-    def oauth(consumer: Token, token: Token) = OAuth.sign(this, consumer, Some(token), None)
-    def oauth(consumer: Token, token: Token, verifier: String) = OAuth.sign(this, consumer, Some(token), Some(verifier))
+    def oauth(consumer: Token):Request = oauth(consumer, None, None)
+    def oauth(consumer: Token, token: Token):Request = oauth(consumer, Some(token), None)
+    def oauth(consumer: Token, token: Token, verifier: String):Request = oauth(consumer, Some(token), Some(verifier))
+    def oauth(consumer: Token, token: Option[Token], verifier: Option[String]):Request = OAuth.sign(this, consumer, token, verifier)
     
     def tryParse[E](is: InputStream, parser: InputStream => E):E = try {
       parser(is)
