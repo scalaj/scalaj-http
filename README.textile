@@ -1,4 +1,4 @@
-h2. hoffrocket.sh
+h2. Simple Http
 
 This is a bare bones http client for scala which wraps HttpURLConnection
 
@@ -7,28 +7,28 @@ h3. Usage
 h3. Simple Get
 
 <code>
-  Sh("http://google.com").param("q","monkeys").asString
+  Http("http://foo.com/search").param("q","monkeys").asString
 </code>
 
 h3. Simple Post
 
 <code>
-  Sh.post("http://foo.com").params("name" -> "jon", "age" -> "29").asString
+  Http.post("http://foo.com/add").params("name" -> "jon", "age" -> "29").asString
 </code>
 
 h3. OAuth Dance and Request
 
 <pre><code>
-  import hoffrocket.sh._
+  import org.scalaj.http.Http
   
   val consumer = Token("key", "secret")
-  val token = Sh("http://foursquare.com/oauth/request_token").param("oauth_callback","oob").oauth(consumer).asToken
+  val token = Http("http://foursquare.com/oauth/request_token").param("oauth_callback","oob").oauth(consumer).asToken
   
   println("Go to http://foursquare.com/oauth/authorize?oauth_token=" + token.key)
   
   val verifier = Console.readLine("Enter verifier: ").trim
 
-  val accessToken = Sh("http://foursquare.com/oauth/access_token").oauth(consumer, token, verifier).asToken
+  val accessToken = Http("http://foursquare.com/oauth/access_token").oauth(consumer, token, verifier).asToken
   
-  println(Sh("http://api.foursquare.com/v1/history.json").oauth(consumer, accessToken).asString)
+  println(Http("http://api.foursquare.com/v1/history.json").oauth(consumer, accessToken).asString)
 </code></pre>
