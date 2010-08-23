@@ -1,4 +1,4 @@
-package org.scalaj.http
+package scalaj.http
 
 import org.specs._
 

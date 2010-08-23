@@ -19,7 +19,7 @@ h3. Simple Post
 h3. OAuth Dance and Request
 
 <pre><code>
-  import org.scalaj.http.Http
+  import scalaj.http.Http
   
   val consumer = Token("key", "secret")
   val token = Http("http://foursquare.com/oauth/request_token").param("oauth_callback","oob").oauth(consumer).asToken

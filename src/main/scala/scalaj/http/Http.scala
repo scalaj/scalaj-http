@@ -1,4 +1,4 @@
-package org.scalaj.http
+package scalaj.http
 
 import java.net.{HttpURLConnection, URL, URLEncoder, URLDecoder}
 import java.io.{DataOutputStream, InputStream, BufferedReader, InputStreamReader}
