@@ -25,9 +25,8 @@ h3. OAuth Dance and Request
   val token = Sh("http://foursquare.com/oauth/request_token").param("oauth_callback","oob").oauth(consumer).asToken
   
   println("Go to http://foursquare.com/oauth/authorize?oauth_token=" + token.key)
-  println("Enter verifier: ")
   
-  val verifier = new BufferedReader(new InputStreamReader(System.in)).readLine.trim
+  val verifier = Console.readLine("Enter verifier: ").trim
 
   val accessToken = Sh("http://foursquare.com/oauth/access_token").oauth(consumer, token, verifier).asToken
   
