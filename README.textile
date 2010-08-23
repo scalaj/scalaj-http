@@ -18,7 +18,7 @@ h3. Simple Post
 
 h3. OAuth Dance and Request
 
-<code>
+<code><pre>
   import hoffrocket.sh._
   
   val consumer = Token("key", "secret")
@@ -32,4 +32,4 @@ h3. OAuth Dance and Request
   val accessToken = Sh("http://foursquare.com/oauth/access_token").oauth(consumer, token, verifier).asToken
   
   println(Sh("http://api.foursquare.com/v1/history.json").oauth(consumer, accessToken).asString)
-</code>  
+</pre></code>  
