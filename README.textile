@@ -2,7 +2,7 @@ h2. Simple Http
 
 This is a bare bones http client for scala which wraps HttpURLConnection
 
-h3. Usage
+h2. Usage
 
 h3. Simple Get
 
@@ -31,4 +31,22 @@ h3. OAuth Dance and Request
   val accessToken = Http("http://foursquare.com/oauth/access_token").oauth(consumer, token, verifier).asToken
   
   println(Http("http://api.foursquare.com/v1/history.json").oauth(consumer, accessToken).asString)
+</code></pre>
+
+h2. Installation
+
+h3. sbt
+
+<code>
+  val scalaj_http = "org.scalaj" %% "scalaj-http" % "0.1"
+</code>
+
+h3. maven
+
+<pre><code>
+  <dependency>
+    <groupId>org.scalaj</groupId>
+    <artifactId>scalaj-http_${scala.version}</artifactId>
+    <version>0.1</version>
+  </dependency>  
 </code></pre>

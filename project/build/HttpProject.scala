@@ -1,11 +1,10 @@
 import sbt._
 import sbt.Process._
 
-class ShProject(info: ProjectInfo) extends DefaultProject(info) {
+class HttpProject(info: ProjectInfo) extends DefaultProject(info) {
   override def managedStyle = ManagedStyle.Maven
   val publishTo = "Scala Tools Nexus" at "http://nexus.scala-tools.org/content/repositories/releases/"
   Credentials(Path.userHome / ".ivy2" / ".credentials", log)
-  override def extraTags = "scalaj" :: super.extraTags
   
   val commonsCodec = "commons-codec" % "commons-codec" % "1.3" % "compile" withSources()
   
