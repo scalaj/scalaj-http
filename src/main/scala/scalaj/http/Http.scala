@@ -16,9 +16,6 @@ object HttpOptions {
 
 class HttpException(val code: Int, message: String) extends RuntimeException("ResponseCode[" + code + "] " + message)
 
-case class Token(key: String, secret: String)
-
-
 object Http {
   def apply(url: String):Request = get(url)
   
