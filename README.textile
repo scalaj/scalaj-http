@@ -1,0 +1,35 @@
+h2. hoffrocket.sh
+
+This is a bare bones http client for scala which wraps HttpURLConnection
+
+h3. Usage
+
+h3. Simple Get
+
+<code>
+  Sh("http://google.com").param("q","monkeys").asString
+</code>
+
+h3. Simple Post
+
+<code>
+  Sh.post("http://foo.com").params("name" -> "jon", "age" -> "29").asString
+</code>
+
+h3. OAuth Dance and Request
+
+<code>
+  import hoffrocket.sh._
+  
+  val consumer = Token("key", "secret")
+  val token = Sh("http://foursquare.com/oauth/request_token").param("oauth_callback","oob").oauth(consumer).asToken
+  
+  println("Go to http://foursquare.com/oauth/authorize?oauth_token=" + token.key)
+  println("Enter verifier: ")
+  
+  val verifier = new BufferedReader(new InputStreamReader(System.in)).readLine.trim
+
+  val accessToken = Sh("http://foursquare.com/oauth/access_token").oauth(consumer, token, verifier).asToken
+  
+  println(Sh("http://api.foursquare.com/v1/history.json").oauth(consumer, accessToken).asString)
+</code>  

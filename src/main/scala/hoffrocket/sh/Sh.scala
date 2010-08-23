@@ -174,6 +174,11 @@ object Sh {
     }
     
     def asParamMap = Map(asParams:_*)
+    
+    def asToken = {
+      val params = asParamMap
+      Token(params("oauth_token"), params("oauth_token_secret"))
+    }
   }
 
   val defaultOptions = List(ShOptions.connTimeout(30000), ShOptions.readTimeout(60000))
