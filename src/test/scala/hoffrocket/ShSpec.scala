@@ -1,4 +1,4 @@
-package com.foursquare.sh
+package hoffrocket.sh
 
 import org.specs._
 

@@ -1,4 +1,4 @@
-package com.foursquare.sh
+package hoffrocket.sh
 
 import java.net.{HttpURLConnection, URL, URLEncoder, URLDecoder}
 import java.io.{DataOutputStream, InputStream, BufferedReader, InputStreamReader}
@@ -103,6 +103,7 @@ object Sh {
     def apply(exec: ShExec, url: ShUrl, method:String):Request = Request(method, exec, url, Nil, Nil, ShOptions.method(method)::defaultOptions)
   }
   case class Request(method: String, exec: ShExec, url: ShUrl, params: List[(String,String)], headers: List[(String,String)], options: List[ShOptions.ShOption]) {
+    def params(p: (String, String)*):Request = params(p.toList)
     def params(p: List[(String,String)]):Request = Request(method, exec,url, p, headers,options)
     def headers(h: List[(String,String)]):Request = Request(method,exec,url, params, h,options)
     def param(key: String, value: String):Request = Request(method,exec,url,(key,value)::params, headers,options)
