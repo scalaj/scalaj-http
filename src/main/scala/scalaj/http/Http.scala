@@ -3,6 +3,15 @@ package scalaj.http
 import java.net.{HttpURLConnection, URL, URLEncoder, URLDecoder}
 import java.io.{DataOutputStream, InputStream, BufferedReader, InputStreamReader}
 import org.apache.commons.codec.binary.Base64
+import javax.net.ssl.HttpsURLConnection
+import javax.net.ssl.SSLContext
+import javax.net.ssl.SSLSession
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
+import javax.net.ssl.HostnameVerifier
+import javax.net.ssl.HttpsURLConnection
+import javax.net.ssl.SSLSession
+import java.security.cert.X509Certificate
 
 
 object HttpOptions {
@@ -11,7 +20,24 @@ object HttpOptions {
   def method(method: String):HttpOption = c => c.setRequestMethod(method)
   def connTimeout(timeout: Int):HttpOption = c => c.setConnectTimeout(timeout)
   def readTimeout(timeout: Int):HttpOption = c => c.setReadTimeout(timeout)
-  
+  def allowUnsafeSSL:HttpOption = c => c match {
+    case httpsConn: HttpsURLConnection => 
+      val hv = new HostnameVerifier() {
+        def verify(urlHostName: String, session: SSLSession) = true
+      }
+      httpsConn.setHostnameVerifier(hv)
+      
+      val trustAllCerts = Array[TrustManager](new X509TrustManager() {
+        def getAcceptedIssuers: Array[X509Certificate] = null
+        def checkClientTrusted(certs: Array[X509Certificate], authType: String){}
+        def checkServerTrusted(certs: Array[X509Certificate], authType: String){}
+      })
+
+      val sc = SSLContext.getInstance("SSL")
+      sc.init(null, trustAllCerts, new java.security.SecureRandom())
+      httpsConn.setSSLSocketFactory(sc.getSocketFactory())
+    case _ => // do nothing
+  }
 }
 
 class HttpException(val code: Int, message: String) extends RuntimeException("ResponseCode[" + code + "] " + message)
