@@ -5,6 +5,9 @@ class HttpProject(info: ProjectInfo) extends DefaultProject(info) {
   override def managedStyle = ManagedStyle.Maven
   val publishTo = "Scala Tools Nexus" at "http://nexus.scala-tools.org/content/repositories/releases/"
   Credentials(Path.userHome / ".ivy2" / ".credentials", log)
+  override def packageSrcJar= defaultJarPath("-sources.jar")
+  val sourceArtifact = Artifact.sources(artifactID)
+  override def packageToPublishActions = super.packageToPublishActions ++ Seq(packageSrc)
   
   val commonsCodec = "commons-codec" % "commons-codec" % "1.3" % "compile" withSources()
   
