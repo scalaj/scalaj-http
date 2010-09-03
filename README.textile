@@ -39,7 +39,7 @@ h3. Parsing the response
 
 <code>
   Http("http://foo.com").{responseCode, asString, asXml, asBytes, asParams}
-</pre>
+</code>
 
 
 h2. Installation
