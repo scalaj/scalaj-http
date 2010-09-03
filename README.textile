@@ -101,7 +101,7 @@ _These are set to 30,000 and 60,000 milliseconds respectively by default_
 
 h3. Other custom options
 
-The @.option()@ method takes a function of type @HTTPUrlConnection => Unit@ so you can manipulate the connection in whatever way you want before the request executes.
+The @.option()@ method takes a function of type @HttpURLConnection => Unit@ so you can manipulate the connection in whatever way you want before the request executes.
 
 h2. TODOS
 
