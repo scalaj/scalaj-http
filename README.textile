@@ -6,9 +6,11 @@ h2. Usage
 
 h3. Simple Get
 
-<code>
+<pre><code>
+  import scalaj.http.Http
+  
   Http("http://foo.com/search").param("q","monkeys").asString
-</code>
+</code></pre>
 
 h3. Simple Post
 
@@ -33,6 +35,13 @@ h3. OAuth Dance and Request
   println(Http("http://api.foursquare.com/v1/history.json").oauth(consumer, accessToken).asString)
 </code></pre>
 
+h3. Parsing the response
+
+<code>
+  Http("http://foo.com").{responseCode, asString, asXml, asBytes, asParams}
+</pre>
+
+
 h2. Installation
 
 h3. sbt
@@ -50,3 +59,51 @@ h3. maven
     <version>0.1</version>
   </dependency>  
 </code></pre>
+
+h2. Advanced Usage Examples
+
+h3. Parse the response InputStream using Lift Json
+
+<pre><code>
+  import java.io.InputStreamReader
+  import net.liftweb.json.JsonParser
+  
+  Http("http://foo.com"){inputStream => 
+    JsonParser.parse(new InputStreamReader(is))
+  }
+</code></pre>
+
+h3. Post raw Array[Byte] or String data and get response code
+
+<code>
+  Http.postData(url, data).header("content-type", "application/json").responseCode
+</code>
+
+h3. Send https request to site with self-signed or otherwise shady certificate
+
+<code>
+  Http("https://localhost/").option(HttpOptions.allowUnsafeSSL).asString
+</code>
+
+h3. Do a HEAD request
+
+<code>
+  Http(url).option(HttpOptions.method("HEAD")).asString
+</code>
+
+h3.  Custom connect and read timeouts
+
+_These are set to 30,000 and 60,000 milliseconds respectively by default_
+
+<code>
+  Http(url).option(HttpOptions.connTimeout(1000)).option(HttpOptions.readTimeout(5000)).asString
+</code>
+
+h3. Other custom options
+
+The @.option()@ method takes a function of type @HTTPUrlConnection => Unit@ so you can manipulate the connection in whatever way you want before the request executes.
+
+h2. TODOS
+
+* Multipart form data
+* Handle other http methods better (PUT,HEAD,DELETE)

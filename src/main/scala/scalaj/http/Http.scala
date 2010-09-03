@@ -58,6 +58,7 @@ object Http {
     def headers(h: List[(String,String)]):Request = Request(method,exec,url, params, h,options)
     def param(key: String, value: String):Request = Request(method,exec,url,(key,value)::params, headers,options)
     def header(key: String, value: String):Request = Request(method,exec,url,params, (key,value)::headers,options)
+    def options(o: HttpOptions.HttpOption*):Request = options(o.toList)
     def options(o: List[HttpOptions.HttpOption]):Request = Request(method,exec, url, params, headers, o)
     def option(o: HttpOptions.HttpOption):Request = Request(method,exec,url, params, headers,o::options)
     
