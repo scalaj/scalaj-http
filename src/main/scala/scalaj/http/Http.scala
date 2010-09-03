@@ -1,7 +1,7 @@
 package scalaj.http
 
 import java.net.{HttpURLConnection, URL, URLEncoder, URLDecoder}
-import java.io.{DataOutputStream, InputStream, BufferedReader, InputStreamReader}
+import java.io.{DataOutputStream, InputStream, BufferedReader, InputStreamReader, ByteArrayOutputStream}
 import org.apache.commons.codec.binary.Base64
 import javax.net.ssl.HttpsURLConnection
 import javax.net.ssl.SSLContext
@@ -40,7 +40,7 @@ object HttpOptions {
   }
 }
 
-class HttpException(val code: Int, message: String) extends RuntimeException("ResponseCode[" + code + "] " + message)
+class HttpException(val code: Int, message: String, body: String) extends RuntimeException(code + ": " + message)
 
 object Http {
   def apply(url: String):Request = get(url)
@@ -54,6 +54,7 @@ object Http {
   case class Request(method: String, exec: HttpExec, url: HttpUrl, params: List[(String,String)], headers: List[(String,String)], options: List[HttpOptions.HttpOption]) {
     def params(p: (String, String)*):Request = params(p.toList)
     def params(p: List[(String,String)]):Request = Request(method, exec,url, p, headers,options)
+    def headers(h: (String,String)*):Request = headers(h.toList)
     def headers(h: List[(String,String)]):Request = Request(method,exec,url, params, h,options)
     def param(key: String, value: String):Request = Request(method,exec,url,(key,value)::params, headers,options)
     def header(key: String, value: String):Request = Request(method,exec,url,params, (key,value)::headers,options)
@@ -90,26 +91,54 @@ object Http {
             processor(conn)
           } catch {
             case e: java.io.IOException =>
-              throw new HttpException(conn.getResponseCode, tryParse(conn.getErrorStream(), readString))
+              throw new HttpException(conn.getResponseCode, conn.getResponseMessage, tryParse(conn.getErrorStream(), readString))
           }
       }
     }
     
     def responseCode = process((conn:HttpURLConnection) => conn.getResponseCode)
     
+    
+    /**
+     * [lifted from lift]
+     */
     def readString(is: InputStream) = {
-      val sb = new StringBuilder()
-      val reader = new BufferedReader(new InputStreamReader(is, charset))
-      var ch = -1
-      def read() = {
-        ch = reader.read()
-        (ch != -1)
+      val in = new InputStreamReader(is, charset)
+      val bos = new StringBuilder
+      val ba = new Array[Char](4096)
+
+      def readOnce {
+        val len = in.read(ba)
+        if (len > 0) bos.appendAll(ba, 0, len)
+        if (len >= 0) readOnce
       }
-      while(read()){
-        sb.append(ch.asInstanceOf[Char])
-      }
-      sb.toString
+
+      readOnce
+
+      bos.toString
     }
+    
+    
+    /**
+     * [lifted from lift]
+     * Read all data from a stream into an Array[Byte]
+     */
+    def readBytes(in: InputStream): Array[Byte] = {
+      val bos = new ByteArrayOutputStream
+      val ba = new Array[Byte](4096)
+
+      def readOnce {
+        val len = in.read(ba)
+        if (len > 0) bos.write(ba, 0, len)
+        if (len >= 0) readOnce
+      }
+
+      readOnce
+
+      bos.toByteArray
+    }
+    
+    def asBytes = apply(readBytes)
     
     def asString = apply(readString)
     
@@ -150,6 +179,17 @@ object Http {
     
     Request(getFunc, appendQsHttpUrl(url), "GET")
   }
+  
+  def postData(url: String, data: String): Request = postData(url, data.getBytes(charset))
+  def postData(url: String, data: Array[Byte]): Request = {
+    val postFunc: HttpExec = (req,conn) => {
+      conn.setDoOutput(true)
+      conn.connect
+      conn.getOutputStream.write(data)
+    }
+    Request(postFunc, noopHttpUrl(url), "POST")
+  }
+  
   def post(url: String): Request = {
     val postFunc: HttpExec = (req,conn) => {
       conn.setDoOutput(true)
