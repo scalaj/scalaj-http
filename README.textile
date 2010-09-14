@@ -79,6 +79,12 @@ h3. Post raw Array[Byte] or String data and get response code
   Http.postData(url, data).header("content-type", "application/json").responseCode
 </code>
 
+h3. Post multipart/form-data
+
+<code>
+  Http.multipart(url, MultiPart("photo","headshot.png", "image/png", fileBytes)).responseCode
+</code>
+
 h3. Send https request to site with self-signed or otherwise shady certificate
 
 <code>
@@ -105,5 +111,5 @@ The @.option()@ method takes a function of type @HttpURLConnection => Unit@ so y
 
 h2. TODOS
 
-* Multipart form data
+* Retrieve triple of (statuscode, responseheaders, content)
 * Handle other http methods better (PUT,HEAD,DELETE)
