@@ -38,7 +38,13 @@ object HttpOptions {
   }
 }
 
-class HttpException(val code: Int, message: String, body: String) extends RuntimeException(code + ": " + message)
+object MultiPart {
+  def apply(name: String, filename: String, mime: String, data: String): MultiPart = MultiPart(name, filename, mime, data.getBytes(Http.charset))
+}
+
+case class MultiPart(val name: String, val filename: String, val mime: String, val data: Array[Byte])
+
+class HttpException(val code: Int, val message: String, val body: String) extends RuntimeException(code + ": " + message)
 
 object Http {
   def apply(url: String):Request = get(url)
@@ -67,11 +73,7 @@ object Http {
     def oauth(consumer: Token, token: Token, verifier: String):Request = oauth(consumer, Some(token), Some(verifier))
     def oauth(consumer: Token, token: Option[Token], verifier: Option[String]):Request = OAuth.sign(this, consumer, token, verifier)
     
-    def tryParse[E](is: InputStream, parser: InputStream => E):E = try {
-      parser(is)
-    } finally {
-      is.close
-    }
+
     
     def apply[T](parser: InputStream => T): T = process((conn:HttpURLConnection) => tryParse(conn.getInputStream(), parser))
     
@@ -98,44 +100,6 @@ object Http {
     def responseCode = process((conn:HttpURLConnection) => conn.getResponseCode)
     
     
-    /**
-     * [lifted from lift]
-     */
-    def readString(is: InputStream) = {
-      val in = new InputStreamReader(is, charset)
-      val bos = new StringBuilder
-      val ba = new Array[Char](4096)
-
-      def readOnce {
-        val len = in.read(ba)
-        if (len > 0) bos.append(ba, 0, len)
-        if (len >= 0) readOnce
-      }
-
-      readOnce
-
-      bos.toString
-    }
-    
-    
-    /**
-     * [lifted from lift]
-     * Read all data from a stream into an Array[Byte]
-     */
-    def readBytes(in: InputStream): Array[Byte] = {
-      val bos = new ByteArrayOutputStream
-      val ba = new Array[Byte](4096)
-
-      def readOnce {
-        val len = in.read(ba)
-        if (len > 0) bos.write(ba, 0, len)
-        if (len >= 0) readOnce
-      }
-
-      readOnce
-
-      bos.toByteArray
-    }
     
     def asBytes = apply(readBytes)
     
@@ -157,6 +121,51 @@ object Http {
       Token(params("oauth_token"), params("oauth_token_secret"))
     }
   }
+  
+  def tryParse[E](is: InputStream, parser: InputStream => E):E = try {
+    parser(is)
+  } finally {
+    is.close
+  }
+  
+  /**
+   * [lifted from lift]
+   */
+  def readString(is: InputStream) = {
+    val in = new InputStreamReader(is, charset)
+    val bos = new StringBuilder
+    val ba = new Array[Char](4096)
+
+    def readOnce {
+      val len = in.read(ba)
+      if (len > 0) bos.append(ba, 0, len)
+      if (len >= 0) readOnce
+    }
+
+    readOnce
+
+    bos.toString
+  }
+  
+  
+  /**
+   * [lifted from lift]
+   * Read all data from a stream into an Array[Byte]
+   */
+  def readBytes(in: InputStream): Array[Byte] = {
+    val bos = new ByteArrayOutputStream
+    val ba = new Array[Byte](4096)
+
+    def readOnce {
+      val len = in.read(ba)
+      if (len > 0) bos.write(ba, 0, len)
+      if (len >= 0) readOnce
+    }
+
+    readOnce
+
+    bos.toByteArray
+  }
 
   val defaultOptions = List(HttpOptions.connTimeout(30000), HttpOptions.readTimeout(60000))
   
@@ -177,6 +186,47 @@ object Http {
     val getFunc: HttpExec = (req,conn) => conn.connect
     
     Request(getFunc, appendQsHttpUrl(url), "GET")
+  }
+  
+  
+  val CrLf = "\r\n"
+  val Pref = "--"
+  val Boundary = "gc0pMUlT1B0uNdArYc0p"
+ 
+  def multipart(url: String, parts: MultiPart*): Request = {
+     val postFunc: Http.HttpExec = (req,conn) => {
+
+       conn.setDoOutput(true)
+       conn.setDoInput(true)
+       conn.setUseCaches(false)
+       conn.setRequestMethod("POST")
+       conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + Boundary)
+       conn.setRequestProperty("MIME-Version", "1.0")
+
+       val out = new DataOutputStream(conn.getOutputStream())
+
+       req.params.foreach {
+         case (name, value) =>
+           out.writeBytes(Pref + Boundary + CrLf)
+           out.writeBytes("Content-Disposition: form-data; name=\"" + name + "\"")
+           out.writeBytes(CrLf + CrLf + value.toString + CrLf)
+       }
+
+       parts.foreach { part =>
+         out.writeBytes(Pref + Boundary + CrLf)
+         out.writeBytes("Content-Disposition: form-data; name=\"" + part.name + "\"; filename=\"" + part.name + "\"" + CrLf)
+         out.writeBytes("Content-Type: " + part.mime + CrLf + CrLf)
+
+         out.write(part.data)
+
+         out.writeBytes(CrLf + Pref + Boundary + Pref + CrLf)
+       }
+
+
+       out.flush()
+       out.close()
+     }
+     Http.Request(postFunc, Http.noopHttpUrl(url), "POST")
   }
   
   def postData(url: String, data: String): Request = postData(url, data.getBytes(charset))
