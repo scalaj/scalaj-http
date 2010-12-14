@@ -2,6 +2,7 @@ package scalaj.http
 
 import java.net.{HttpURLConnection, URL, URLEncoder, URLDecoder}
 import java.io.{DataOutputStream, InputStream, BufferedReader, InputStreamReader, ByteArrayOutputStream}
+import org.apache.commons.codec.binary.Base64
 import javax.net.ssl.HttpsURLConnection
 import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLSession
@@ -9,7 +10,7 @@ import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 import javax.net.ssl.HostnameVerifier
 import java.security.cert.X509Certificate
-import sun.misc.BASE64Encoder
+
 
 object HttpOptions {
   type HttpOption = HttpURLConnection => Unit
@@ -170,7 +171,7 @@ object Http {
   
   def urlEncode(name: String): String = URLEncoder.encode(name, charset)
   def urlDecode(name: String): String = URLDecoder.decode(name, charset)
-  def base64(bytes: Array[Byte]) = new BASE64Encoder().encode(bytes)
+  def base64(bytes: Array[Byte]) = new String((new Base64).encode(bytes))
   def base64(in: String): String = base64(in.getBytes(charset))
   
   def toQs(params: List[(String,String)]) = params.map(p => urlEncode(p._1) + "=" + urlEncode(p._2)).mkString("&")
