@@ -1,7 +1,6 @@
 package scalaj.http
 
 import java.net.URL
-import org.apache.commons.codec.binary.Base64
 
 case class Token(key: String, secret: String)
 

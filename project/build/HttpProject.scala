@@ -14,4 +14,6 @@ class HttpProject(info: ProjectInfo) extends DefaultProject(info) {
   } else {
     "org.scala-tools.testing" %% "specs" % "1.6.5" % "test" withSources()
   }
+  
+  val dispatchOauth    = "net.databinder" %% "dispatch-oauth"     % "0.7.5" % "test"
 }

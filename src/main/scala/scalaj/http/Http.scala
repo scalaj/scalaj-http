@@ -43,7 +43,7 @@ object MultiPart {
 
 case class MultiPart(val name: String, val filename: String, val mime: String, val data: Array[Byte])
 
-class HttpException(val code: Int, val message: String, val body: String) extends RuntimeException(code + ": " + message)
+case class HttpException(val code: Int, val message: String, val body: String) extends RuntimeException(code + ": " + message)
 
 object Http {
   def apply(url: String):Request = get(url)
