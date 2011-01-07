@@ -9,7 +9,7 @@ class HttpProject(info: ProjectInfo) extends DefaultProject(info) {
   val sourceArtifact = Artifact.sources(artifactID)
   override def packageToPublishActions = super.packageToPublishActions ++ Seq(packageSrc)
   
-  val commonsCodec = "commons-codec" % "commons-codec" % "1.3" % "compile" withSources()
+  val commonsCodec = "commons-codec" % "commons-codec" % "1.4" % "compile" withSources()
   
   val specs = if (buildScalaVersion.startsWith("2.7.")) {
     "org.scala-tools.testing" % "specs" % "1.6.2.2" % "test" withSources()

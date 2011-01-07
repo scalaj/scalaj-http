@@ -73,7 +73,7 @@ object Http {
     def oauth(consumer: Token, token: Token, verifier: String):Request = oauth(consumer, Some(token), Some(verifier))
     def oauth(consumer: Token, token: Option[Token], verifier: Option[String]):Request = OAuth.sign(this, consumer, token, verifier)
     
-
+    def getUrl: URL = url(this)
     
     def apply[T](parser: InputStream => T): T = process((conn:HttpURLConnection) => tryParse(conn.getInputStream(), parser))
     
@@ -171,7 +171,7 @@ object Http {
   
   def urlEncode(name: String): String = URLEncoder.encode(name, charset)
   def urlDecode(name: String): String = URLDecoder.decode(name, charset)
-  def base64(bytes: Array[Byte]) = new String((new Base64).encode(bytes))
+  def base64(bytes: Array[Byte]) = new String((new Base64).encode(bytes)).trim
   def base64(in: String): String = base64(in.getBytes(charset))
   
   def toQs(params: List[(String,String)]) = params.map(p => urlEncode(p._1) + "=" + urlEncode(p._2)).mkString("&")
