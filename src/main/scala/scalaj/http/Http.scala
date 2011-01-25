@@ -214,7 +214,7 @@ object Http {
 
        parts.foreach { part =>
          out.writeBytes(Pref + Boundary + CrLf)
-         out.writeBytes("Content-Disposition: form-data; name=\"" + part.name + "\"; filename=\"" + part.name + "\"" + CrLf)
+         out.writeBytes("Content-Disposition: form-data; name=\"" + part.name + "\"; filename=\"" + part.filename + "\"" + CrLf)
          out.writeBytes("Content-Type: " + part.mime + CrLf + CrLf)
 
          out.write(part.data)
