@@ -6,6 +6,7 @@ import org.apache.commons.codec.binary.Base64
 import javax.net.ssl.HttpsURLConnection
 import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLSession
+import javax.net.ssl.SSLSocketFactory
 import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 import javax.net.ssl.HostnameVerifier
@@ -34,6 +35,11 @@ object HttpOptions {
       val sc = SSLContext.getInstance("SSL")
       sc.init(null, trustAllCerts, new java.security.SecureRandom())
       httpsConn.setSSLSocketFactory(sc.getSocketFactory())
+    case _ => // do nothing
+  }
+  def sslSocketFactory(sslSocketFactory: SSLSocketFactory): HttpOption = c => c match {
+    case httpsConn: HttpsURLConnection =>
+      httpsConn.setSSLSocketFactory(sslSocketFactory) 
     case _ => // do nothing
   }
 }
