@@ -173,7 +173,7 @@ object Http {
     bos.toByteArray
   }
 
-  val defaultOptions = List(HttpOptions.connTimeout(30000), HttpOptions.readTimeout(60000))
+  val defaultOptions = List(HttpOptions.connTimeout(100), HttpOptions.readTimeout(500))
   
   def urlEncode(name: String): String = URLEncoder.encode(name, charset)
   def urlDecode(name: String): String = URLDecoder.decode(name, charset)
