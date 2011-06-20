@@ -65,11 +65,11 @@ object Http {
     def params(p: (String, String)*):Request = params(p.toList)
     def params(p: List[(String,String)]):Request = Request(method, exec,url, p, headers,options)
     def headers(h: (String,String)*):Request = headers(h.toList)
-    def headers(h: List[(String,String)]):Request = Request(method,exec,url, params, h,options)
+    def headers(h: List[(String,String)]):Request = Request(method,exec,url, params, h ++ headers,options)
     def param(key: String, value: String):Request = Request(method,exec,url,(key,value)::params, headers,options)
     def header(key: String, value: String):Request = Request(method,exec,url,params, (key,value)::headers,options)
     def options(o: HttpOptions.HttpOption*):Request = options(o.toList)
-    def options(o: List[HttpOptions.HttpOption]):Request = Request(method,exec, url, params, headers, o)
+    def options(o: List[HttpOptions.HttpOption]):Request = Request(method,exec, url, params, headers, o ++ options)
     def option(o: HttpOptions.HttpOption):Request = Request(method,exec,url, params, headers,o::options)
     
     def auth(user: String, password: String) = header("Authorization", "Basic " + base64(user + ":" + password))
