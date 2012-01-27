@@ -99,7 +99,7 @@ h3. Do a HEAD request
 
 h3.  Custom connect and read timeouts
 
-_These are set to 30,000 and 60,000 milliseconds respectively by default_
+_These are set to 100 and 500 milliseconds respectively by default_
 
 <code>
   Http(url).option(HttpOptions.connTimeout(1000)).option(HttpOptions.readTimeout(5000)).asString
