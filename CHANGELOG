@@ -1,0 +1,9 @@
+0.3.1
+------
+release: 27 April 2012
+
+ - cross compile for scala 2.9.2, no new features or fixes
+ - maintaining a specs version mapping is too painful, junit ftw
+ 
+for 0.3.0 and older:
+ - sorry for starting this log so late. you'll have to see the commit history

@@ -1,24 +1,18 @@
 name := "scalaj-http"
 
-version := "0.3.0"
+version := "0.3.1"
 
 organization := "org.scalaj"
 
 scalaVersion := "2.9.1"
 
 libraryDependencies ++= Seq(
-   "commons-codec" % "commons-codec" % "1.5" % "compile"
+  "commons-codec"        % "commons-codec"      % "1.5"           % "compile" withSources(),
+  "junit"                % "junit"              % "4.10"          % "test" withSources(),
+  "com.novocode"         % "junit-interface"    % "0.8"           % "test"
 )
 
-crossScalaVersions := Seq("2.8.0", "2.8.1", "2.9.1")
-
-libraryDependencies <<= (scalaVersion, libraryDependencies) { (sv, deps) =>
-  // select the specs version based on the Scala version
-  val versionMap = Map("2.8.0" -> "1.6.5", "2.8.1" -> "1.6.8", "2.9.1" -> "1.6.9")
-  val testVersion = versionMap.getOrElse(sv, error("Unsupported Scala version " + sv))
-  // append the specs dependency to the existing dependencies
-  deps :+ ("org.scala-tools.testing" %% "specs" % testVersion)
-}
+crossScalaVersions := Seq("2.8.0", "2.8.1", "2.9.1", "2.9.2")
 
 publishTo <<= version { v: String =>
   val nexus = "https://oss.sonatype.org/"
