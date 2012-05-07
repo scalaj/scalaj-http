@@ -7,7 +7,8 @@ if [ ! -d .sbtlib ]; then
 fi
 
 if [ ! -f .sbtlib/sbt-launcher.jar ]; then
-  wget -O .sbtlib/sbt-launcher.jar $LATEST
+  echo "Fetching sbt"
+  curl --progress-bar $LATEST > .sbtlib/sbt-launcher.jar
 fi
 
 java \
