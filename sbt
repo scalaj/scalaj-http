@@ -1,14 +1,19 @@
 #!/bin/sh
 
-LATEST=http://typesafe.artifactoryonline.com/typesafe/ivy-releases/org.scala-tools.sbt/sbt-launch/0.11.2/sbt-launch.jar
+VERSION=0.11.3-2
+LATEST=http://typesafe.artifactoryonline.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/${VERSION}/sbt-launch.jar
+JAR=.sbtlib/sbt-launch-${VERSION}.jar
 
 if [ ! -d .sbtlib ]; then
   mkdir .sbtlib
 fi
 
-if [ ! -f .sbtlib/sbt-launcher.jar ]; then
+
+
+if [ ! -f ${JAR} ]; then
+  rm .sbtlib/*
   echo "Fetching sbt"
-  curl --progress-bar $LATEST > .sbtlib/sbt-launcher.jar
+  curl --progress-bar ${LATEST} > ${JAR}
 fi
 
 java \
@@ -18,5 +23,5 @@ java \
 -XX:MaxPermSize=256m \
 -Xmx1g \
 -noverify \
--jar .sbtlib/sbt-launcher.jar \
+-jar ${JAR} \
 "$@"
