@@ -47,7 +47,7 @@ h2. Installation
 h3. sbt
 
 <code>
-  val scalaj_http = "org.scalaj" %% "scalaj-http" % "0.3.1"
+  val scalaj_http = "org.scalaj" %% "scalaj-http" % "0.3.2"
 </code>
 
 h3. maven
@@ -56,7 +56,7 @@ h3. maven
   <dependency>
     <groupId>org.scalaj</groupId>
     <artifactId>scalaj-http_${scala.version}</artifactId>
-    <version>0.3.1</version>
+    <version>0.3.2</version>
   </dependency>  
 </code></pre>
 
@@ -97,12 +97,18 @@ h3. Do a HEAD request
   Http(url).option(HttpOptions.method("HEAD")).asString
 </code>
 
-h3.  Custom connect and read timeouts
+h3. Custom connect and read timeouts
 
 _These are set to 100 and 500 milliseconds respectively by default_
 
 <code>
   Http(url).option(HttpOptions.connTimeout(1000)).option(HttpOptions.readTimeout(5000)).asString
+</code>
+
+h3. Get responseCode, responseHeaders and parsedResponse
+
+<code>
+  val (responseCode, headersMap, resultString) = Http(url).asHeadersAndParse(Http.readString)
 </code>
 
 h3. Other custom options
@@ -111,5 +117,4 @@ The @.option()@ method takes a function of type @HttpURLConnection => Unit@ so y
 
 h2. TODOS
 
-* Retrieve triple of (statuscode, responseheaders, content)
 * Handle other http methods better (PUT,HEAD,DELETE)

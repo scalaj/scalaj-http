@@ -7,6 +7,12 @@ import scalaj.http.Http._
 class HttpTest {
   
   @Test
+  def asCodeHeaders: Unit = {
+    val (code, headers) = Http("http://localhost").asCodeHeaders
+    assertTrue(headers.contains("Date"))
+  }
+  
+  @Test
   def shouldPrependOptions: Unit = {
     val http = Http("http://localhost")
     val origOptions = http.options

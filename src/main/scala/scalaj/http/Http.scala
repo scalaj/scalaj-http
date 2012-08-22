@@ -11,6 +11,7 @@ import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 import javax.net.ssl.HostnameVerifier
 import java.security.cert.X509Certificate
+import scala.xml.{Elem, XML}
 
 
 object HttpOptions {
@@ -103,15 +104,30 @@ object Http {
       }
     }
     
-    def responseCode = process((conn:HttpURLConnection) => conn.getResponseCode)
+    def getResponseHeaders(conn: HttpURLConnection): Map[String, String] = {
+      // according to javadoc, there can be a headerField value where the HeaderFieldKey is null
+      // at the 0th row in some implementations.  In that case it's the http status line
+      Stream.from(0).map(i => i -> conn.getHeaderField(i)).takeWhile(_._2 != null).map{ case (i, value) =>
+        Option(conn.getHeaderFieldKey(i)).getOrElse("Status") -> value
+      }.toMap
+    }
+    
+    def responseCode: Int = process((conn:HttpURLConnection) => conn.getResponseCode)
+    
+    def asCodeHeaders: (Int, Map[String, String]) = process { conn: HttpURLConnection => 
+      (conn.getResponseCode, getResponseHeaders(conn))
+    }
+    
+    def asHeadersAndParse[T](parser: InputStream => T): (Int, Map[String, String], T) = process { conn: HttpURLConnection =>
+      (conn.getResponseCode, getResponseHeaders(conn), tryParse(conn.getInputStream(), parser))
+    }
     
     
+    def asBytes: Array[Byte] = apply(readBytes)
     
-    def asBytes = apply(readBytes)
+    def asString: String = apply(readString)
     
-    def asString = apply(readString)
-    
-    def asXml = apply(is => scala.xml.XML.load(is))
+    def asXml: Elem = apply(is => XML.load(is))
     
     def asParams: List[(String,String)] = {
       asString.split("&").flatMap(_.split("=") match {
@@ -120,9 +136,9 @@ object Http {
       }).toList
     }
     
-    def asParamMap = Map(asParams:_*)
+    def asParamMap: Map[String, String] = Map(asParams:_*)
     
-    def asToken = {
+    def asToken: Token = {
       val params = asParamMap
       Token(params("oauth_token"), params("oauth_token_secret"))
     }
@@ -137,7 +153,7 @@ object Http {
   /**
    * [lifted from lift]
    */
-  def readString(is: InputStream) = {
+  def readString(is: InputStream): String = {
     val in = new InputStreamReader(is, charset)
     val bos = new StringBuilder
     val ba = new Array[Char](4096)
