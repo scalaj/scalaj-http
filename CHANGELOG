@@ -1,3 +1,9 @@
+0.3.3
+------
+release: 19 December 2012
+
+ - no changes, just dropped support for scala 2.8.x and added 2.10.0-RC5
+
 0.3.2
 ------
 release: 22 August 2012

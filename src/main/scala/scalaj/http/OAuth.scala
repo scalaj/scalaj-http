@@ -48,7 +48,7 @@ object OAuth {
   }
   
   private def normalizeParams(params: List[(String,String)]) = {
-    percentEncode(params).sort(_ < _).mkString("&")
+    percentEncode(params).sortWith(_ < _).mkString("&")
   }
   
   private def normalizeUrl(url: URL) = {

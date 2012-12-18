@@ -1,10 +1,10 @@
 name := "scalaj-http"
 
-version := "0.3.2"
+version := "0.3.3"
 
 organization := "org.scalaj"
 
-scalaVersion := "2.9.1"
+scalaVersion := "2.9.2"
 
 libraryDependencies ++= Seq(
   "commons-codec"        % "commons-codec"      % "1.5"           % "compile" withSources(),
@@ -12,7 +12,7 @@ libraryDependencies ++= Seq(
   "com.novocode"         % "junit-interface"    % "0.8"           % "test"
 )
 
-crossScalaVersions := Seq("2.8.0", "2.8.1", "2.9.1", "2.9.2")
+crossScalaVersions := Seq("2.9.2", "2.10.0-RC5")
 
 publishTo <<= version { v: String =>
   val nexus = "https://oss.sonatype.org/"
