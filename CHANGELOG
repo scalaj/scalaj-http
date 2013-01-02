@@ -1,3 +1,9 @@
+0.3.5
+------
+release: 02 January 2013
+
+ - removed dependency on commons-codec. This library now has no dependencies
+
 0.3.4
 ------
 release: 20 December 2012

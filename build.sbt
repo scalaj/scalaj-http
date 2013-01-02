@@ -1,13 +1,12 @@
 name := "scalaj-http"
 
-version := "0.3.4"
+version := "0.3.5"
 
 organization := "org.scalaj"
 
 scalaVersion := "2.9.2"
 
 libraryDependencies ++= Seq(
-  "commons-codec"        % "commons-codec"      % "1.5"           % "compile" withSources(),
   "junit"                % "junit"              % "4.10"          % "test" withSources(),
   "com.novocode"         % "junit-interface"    % "0.8"           % "test"
 )
