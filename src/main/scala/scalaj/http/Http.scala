@@ -103,21 +103,21 @@ object Http {
       }
     }
     
-    def getResponseHeaders(conn: HttpURLConnection): Map[String, String] = {
+    def getResponseHeaders(conn: HttpURLConnection): Map[String, List[String]] = {
       // according to javadoc, there can be a headerField value where the HeaderFieldKey is null
       // at the 0th row in some implementations.  In that case it's the http status line
       Stream.from(0).map(i => i -> conn.getHeaderField(i)).takeWhile(_._2 != null).map{ case (i, value) =>
         Option(conn.getHeaderFieldKey(i)).getOrElse("Status") -> value
-      }.toMap
+      }.groupBy(_._1).mapValues(_.map(_._2).toList)
     }
     
     def responseCode: Int = process((conn:HttpURLConnection) => conn.getResponseCode)
     
-    def asCodeHeaders: (Int, Map[String, String]) = process { conn: HttpURLConnection => 
+    def asCodeHeaders: (Int, Map[String, List[String]]) = process { conn: HttpURLConnection => 
       (conn.getResponseCode, getResponseHeaders(conn))
     }
     
-    def asHeadersAndParse[T](parser: InputStream => T): (Int, Map[String, String], T) = process { conn: HttpURLConnection =>
+    def asHeadersAndParse[T](parser: InputStream => T): (Int, Map[String, List[String]], T) = process { conn: HttpURLConnection =>
       (conn.getResponseCode, getResponseHeaders(conn), tryParse(conn.getInputStream(), parser))
     }
     
