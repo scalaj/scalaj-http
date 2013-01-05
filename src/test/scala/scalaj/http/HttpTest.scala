@@ -1,5 +1,6 @@
 package scalaj.http
 
+import java.io.ByteArrayInputStream
 import org.junit.Assert._
 import org.junit.Test
 import scalaj.http.Http._
@@ -35,6 +36,12 @@ class HttpTest {
       assertEquals(c.getReadTimeout, 1234)
       assertEquals(c.getConnectTimeout, 1234)
     })
+  }
+  
+  @Test
+  def readString: Unit = {
+    val bais = new ByteArrayInputStream("hello there".getBytes("UTF-8"))
+    assertEquals("hello there", Http.readString(bais))
   }
   
   
