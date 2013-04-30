@@ -47,7 +47,7 @@ h2. Installation
 h3. sbt
 
 <code>
-  val scalaj_http = "org.scalaj" %% "scalaj-http" % "0.3.6"
+  val scalaj_http = "org.scalaj" %% "scalaj-http" % "0.3.7"
 </code>
 
 h3. maven
@@ -56,7 +56,7 @@ h3. maven
   <dependency>
     <groupId>org.scalaj</groupId>
     <artifactId>scalaj-http_${scala.version}</artifactId>
-    <version>0.3.6</version>
+    <version>0.3.7</version>
   </dependency>  
 </code></pre>
 
@@ -109,6 +109,12 @@ h3. Get responseCode, responseHeaders and parsedResponse
 
 <code>
   val (responseCode, headersMap, resultString) = Http(url).asHeadersAndParse(Http.readString)
+</code>
+
+h3. Get request via a proxy
+
+<code>
+  val response = Http(url).proxy(proxyHost, proxyPort).asString
 </code>
 
 h3. Other custom options
