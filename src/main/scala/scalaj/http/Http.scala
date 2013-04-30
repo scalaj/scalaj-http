@@ -1,6 +1,6 @@
 package scalaj.http
 
-import java.net.{HttpURLConnection, URL, URLEncoder, URLDecoder}
+import java.net.{HttpURLConnection, InetSocketAddress, Proxy, URL, URLEncoder, URLDecoder}
 import java.io.{DataOutputStream, InputStream, BufferedReader, InputStreamReader, ByteArrayOutputStream}
 import javax.net.ssl.HttpsURLConnection
 import javax.net.ssl.SSLContext
@@ -59,9 +59,13 @@ object Http {
   type HttpUrl = Request => URL
   
   object Request {
-    def apply(exec: HttpExec, url: HttpUrl, method:String):Request = Request(method, exec, url, Nil, Nil, HttpOptions.method(method)::defaultOptions)
+    def apply(exec: HttpExec, url: HttpUrl, method:String):Request = Request(method, exec, url, Nil, Nil, 
+      HttpOptions.method(method)::defaultOptions)
   }
-  case class Request(method: String, exec: HttpExec, url: HttpUrl, params: List[(String,String)], headers: List[(String,String)], options: List[HttpOptions.HttpOption]) {
+
+  case class Request(method: String, exec: HttpExec, url: HttpUrl, params: List[(String,String)], 
+      headers: List[(String,String)], options: List[HttpOptions.HttpOption], proxy: Proxy = Proxy.NO_PROXY) {
+
     def params(p: (String, String)*):Request = params(p.toList)
     def params(p: List[(String,String)]):Request = Request(method, exec,url, p, headers,options)
     def headers(h: (String,String)*):Request = headers(h.toList)
@@ -78,6 +82,8 @@ object Http {
     def oauth(consumer: Token, token: Token):Request = oauth(consumer, Some(token), None)
     def oauth(consumer: Token, token: Token, verifier: String):Request = oauth(consumer, Some(token), Some(verifier))
     def oauth(consumer: Token, token: Option[Token], verifier: Option[String]):Request = OAuth.sign(this, consumer, token, verifier)
+
+    def proxy(host: String, port: Int) = copy(proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(host, port)))
     
     def getUrl: URL = url(this)
     
@@ -85,7 +91,7 @@ object Http {
     
     def process[T](processor: HttpURLConnection => T): T = {
 
-      url(this).openConnection match {
+      url(this).openConnection(proxy) match {
         case conn:HttpURLConnection =>
           conn.setInstanceFollowRedirects(true)
           headers.reverse.foreach{case (name, value) => 
