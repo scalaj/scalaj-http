@@ -69,7 +69,7 @@ h3. Parse the response InputStream using Lift Json
   import net.liftweb.json.JsonParser
   
   Http("http://foo.com"){inputStream => 
-    JsonParser.parse(new InputStreamReader(is))
+    JsonParser.parse(new InputStreamReader(inputStream))
   }
 </code></pre>
 
