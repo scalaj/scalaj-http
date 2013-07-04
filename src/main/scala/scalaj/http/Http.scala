@@ -42,6 +42,7 @@ object HttpOptions {
       httpsConn.setSSLSocketFactory(sslSocketFactory) 
     case _ => // do nothing
   }
+  def followRedirect(follow: Boolean = true): HttpOption = c => c.setInstanceFollowRedirects(follow)
 }
 
 object MultiPart {
@@ -93,7 +94,6 @@ object Http {
 
       url(this).openConnection(proxy) match {
         case conn:HttpURLConnection =>
-          conn.setInstanceFollowRedirects(true)
           headers.reverse.foreach{case (name, value) => 
             conn.setRequestProperty(name, value)
           }
@@ -194,7 +194,7 @@ object Http {
     bos.toByteArray
   }
 
-  val defaultOptions = List(HttpOptions.connTimeout(100), HttpOptions.readTimeout(500))
+  val defaultOptions = List(HttpOptions.connTimeout(100), HttpOptions.readTimeout(500), HttpOptions.followRedirect())
   
   def urlEncode(name: String): String = URLEncoder.encode(name, charset)
   def urlDecode(name: String): String = URLDecoder.decode(name, charset)
