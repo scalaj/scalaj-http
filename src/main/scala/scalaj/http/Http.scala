@@ -131,22 +131,10 @@ object Http {
     def asBytes: Array[Byte] = apply(readBytes)
     
     def asString: String = apply(readString)
-    
-    def asXml: Elem = apply(is => XML.load(is))
-    
-    def asParams: List[(String,String)] = {
-      asString.split("&").flatMap(_.split("=") match {
-        case Array(k,v) => Some(urlDecode(k), urlDecode(v))
-        case _ => None
-      }).toList
-    }
-    
-    def asParamMap: Map[String, String] = Map(asParams:_*)
-    
-    def asToken: Token = {
-      val params = asParamMap
-      Token(params("oauth_token"), params("oauth_token_secret"))
-    }
+    def asXml: Elem = apply(readXml)
+    def asParams: List[(String, String)] = apply(readParams)
+    def asParamMap: Map[String, String] = apply(readParamMap)
+    def asToken: Token = apply(readToken)
   }
   
   def tryParse[E](is: InputStream, parser: InputStream => E):E = try {
@@ -192,6 +180,22 @@ object Http {
     readOnce
 
     bos.toByteArray
+  }
+
+  def readXml(in: InputStream): Elem = XML.load(in)
+
+  def readParams(in: InputStream): List[(String,String)] = {
+    readString(in).split("&").flatMap(_.split("=") match {
+      case Array(k,v) => Some(urlDecode(k), urlDecode(v))
+      case _ => None
+    }).toList
+  }
+
+  def readParamMap(in: InputStream): Map[String, String] = Map(readParams(in):_*)
+
+  def readToken(in: InputStream): Token = {
+    val params = readParamMap(in)
+    Token(params("oauth_token"), params("oauth_token_secret"))
   }
 
   val defaultOptions = List(HttpOptions.connTimeout(100), HttpOptions.readTimeout(500))
