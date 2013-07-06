@@ -9,7 +9,7 @@ class HttpTest {
   
   @Test
   def asCodeHeaders: Unit = {
-    val (code, headers) = Http("http://localhost").asCodeHeaders
+    val (code, headers) = Http("http://www.google.com/").asCodeHeaders
     assertTrue(headers.contains("Date"))
   }
   
@@ -31,7 +31,7 @@ class HttpTest {
     val getFunc: HttpExec = (req,conn) => {
       
     }
-    val r = Request(getFunc, Http.noopHttpUrl("http://localhost"), "GET").options(HttpOptions.connTimeout(1234)).options(HttpOptions.readTimeout(1234))
+    val r = Request(getFunc, Http.noopHttpUrl("http://www.google.com/"), "GET").options(HttpOptions.connTimeout(1234)).options(HttpOptions.readTimeout(1234))
     r.process(c => {
       assertEquals(c.getReadTimeout, 1234)
       assertEquals(c.getConnectTimeout, 1234)
