@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VERSION=0.12.1
+VERSION=0.12.4
 LATEST=http://typesafe.artifactoryonline.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/${VERSION}/sbt-launch.jar
 JAR=.sbtlib/sbt-launch-${VERSION}.jar
 

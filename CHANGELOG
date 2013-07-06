@@ -1,3 +1,9 @@
+0.3.8
+------
+release: 06 July 2013
+
+ - break out InputStream readX methods from asX methods
+
 0.3.7
 ------
 release: 30 April 2013
