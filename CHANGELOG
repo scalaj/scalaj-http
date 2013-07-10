@@ -3,6 +3,7 @@
 release: 10 July 2013
 
  - allow control over charset
+ - multipart file streaming
 
 0.3.8
 ------
