@@ -9,3 +9,7 @@ log/*
 *.iml
 *.ipr
 .sbtlib
+.cache
+.classpath
+.project
+.settings/*

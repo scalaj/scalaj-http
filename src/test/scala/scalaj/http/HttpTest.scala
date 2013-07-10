@@ -40,9 +40,29 @@ class HttpTest {
   
   @Test
   def readString: Unit = {
-    val bais = new ByteArrayInputStream("hello there".getBytes("UTF-8"))
+    val bais = new ByteArrayInputStream("hello there".getBytes(Http.defaultCharset))
+    Http.setCharset(Http.defaultCharset)
     assertEquals("hello there", Http.readString(bais))
   }
   
+  @Test
+  def shouldUseDefaultCharset: Unit = {
+    val charset = Http.defaultCharset
+    val message = "ãéíôúç - Hello There!"
+    val bais = new ByteArrayInputStream(message.getBytes(charset))
+    
+    Http.setCharset(charset)
+    assertEquals(message, Http.readString(bais))
+  }
   
+  @Test
+  def shouldUseCustomCharset: Unit = {
+    val charset = "ISO-8859-1"
+    val message = "ãéíôúç - Hello There!"
+    val bais = new ByteArrayInputStream(message.getBytes(charset))
+    
+    Http.setCharset(charset)
+    assertEquals(message, Http.readString(bais))
+  }
+
 }
