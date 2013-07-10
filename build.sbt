@@ -1,10 +1,10 @@
 name := "scalaj-http"
 
-version := "0.3.8"
+version := "0.3.9"
 
 organization := "org.scalaj"
 
-scalaVersion := "2.9.2"
+scalaVersion := "2.10.2"
 
 libraryDependencies ++= Seq(
   "junit"                % "junit"              % "4.10"          % "test" withSources(),

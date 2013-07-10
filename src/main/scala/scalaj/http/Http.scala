@@ -16,6 +16,7 @@ import scala.xml.{Elem, XML}
 object HttpOptions {
   type HttpOption = HttpURLConnection => Unit
   
+
   def method(method: String):HttpOption = c => c.setRequestMethod(method)
   def connTimeout(timeout: Int):HttpOption = c => c.setConnectTimeout(timeout)
   def readTimeout(timeout: Int):HttpOption = c => c.setReadTimeout(timeout)
@@ -53,8 +54,17 @@ case class MultiPart(val name: String, val filename: String, val mime: String, v
 case class HttpException(val code: Int, val message: String, val body: String) extends RuntimeException(code + ": " + message)
 
 object Http {
-  def apply(url: String):Request = get(url)
-  
+  private var currentCharset: Option[String] = None
+  val defaultCharset: String = "UTF-8"
+
+  def charset: String = currentCharset.getOrElse(defaultCharset)
+
+  def setCharset(charset: String) = currentCharset = Some(charset)
+
+  def apply(url: String, charset: String = defaultCharset):Request = {
+    get(url, charset)
+  }
+
   type HttpExec = (Request, HttpURLConnection) => Unit
   type HttpUrl = Request => URL
   
@@ -213,9 +223,10 @@ object Http {
   def appendQsHttpUrl(url: String): HttpUrl = r => new URL(appendQs(url, r.params))
   def noopHttpUrl(url :String): HttpUrl = r => new URL(url)
   
-  def get(url: String): Request = {
+  def get(url: String, charset: String = defaultCharset): Request = {
+    setCharset(charset)
     val getFunc: HttpExec = (req,conn) => conn.connect
-    
+
     Request(getFunc, appendQsHttpUrl(url), "GET")
   }
   
@@ -278,5 +289,5 @@ object Http {
     }
     Request(postFunc, noopHttpUrl(url), "POST").header("content-type", "application/x-www-form-urlencoded")
   }
-  val charset = "UTF-8"
+
 }
