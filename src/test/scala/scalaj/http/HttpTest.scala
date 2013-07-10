@@ -7,10 +7,18 @@ import scalaj.http.Http._
 
 class HttpTest {
   
+  // TODO(jon): start up internal webserver so this works without internet
+
   @Test
   def asCodeHeaders: Unit = {
     val (code, headers) = Http("http://www.google.com/").asCodeHeaders
     assertTrue(headers.contains("Date"))
+  }
+
+  @Test
+  def forceCharset: Unit = {
+    val result = Http("http://www.google.com/").charset("ISO-8859-1").asString
+    assertNotNull("the result should not be null", result)
   }
   
   @Test
@@ -31,7 +39,8 @@ class HttpTest {
     val getFunc: HttpExec = (req,conn) => {
       
     }
-    val r = Request(getFunc, Http.noopHttpUrl("http://www.google.com/"), "GET").options(HttpOptions.connTimeout(1234)).options(HttpOptions.readTimeout(1234))
+    val r = Request(getFunc, Http.noopHttpUrl("http://www.google.com/"), "GET")
+      .options(HttpOptions.connTimeout(1234)).options(HttpOptions.readTimeout(1234))
     r.process(c => {
       assertEquals(c.getReadTimeout, 1234)
       assertEquals(c.getConnectTimeout, 1234)
@@ -40,9 +49,7 @@ class HttpTest {
   
   @Test
   def readString: Unit = {
-    val bais = new ByteArrayInputStream("hello there".getBytes("UTF-8"))
+    val bais = new ByteArrayInputStream("hello there".getBytes(Http.utf8))
     assertEquals("hello there", Http.readString(bais))
   }
-  
-  
 }

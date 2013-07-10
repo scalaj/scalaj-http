@@ -45,12 +45,13 @@ object HttpOptions {
 }
 
 object MultiPart {
-  def apply(name: String, filename: String, mime: String, data: String): MultiPart = MultiPart(name, filename, mime, data.getBytes(Http.charset))
+  def apply(name: String, filename: String, mime: String, data: String): MultiPart = MultiPart(name, filename, mime, data.getBytes(Http.utf8))
 }
 
 case class MultiPart(val name: String, val filename: String, val mime: String, val data: Array[Byte])
 
-case class HttpException(val code: Int, val message: String, val body: String) extends RuntimeException(code + ": " + message)
+case class HttpException(val code: Int, val message: String, val body: String, cause: Throwable) extends 
+  RuntimeException(code + ": " + message, cause)
 
 object Http {
   def apply(url: String):Request = get(url)
@@ -64,7 +65,8 @@ object Http {
   }
 
   case class Request(method: String, exec: HttpExec, url: HttpUrl, params: List[(String,String)], 
-      headers: List[(String,String)], options: List[HttpOptions.HttpOption], proxy: Proxy = Proxy.NO_PROXY) {
+      headers: List[(String,String)], options: List[HttpOptions.HttpOption], proxy: Proxy = Proxy.NO_PROXY,
+      charset: String = Http.utf8) {
 
     def params(p: (String, String)*):Request = params(p.toList)
     def params(p: List[(String,String)]):Request = Request(method, exec,url, p, headers,options)
@@ -81,15 +83,25 @@ object Http {
     def oauth(consumer: Token):Request = oauth(consumer, None, None)
     def oauth(consumer: Token, token: Token):Request = oauth(consumer, Some(token), None)
     def oauth(consumer: Token, token: Token, verifier: String):Request = oauth(consumer, Some(token), Some(verifier))
-    def oauth(consumer: Token, token: Option[Token], verifier: Option[String]):Request = OAuth.sign(this, consumer, token, verifier)
+    def oauth(consumer: Token, token: Option[Token], verifier: Option[String]):Request = {
+      OAuth.sign(this, consumer, token, verifier)
+    }
 
     def proxy(host: String, port: Int) = copy(proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(host, port)))
+
+    def charset(cs: String): Request = copy(charset = cs)
     
     def getUrl: URL = url(this)
     
     def apply[T](parser: InputStream => T): T = process((conn:HttpURLConnection) => tryParse(conn.getInputStream(), parser))
     
     def process[T](processor: HttpURLConnection => T): T = {
+
+      def getErrorBody(errorStream: InputStream): String = {
+        if (errorStream != null) {
+          tryParse(errorStream, readString(_, charset))  
+        } else ""
+      }
 
       url(this).openConnection(proxy) match {
         case conn:HttpURLConnection =>
@@ -104,7 +116,8 @@ object Http {
             processor(conn)
           } catch {
             case e: java.io.IOException =>
-              throw new HttpException(conn.getResponseCode, conn.getResponseMessage, tryParse(conn.getErrorStream(), readString))
+              throw new HttpException(conn.getResponseCode, conn.getResponseMessage, 
+                getErrorBody(conn.getErrorStream), e)
           }
       }
     }
@@ -127,26 +140,26 @@ object Http {
       (conn.getResponseCode, getResponseHeaders(conn), tryParse(conn.getInputStream(), parser))
     }
     
-    
     def asBytes: Array[Byte] = apply(readBytes)
     
-    def asString: String = apply(readString)
+    def asString: String = apply(readString(_, charset))
     def asXml: Elem = apply(readXml)
-    def asParams: List[(String, String)] = apply(readParams)
-    def asParamMap: Map[String, String] = apply(readParamMap)
+    def asParams: List[(String, String)] = apply(readParams(_, charset))
+    def asParamMap: Map[String, String] = apply(readParamMap(_, charset))
     def asToken: Token = apply(readToken)
   }
   
-  def tryParse[E](is: InputStream, parser: InputStream => E):E = try {
+  def tryParse[E](is: InputStream, parser: InputStream => E): E = try {
     parser(is)
   } finally {
     is.close
   }
   
+  def readString(is: InputStream): String = readString(is, utf8)
   /**
    * [lifted from lift]
    */
-  def readString(is: InputStream): String = {
+  def readString(is: InputStream, charset: String): String = {
     val in = new InputStreamReader(is, charset)
     val bos = new StringBuilder
     val ba = new Array[Char](4096)
@@ -158,7 +171,6 @@ object Http {
     }
 
     readOnce
-
     bos.toString
   }
   
@@ -184,14 +196,14 @@ object Http {
 
   def readXml(in: InputStream): Elem = XML.load(in)
 
-  def readParams(in: InputStream): List[(String,String)] = {
-    readString(in).split("&").flatMap(_.split("=") match {
-      case Array(k,v) => Some(urlDecode(k), urlDecode(v))
+  def readParams(in: InputStream, charset: String = utf8): List[(String,String)] = {
+    readString(in, charset).split("&").flatMap(_.split("=") match {
+      case Array(k,v) => Some(urlDecode(k, charset), urlDecode(v, charset))
       case _ => None
     }).toList
   }
 
-  def readParamMap(in: InputStream): Map[String, String] = Map(readParams(in):_*)
+  def readParamMap(in: InputStream, charset: String = utf8): Map[String, String] = Map(readParams(in, charset):_*)
 
   def readToken(in: InputStream): Token = {
     val params = readParamMap(in)
@@ -200,17 +212,22 @@ object Http {
 
   val defaultOptions = List(HttpOptions.connTimeout(100), HttpOptions.readTimeout(500))
   
-  def urlEncode(name: String): String = URLEncoder.encode(name, charset)
-  def urlDecode(name: String): String = URLDecoder.decode(name, charset)
+  def urlEncode(name: String, charset: String): String = URLEncoder.encode(name, charset)
+  def urlDecode(name: String, charset: String): String = URLDecoder.decode(name, charset)
   def base64(bytes: Array[Byte]): String = new String(Base64.encode(bytes))
-  def base64(in: String): String = base64(in.getBytes(charset))
+  def base64(in: String): String = base64(in.getBytes(utf8))
   
-  def toQs(params: List[(String,String)]) = params.map(p => urlEncode(p._1) + "=" + urlEncode(p._2)).mkString("&")
-  def appendQs(url:String, params: List[(String,String)]) = url + (if(params.isEmpty) "" else {
-    (if(url.contains("?")) "&" else "?") + toQs(params)
-  })
+  def toQs(params: List[(String,String)], charset: String) = {
+    params.map(p => urlEncode(p._1, charset) + "=" + urlEncode(p._2, charset)).mkString("&")
+  }
+
+  def appendQs(url:String, params: List[(String,String)], charset: String) = {
+    url + (if(params.isEmpty) "" else {
+      (if(url.contains("?")) "&" else "?") + toQs(params, charset)
+    })
+  }
   
-  def appendQsHttpUrl(url: String): HttpUrl = r => new URL(appendQs(url, r.params))
+  def appendQsHttpUrl(url: String): HttpUrl = r => new URL(appendQs(url, r.params, r.charset))
   def noopHttpUrl(url :String): HttpUrl = r => new URL(url)
   
   def get(url: String): Request = {
@@ -225,7 +242,7 @@ object Http {
   val Boundary = "gc0pMUlT1B0uNdArYc0p"
  
   def multipart(url: String, parts: MultiPart*): Request = {
-     val postFunc: Http.HttpExec = (req,conn) => {
+     val postFunc: Http.HttpExec = (req, conn) => {
 
        conn.setDoOutput(true)
        conn.setDoInput(true)
@@ -260,9 +277,9 @@ object Http {
      Http.Request(postFunc, Http.noopHttpUrl(url), "POST")
   }
   
-  def postData(url: String, data: String): Request = postData(url, data.getBytes(charset))
+  def postData(url: String, data: String): Request = postData(url, data.getBytes(utf8))
   def postData(url: String, data: Array[Byte]): Request = {
-    val postFunc: HttpExec = (req,conn) => {
+    val postFunc: HttpExec = (req, conn) => {
       conn.setDoOutput(true)
       conn.connect
       conn.getOutputStream.write(data)
@@ -271,12 +288,12 @@ object Http {
   }
   
   def post(url: String): Request = {
-    val postFunc: HttpExec = (req,conn) => {
+    val postFunc: HttpExec = (req, conn) => {
       conn.setDoOutput(true)
       conn.connect
-      conn.getOutputStream.write(toQs(req.params).getBytes(charset))
+      conn.getOutputStream.write(toQs(req.params, req.charset).getBytes(req.charset))
     }
     Request(postFunc, noopHttpUrl(url), "POST").header("content-type", "application/x-www-form-urlencoded")
   }
-  val charset = "UTF-8"
+  val utf8 = "UTF-8"
 }

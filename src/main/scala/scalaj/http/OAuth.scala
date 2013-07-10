@@ -40,10 +40,10 @@ object OAuth {
     val baseString = List(req.method.toUpperCase,normalizeUrl(req.url(req)),normalizeParams(req.params ++ oauthParams)).map(percentEncode).mkString("&")
     
     val keyString = percentEncode(consumer.secret) + "&" + token.map(t => percentEncode(t.secret)).getOrElse("")
-    val key = new SecretKeySpec(keyString.getBytes(Http.charset), MAC)
+    val key = new SecretKeySpec(keyString.getBytes(Http.utf8), MAC)
     val mac = Mac.getInstance(MAC)
     mac.init(key)
-    val text = baseString.getBytes(Http.charset)
+    val text = baseString.getBytes(Http.utf8)
     (oauthParams, Http.base64(mac.doFinal(text)))
   }
   
@@ -71,11 +71,13 @@ object OAuth {
     scheme + "://" + authority + path
   }
   
-  def percentEncode(params: List[(String,String)]):List[String] = params.map(p => percentEncode(p._1) + "=" + percentEncode(p._2))
+  def percentEncode(params: List[(String,String)]):List[String] = {
+    params.map(p => percentEncode(p._1) + "=" + percentEncode(p._2))
+  }
   
   def percentEncode(s: String): String = {
     if (s == null) "" else {
-       Http.urlEncode(s).replace("+", "%20").replace("*", "%2A").replace("%7E", "~")
+       Http.urlEncode(s, Http.utf8).replace("+", "%20").replace("*", "%2A").replace("%7E", "~")
      }
   }
 }
