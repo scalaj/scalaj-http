@@ -121,7 +121,7 @@ h3. Other custom options
 
 The @.option()@ method takes a function of type @HttpURLConnection => Unit@ so you can manipulate the connection in whatever way you want before the request executes.
 
-h3. take control over the charset
+h3. Change the Charset
 
 By default, the charset for all param encoding and string response parsing is UTF-8. You can override with charset of your choice:
 
