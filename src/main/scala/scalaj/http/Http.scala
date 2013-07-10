@@ -1,7 +1,8 @@
 package scalaj.http
 
 import java.net.{HttpURLConnection, InetSocketAddress, Proxy, URL, URLEncoder, URLDecoder}
-import java.io.{DataOutputStream, InputStream, BufferedReader, InputStreamReader, ByteArrayOutputStream}
+import java.io.{DataOutputStream, InputStream, BufferedReader, InputStreamReader, ByteArrayInputStream, 
+  ByteArrayOutputStream}
 import javax.net.ssl.HttpsURLConnection
 import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLSession
@@ -45,10 +46,15 @@ object HttpOptions {
 }
 
 object MultiPart {
-  def apply(name: String, filename: String, mime: String, data: String): MultiPart = MultiPart(name, filename, mime, data.getBytes(Http.utf8))
+  def apply(name: String, filename: String, mime: String, data: String): MultiPart = {
+    apply(name, filename, mime, data.getBytes(Http.utf8))
+  }
+  def apply(name: String, filename: String, mime: String, data: Array[Byte]): MultiPart = {
+    MultiPart(name, filename, mime, new ByteArrayInputStream(data), data.length)
+  }
 }
 
-case class MultiPart(val name: String, val filename: String, val mime: String, val data: Array[Byte])
+case class MultiPart(val name: String, val filename: String, val mime: String, val data: InputStream, val numBytes: Int)
 
 case class HttpException(val code: Int, val message: String, val body: String, cause: Throwable) extends 
   RuntimeException(code + ": " + message, cause)
@@ -239,42 +245,94 @@ object Http {
   
   val CrLf = "\r\n"
   val Pref = "--"
-  val Boundary = "gc0pMUlT1B0uNdArYc0p"
+  val Boundary = "--gc0pMUlT1B0uNdArYc0p"
+  val ContentDisposition = "Content-Disposition: form-data; name=\""
+  val Filename = "\"; filename=\""
+  val ContentType = "Content-Type: "
  
   def multipart(url: String, parts: MultiPart*): Request = {
-     val postFunc: Http.HttpExec = (req, conn) => {
+    val postFunc: Http.HttpExec = (req, conn) => {
 
-       conn.setDoOutput(true)
-       conn.setDoInput(true)
-       conn.setUseCaches(false)
-       conn.setRequestMethod("POST")
-       conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + Boundary)
-       conn.setRequestProperty("MIME-Version", "1.0")
+      conn.setDoOutput(true)
+      conn.setDoInput(true)
+      conn.setUseCaches(false)
+      conn.setRequestMethod("POST")
+      conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + Boundary)
+      conn.setRequestProperty("MIME-Version", "1.0")
 
-       val out = new DataOutputStream(conn.getOutputStream())
+      // encode params up front for the length calculation
+      val paramBytes = req.params.map(p => (p._1.getBytes(req.charset) -> p._2.getBytes(req.charset)))
 
-       req.params.foreach {
-         case (name, value) =>
-           out.writeBytes(Pref + Boundary + CrLf)
-           out.writeBytes("Content-Disposition: form-data; name=\"" + name + "\"")
-           out.writeBytes(CrLf + CrLf + value.toString + CrLf)
-       }
+      val partBytes = parts.map(p => (p.name.getBytes(req.charset), 
+                                      p.filename.getBytes(req.charset),
+                                      p))
 
-       parts.foreach { part =>
-         out.writeBytes(Pref + Boundary + CrLf)
-         out.writeBytes("Content-Disposition: form-data; name=\"" + part.name + "\"; filename=\"" + part.filename + "\"" + CrLf)
-         out.writeBytes("Content-Type: " + part.mime + CrLf + CrLf)
+      // we need to pre-calculate the Content-Length of this request because most servers don't
+      // support chunked transfer
+      val totalBytesToSend = {
+        val paramOverhead = Pref.length + Boundary.length + ContentDisposition.length + 1 + (CrLf.length * 4)
+        val paramsLength = paramBytes.map(p => p._1.length + p._2.length + paramOverhead).sum
 
-         out.write(part.data)
+        val fileOverhead = Pref.length + Boundary.length + ContentDisposition.length + Filename.length + 1 +
+          (CrLf.length * 5) + ContentType.length
 
-         out.writeBytes(CrLf + Pref + Boundary + Pref + CrLf)
-       }
+        val filesLength =
+          partBytes.map(p => fileOverhead + p._1.length + p._2.length + p._3.mime.length + p._3.numBytes).sum
 
+        val finaleBoundaryLength = (Pref.length * 2) + Boundary.length + CrLf.length
+        
+        paramsLength + filesLength + finaleBoundaryLength
+      }
 
-       out.flush()
-       out.close()
-     }
-     Http.Request(postFunc, Http.noopHttpUrl(url), "POST")
+      conn.setFixedLengthStreamingMode(totalBytesToSend)
+
+      val out = conn.getOutputStream()
+
+      def writeBytes(s: String) {
+        // this is only used for the structural pieces, not user input, so should be plain old ascii
+        out.write(s.getBytes(Http.utf8))
+      }
+
+      paramBytes.foreach {
+       case (name, value) =>
+         writeBytes(Pref + Boundary + CrLf)
+         writeBytes(ContentDisposition)
+         out.write(name)
+         writeBytes("\"" + CrLf)
+         writeBytes(CrLf)
+         out.write(value)
+         writeBytes(CrLf)
+      }
+
+      val buffer = new Array[Byte](4096)
+
+      partBytes.foreach { 
+        case(name, filename, part) =>
+          writeBytes(Pref + Boundary + CrLf)
+          writeBytes(ContentDisposition)
+          out.write(name)
+          writeBytes(Filename)
+          out.write(filename)
+          writeBytes("\"" + CrLf)
+          writeBytes(ContentType + part.mime + CrLf + CrLf)
+
+          def readOnce {
+            val len = part.data.read(buffer)
+            if (len > 0) out.write(buffer, 0, len)
+            if (len >= 0) readOnce
+          }
+
+          readOnce
+
+          writeBytes(CrLf)
+      }
+
+      writeBytes(Pref + Boundary + Pref + CrLf)
+
+      out.flush()
+      out.close()
+    }
+    Http.Request(postFunc, Http.noopHttpUrl(url), "POST")
   }
   
   def postData(url: String, data: String): Request = postData(url, data.getBytes(utf8))
