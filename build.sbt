@@ -8,7 +8,8 @@ scalaVersion := "2.9.2"
 
 libraryDependencies ++= Seq(
   "junit"                % "junit"              % "4.10"          % "test" withSources(),
-  "com.novocode"         % "junit-interface"    % "0.8"           % "test"
+  "com.novocode"         % "junit-interface"    % "0.8"           % "test",
+  "com.github.kristofa"  % "mock-http-server"   % "1.3"           % "test"
 )
 
 crossScalaVersions := Seq("2.9.2", "2.10.2")
