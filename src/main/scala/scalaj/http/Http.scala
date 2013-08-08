@@ -75,6 +75,7 @@ object Http {
       charset: String = Http.utf8) {
 
     def params(p: (String, String)*):Request = params(p.toList)
+    def params(p: Map[String, String]):Request = params(p.toList)
     def params(p: List[(String,String)]):Request = Request(method, exec,url, p, headers,options)
     def headers(h: (String,String)*):Request = headers(h.toList)
     def headers(h: List[(String,String)]):Request = Request(method,exec,url, params, h ++ headers,options)
