@@ -1,3 +1,10 @@
+0.3.10
+------
+release: 01 September 2013
+
+ - hopefully fixed that sources.src pom problem by removing withSources() from junit test dep
+ - MultiPart upload progress callback and configurable sendBufferSize
+
 0.3.9
 ------
 release: 10 July 2013

@@ -47,7 +47,7 @@ h2. Installation
 h3. sbt
 
 <code>
-  val scalaj_http = "org.scalaj" %% "scalaj-http" % "0.3.9"
+  val scalaj_http = "org.scalaj" %% "scalaj-http" % "0.3.10"
 </code>
 
 h3. maven
@@ -56,7 +56,7 @@ h3. maven
   <dependency>
     <groupId>org.scalaj</groupId>
     <artifactId>scalaj-http_${scala.version}</artifactId>
-    <version>0.3.9</version>
+    <version>0.3.10</version>
   </dependency>  
 </code></pre>
 
@@ -82,7 +82,15 @@ h3. Post raw Array[Byte] or String data and get response code
 h3. Post multipart/form-data
 
 <code>
-  Http.multipart(url, MultiPart("photo","headshot.png", "image/png", fileBytes)).responseCode
+  Http.multipart(url, MultiPart("photo", "headshot.png", "image/png", fileBytes)).responseCode
+</code>
+
+You can also stream uploads and get a callback on progress:
+
+<code>
+  Http.multipart(url, MultiPart("photo", "headshot.png", "image/png", inputStream, bytesInStream, lenWritten => {
+    println("Wrote %d bytes out of %d total for headshot.png".format(lenWritten, bytesInStream))
+  })).responseCode
 </code>
 
 h3. Send https request to site with self-signed or otherwise shady certificate
