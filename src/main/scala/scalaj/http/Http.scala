@@ -320,11 +320,13 @@ object Http {
           writeBytes("\"" + CrLf)
           writeBytes(ContentType + part.mime + CrLf + CrLf)
 
+          var bytesWritten = 0
           def readOnce {
             val len = part.data.read(buffer)
             if (len > 0) {
               out.write(buffer, 0, len)
-              part.writeCallBack(len)
+              bytesWritten += len
+              part.writeCallBack(bytesWritten)
             }
 
             if (len >= 0) {
