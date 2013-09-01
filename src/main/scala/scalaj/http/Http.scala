@@ -50,11 +50,12 @@ object MultiPart {
     apply(name, filename, mime, data.getBytes(Http.utf8))
   }
   def apply(name: String, filename: String, mime: String, data: Array[Byte]): MultiPart = {
-    MultiPart(name, filename, mime, new ByteArrayInputStream(data), data.length)
+    MultiPart(name, filename, mime, new ByteArrayInputStream(data), data.length, n => ())
   }
 }
 
-case class MultiPart(val name: String, val filename: String, val mime: String, val data: InputStream, val numBytes: Int)
+case class MultiPart(val name: String, val filename: String, val mime: String, val data: InputStream, val numBytes: Int,
+  val writeCallBack: Int => Unit)
 
 case class HttpException(val code: Int, val message: String, val body: String, cause: Throwable) extends 
   RuntimeException(code + ": " + message, cause)
@@ -72,7 +73,7 @@ object Http {
 
   case class Request(method: String, exec: HttpExec, url: HttpUrl, params: List[(String,String)], 
       headers: List[(String,String)], options: List[HttpOptions.HttpOption], proxy: Proxy = Proxy.NO_PROXY,
-      charset: String = Http.utf8) {
+      charset: String = Http.utf8, sendBufferSize: Int = 4096) {
 
     def params(p: (String, String)*):Request = params(p.toList)
     def params(p: Map[String, String]):Request = params(p.toList)
@@ -97,6 +98,8 @@ object Http {
     def proxy(host: String, port: Int) = copy(proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(host, port)))
 
     def charset(cs: String): Request = copy(charset = cs)
+
+    def sendBufferSize(numBytes: Int): Request = copy(sendBufferSize = numBytes)
     
     def getUrl: URL = url(this)
     
@@ -305,7 +308,7 @@ object Http {
          writeBytes(CrLf)
       }
 
-      val buffer = new Array[Byte](4096)
+      val buffer = new Array[Byte](req.sendBufferSize)
 
       partBytes.foreach { 
         case(name, filename, part) =>
@@ -319,8 +322,14 @@ object Http {
 
           def readOnce {
             val len = part.data.read(buffer)
-            if (len > 0) out.write(buffer, 0, len)
-            if (len >= 0) readOnce
+            if (len > 0) {
+              out.write(buffer, 0, len)
+              part.writeCallBack(len)
+            }
+
+            if (len >= 0) {
+              readOnce
+            }
           }
 
           readOnce
