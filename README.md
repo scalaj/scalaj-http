@@ -24,13 +24,15 @@ Http.post("http://foo.com/add").params("name" -> "jon", "age" -> "29").asString
 import scalaj.http.{Http, Token}
 
 val consumer = Token("key", "secret")
-val token = Http("http://foursquare.com/oauth/request_token").param("oauth_callback","oob").oauth(consumer).asToken
+val token = Http("http://foursquare.com/oauth/request_token").param("oauth_callback","oob")
+  .oauth(consumer).asToken
 
 println("Go to http://foursquare.com/oauth/authorize?oauth_token=" + token.key)
 
 val verifier = Console.readLine("Enter verifier: ").trim
 
-val accessToken = Http("http://foursquare.com/oauth/access_token").oauth(consumer, token, verifier).asToken
+val accessToken = Http("http://foursquare.com/oauth/access_token")
+  .oauth(consumer, token, verifier).asToken
 
 println(Http("http://api.foursquare.com/v1/history.json").oauth(consumer, accessToken).asString)
 ```
@@ -87,9 +89,10 @@ Http.multipart(url, MultiPart("photo", "headshot.png", "image/png", fileBytes)).
 You can also stream uploads and get a callback on progress:
 
 ```scala
-Http.multipart(url, MultiPart("photo", "headshot.png", "image/png", inputStream, bytesInStream, lenWritten => {
-  println("Wrote %d bytes out of %d total for headshot.png".format(lenWritten, bytesInStream))
-})).responseCode
+Http.multipart(url, MultiPart("photo", "headshot.png", "image/png", inputStream, bytesInStream, 
+  lenWritten => {
+    println("Wrote %d bytes out of %d total for headshot.png".format(lenWritten, bytesInStream))
+  })).responseCode
 ```
 
 ### Send https request to site with self-signed or otherwise shady certificate
@@ -126,11 +129,13 @@ val response = Http(url).proxy(proxyHost, proxyPort).asString
 
 ### Other custom options
 
-The ```.option()``` method takes a function of type ```HttpURLConnection => Unit``` so you can manipulate the connection in whatever way you want before the request executes.
+The ```.option()``` method takes a function of type ```HttpURLConnection => Unit``` so 
+you can manipulate the connection in whatever way you want before the request executes.
 
 ### Change the Charset
 
-By default, the charset for all param encoding and string response parsing is UTF-8. You can override with charset of your choice:
+By default, the charset for all param encoding and string response parsing is UTF-8. You 
+can override with charset of your choice:
 
 ```scala
 Http(url).charset("ISO-8859-1").asString
