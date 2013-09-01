@@ -87,11 +87,11 @@ h3. Post multipart/form-data
 
 You can also stream uploads and get a callback on progress:
 
-<code>
+<pre><code>
   Http.multipart(url, MultiPart("photo", "headshot.png", "image/png", inputStream, bytesInStream, lenWritten => {
     println("Wrote %d bytes out of %d total for headshot.png".format(lenWritten, bytesInStream))
   })).responseCode
-</code>
+</code></pre>
 
 h3. Send https request to site with self-signed or otherwise shady certificate
 
