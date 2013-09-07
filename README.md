@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/scalaj/scalaj-http.png)](https://travis-ci.org/scalaj/scalaj-http)
+
 # Simple Http
 
 This is a bare bones http client for scala which wraps HttpURLConnection
