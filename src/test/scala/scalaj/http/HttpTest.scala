@@ -114,4 +114,11 @@ class HttpTest {
     val bais = new ByteArrayInputStream("hello there".getBytes(Http.utf8))
     assertEquals("hello there", Http.readString(bais))
   }
+
+  @Test
+  def put: Unit = {
+    rProvider.expect(Method.PUT, "/").respondWith(rCode, cType, response);
+    val xml = Http.put(url).asXml
+    assertEquals(xml.toString, response)
+  }
 }

@@ -356,7 +356,6 @@ object Http {
     }
     Request(postFunc, noopHttpUrl(url), "POST")
   }
-  
   def post(url: String): Request = {
     val postFunc: HttpExec = (req, conn) => {
       conn.setDoOutput(true)
@@ -365,5 +364,24 @@ object Http {
     }
     Request(postFunc, noopHttpUrl(url), "POST").header("content-type", "application/x-www-form-urlencoded")
   }
+
+  def putData(url: String, data: String): Request = putData(url, data.getBytes(utf8))
+  def putData(url: String, data: Array[Byte]): Request = {
+    val putFunc: HttpExec = (req, conn) => {
+      conn.setDoOutput(true)
+      conn.connect
+      conn.getOutputStream.write(data)
+    }
+    Request(putFunc, Http.noopHttpUrl(url), "PUT").header("content-type", "text/data")
+  }
+  def put(url: String): Request = {
+    val postFunc: HttpExec = (req, conn) => {
+      conn.setDoOutput(true)
+      conn.connect
+      conn.getOutputStream.write(toQs(req.params, req.charset).getBytes(req.charset))
+    }
+    Request(postFunc, noopHttpUrl(url), "PUT").header("content-type", "application/x-www-form-urlencoded")
+  }
+
   val utf8 = "UTF-8"
 }
