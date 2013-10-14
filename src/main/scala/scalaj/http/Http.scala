@@ -95,7 +95,8 @@ object Http {
       OAuth.sign(this, consumer, token, verifier)
     }
 
-    def proxy(host: String, port: Int) = copy(proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(host, port)))
+    def proxy(host: String, port: Int): Request = proxy(host, port, Proxy.Type.HTTP)
+	def proxy(host: String, port: Int, proxyType: Proxy.Type): Request = copy(proxy = new Proxy(proxyType, new InetSocketAddress(host, port)))
 
     def charset(cs: String): Request = copy(charset = cs)
 
