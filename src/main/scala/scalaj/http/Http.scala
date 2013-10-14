@@ -96,7 +96,7 @@ object Http {
     }
 
     def proxy(host: String, port: Int): Request = proxy(host, port, Proxy.Type.HTTP)
-	def proxy(host: String, port: Int, proxyType: Proxy.Type): Request = copy(proxy = new Proxy(proxyType, new InetSocketAddress(host, port)))
+    def proxy(host: String, port: Int, proxyType: Proxy.Type): Request = copy(proxy = new Proxy(proxyType, new InetSocketAddress(host, port)))
 
     def charset(cs: String): Request = copy(charset = cs)
 
