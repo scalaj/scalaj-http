@@ -106,6 +106,7 @@ class HttpTest {
     r.process(c => {
       assertEquals(c.getReadTimeout, 1234)
       assertEquals(c.getConnectTimeout, 1234)
+      Http.readString(c.getInputStream())
     })
   }
 
@@ -113,5 +114,23 @@ class HttpTest {
   def readString: Unit = {
     val bais = new ByteArrayInputStream("hello there".getBytes(Http.utf8))
     assertEquals("hello there", Http.readString(bais))
+  }
+
+  @Test
+  def overrideTheMethod: Unit = {
+    rProvider.expect(Method.DELETE, "/").respondWith(rCode, cType, response)
+    val req = Http(url).method("DELETE")
+    req.process(c => {
+      assertEquals("DELETE", c.getRequestMethod)
+      Http.readString(c.getInputStream())
+    })
+  }
+
+  @Test
+  def unofficialOverrideTheMethod: Unit = {
+    val reqMethod = Http(url).method("FOO").process(c => {
+      c.getRequestMethod
+    })
+    assertEquals("should have overriden the request method", "FOO", reqMethod)
   }
 }

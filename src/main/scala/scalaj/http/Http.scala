@@ -1,8 +1,10 @@
 package scalaj.http
 
+import java.lang.reflect.Field
 import java.net.{HttpURLConnection, InetSocketAddress, Proxy, URL, URLEncoder, URLDecoder}
 import java.io.{DataOutputStream, InputStream, BufferedReader, InputStreamReader, ByteArrayInputStream, 
   ByteArrayOutputStream}
+import java.security.cert.X509Certificate
 import javax.net.ssl.HttpsURLConnection
 import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLSession
@@ -10,14 +12,38 @@ import javax.net.ssl.SSLSocketFactory
 import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 import javax.net.ssl.HostnameVerifier
-import java.security.cert.X509Certificate
 import scala.xml.{Elem, XML}
 
 
 object HttpOptions {
   type HttpOption = HttpURLConnection => Unit
+
+  val officalHttpMethods = Set("GET", "POST", "HEAD", "OPTIONS", "PUT", "DELETE", "TRACE")
   
-  def method(method: String):HttpOption = c => c.setRequestMethod(method)
+  private val methodField: Field = {
+    val m = classOf[HttpURLConnection].getDeclaredField("method")
+    m.setAccessible(true)
+    m
+  }
+  
+  def method(methodOrig: String):HttpOption = c => {
+    val method = methodOrig.toUpperCase
+    if (officalHttpMethods.contains(method)) {
+      c.setRequestMethod(method)
+    } else {
+      // HttpURLConnection enforces a list of official http METHODs, but not everyone abides by the spec
+      // this hack allows us set an unofficial http method
+      c match {
+        case cs: HttpsURLConnection =>
+          cs.getClass.getDeclaredFields.find(_.getName == "delegate").foreach{ del =>
+            del.setAccessible(true)
+            methodField.set(del.get(cs), method)
+          }
+        case c => 
+          methodField.set(c, method)
+      }
+    }
+  }
   def connTimeout(timeout: Int):HttpOption = c => c.setConnectTimeout(timeout)
   def readTimeout(timeout: Int):HttpOption = c => c.setReadTimeout(timeout)
   def allowUnsafeSSL:HttpOption = c => c match {
@@ -95,8 +121,12 @@ object Http {
       OAuth.sign(this, consumer, token, verifier)
     }
 
+    def method(m: String): Request = option(HttpOptions.method(m))
+
     def proxy(host: String, port: Int): Request = proxy(host, port, Proxy.Type.HTTP)
-    def proxy(host: String, port: Int, proxyType: Proxy.Type): Request = copy(proxy = new Proxy(proxyType, new InetSocketAddress(host, port)))
+    def proxy(host: String, port: Int, proxyType: Proxy.Type): Request = {
+      copy(proxy = new Proxy(proxyType, new InetSocketAddress(host, port)))
+    }
 
     def charset(cs: String): Request = copy(charset = cs)
 
