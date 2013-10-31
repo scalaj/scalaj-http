@@ -1,6 +1,6 @@
 name := "scalaj-http"
 
-version := "0.3.10"
+version := "0.3.11"
 
 organization := "org.scalaj"
 
@@ -12,7 +12,7 @@ libraryDependencies ++= Seq(
   "com.github.kristofa"  % "mock-http-server"   % "1.3"           % "test"
 )
 
-crossScalaVersions := Seq("2.9.2", "2.10.2")
+crossScalaVersions := Seq("2.9.2", "2.10.3")
 
 javacOptions ++= Seq("-source", "1.6", "-target", "1.6")
 

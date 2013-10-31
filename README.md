@@ -50,7 +50,7 @@ Http("http://foo.com").{responseCode, asString, asXml, asBytes, asParams}
 ### sbt
 
 ```scala
-val scalaj_http = "org.scalaj" %% "scalaj-http" % "0.3.10"
+val scalaj_http = "org.scalaj" %% "scalaj-http" % "0.3.11"
 ```
 
 ### maven
@@ -59,7 +59,7 @@ val scalaj_http = "org.scalaj" %% "scalaj-http" % "0.3.10"
 <dependency>
   <groupId>org.scalaj</groupId>
   <artifactId>scalaj-http_${scala.version}</artifactId>
-  <version>0.3.10</version>
+  <version>0.3.11</version>
 </dependency>  
 ```
 
@@ -106,7 +106,7 @@ Http("https://localhost/").option(HttpOptions.allowUnsafeSSL).asString
 ### Do a HEAD request
 
 ```scala
-Http(url).option(HttpOptions.method("HEAD")).asString
+Http(url).method("HEAD").asString
 ```
 
 ### Custom connect and read timeouts
@@ -142,7 +142,3 @@ can override with charset of your choice:
 ```scala
 Http(url).charset("ISO-8859-1").asString
 ```
-
-## TODOS
-
-* Handle other http methods better (PUT,HEAD,DELETE)
