@@ -14,6 +14,8 @@ libraryDependencies ++= Seq(
 
 crossScalaVersions := Seq("2.9.2", "2.10.2")
 
+javacOptions ++= Seq("-source", "1.6", "-target", "1.6")
+
 publishTo <<= version { v: String =>
   val nexus = "https://oss.sonatype.org/"
   if (v.trim.endsWith("SNAPSHOT"))
