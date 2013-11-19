@@ -41,7 +41,7 @@ object HttpOptions {
           }
         case c => 
           methodField.set(c, method)
-      }
+      }p
     }
   }
   def connTimeout(timeout: Int):HttpOption = c => c.setConnectTimeout(timeout)
@@ -125,6 +125,10 @@ object Http {
 
     def proxy(host: String, port: Int): Request = proxy(host, port, Proxy.Type.HTTP)
     def proxy(host: String, port: Int, proxyType: Proxy.Type): Request = {
+      copy(proxy = new Proxy(proxyType, new InetSocketAddress(host, port)))
+    }
+    def proxy(host: String, port: Int, proxyType: Proxy.Type, username:String, password:String): Request = {
+      Authenticator.setDefault(new ProxyAuthenticator(username, password))
       copy(proxy = new Proxy(proxyType, new InetSocketAddress(host, port)))
     }
 
@@ -397,4 +401,10 @@ object Http {
     Request(postFunc, noopHttpUrl(url), "POST").header("content-type", "application/x-www-form-urlencoded")
   }
   val utf8 = "UTF-8"
+}
+
+class ProxyAuthenticator (username: String, password:String) extends Authenticator {
+  override def getPasswordAuthentication(): PasswordAuthentication = {
+    new PasswordAuthentication(username, password.toCharArray())
+  }
 }
