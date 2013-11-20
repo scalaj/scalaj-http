@@ -127,6 +127,11 @@ object Http {
     def proxy(host: String, port: Int, proxyType: Proxy.Type): Request = {
       copy(proxy = new Proxy(proxyType, new InetSocketAddress(host, port)))
     }
+    def proxy(host: String, port: Int, username: String, password: String): Request = proxy(host, port, Proxy.Type.HTTP, username, password)
+    def proxy(host: String, port: Int, proxyType: Proxy.Type, username: String, password: String): Request = {
+      Authenticator.setDefault(new ProxyAuthenticator(username, password))
+      copy(proxy = new Proxy(proxyType, new InetSocketAddress(host, port)))
+    }
 
     def charset(cs: String): Request = copy(charset = cs)
 
@@ -398,3 +403,10 @@ object Http {
   }
   val utf8 = "UTF-8"
 }
+
+class ProxyAuthenticator (username: String, password:String) extends Authenticator {
+  override def getPasswordAuthentication(): PasswordAuthentication = {
+    new PasswordAuthentication(username, password.toCharArray())
+  }
+}
+
