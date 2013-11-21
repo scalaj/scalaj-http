@@ -20,23 +20,23 @@ Http("http://foo.com/search").param("q","monkeys").asString
 Http.post("http://foo.com/add").params("name" -> "jon", "age" -> "29").asString
 ```
 
-### OAuth Dance and Request
+### OAuth v1 Dance and Request
 
 ```scala
 import scalaj.http.{Http, Token}
 
 val consumer = Token("key", "secret")
-val token = Http("http://foursquare.com/oauth/request_token").param("oauth_callback","oob")
+val token = Http.post("https://api.twitter.com/oauth/request_token").param("oauth_callback","oob")
   .oauth(consumer).asToken
 
-println("Go to http://foursquare.com/oauth/authorize?oauth_token=" + token.key)
+println("Go to https://api.twitter.com/oauth/authorize?oauth_token=" + token.key)
 
 val verifier = Console.readLine("Enter verifier: ").trim
 
-val accessToken = Http("http://foursquare.com/oauth/access_token")
+val accessToken = Http.post("https://api.twitter.com/oauth/access_token")
   .oauth(consumer, token, verifier).asToken
 
-println(Http("http://api.foursquare.com/v1/history.json").oauth(consumer, accessToken).asString)
+println(Http("https://api.twitter.com/1.1/account/settings.json").oauth(consumer, accessToken).asString)
 ```
 
 ### Parsing the response
@@ -65,7 +65,7 @@ val scalaj_http = "org.scalaj" %% "scalaj-http" % "0.3.11"
 
 ## Advanced Usage Examples
 
-### Parse the response InputStream using Lift Json
+### Parse the response InputStream to JSON
 
 ```scala
 import java.io.InputStreamReader
