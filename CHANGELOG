@@ -1,3 +1,9 @@
+0.3.12
+------
+release: 26 November 2013
+
+ - fix for issue where Request copies lost state
+
 0.3.11
 ------
 release: 30 October 2013
