@@ -14,6 +14,25 @@ import scalaj.http.Http
 Http("http://foo.com/search").param("q","monkeys").asString
 ```
 
+### Immutable Request
+
+```Http(url)`` is just shorthead for a ```Http.apply``` which returns an immutable instance of ```Http.Request```.  
+You can create a ```Request``` and reuse it:
+
+```scala
+val request: Http.Request = Http("http://date.jsontest.com/")
+
+val resultOne = request.asString
+val resultTwo = request.asString
+```
+
+#### Additive Request
+
+All the "modification" methods of a ```Request``` are actually returning a new instance. The param(s), option(s), header(s) 
+methods always add to their respective sets. So calling ```.headers(newHeaders)``` will return a ```Request``` instance 
+that has ```newHeaders``` appended to the previous ```req.headers```
+
+
 ### Simple Post
 
 ```scala
