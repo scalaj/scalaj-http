@@ -16,7 +16,7 @@ Http("http://foo.com/search").param("q","monkeys").asString
 
 ### Immutable Request
 
-```Http(url)`` is just shorthead for a ```Http.apply``` which returns an immutable instance of ```Http.Request```.  
+```Http(url)``` is just shorthead for a ```Http.apply``` which returns an immutable instance of ```Http.Request```.  
 You can create a ```Request``` and reuse it:
 
 ```scala
