@@ -105,6 +105,7 @@ object Http {
     def params(p: Map[String, String]):Request = params(p.toList)
     def params(p: List[(String,String)]):Request = copy(params = params ++ p)
     def headers(h: (String,String)*):Request = headers(h.toList)
+    def headers(h: Map[String, String]):Request = headers(h.toList)
     def headers(h: List[(String,String)]):Request = copy(headers = headers ++ h)
     def param(key: String, value: String):Request = params(key -> value)
     def header(key: String, value: String):Request = headers(key -> value)
