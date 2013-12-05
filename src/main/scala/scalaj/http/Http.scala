@@ -128,7 +128,10 @@ object Http {
     def proxy(host: String, port: Int, proxyType: Proxy.Type): Request = {
       copy(proxy = new Proxy(proxyType, new InetSocketAddress(host, port)))
     }
-
+    def proxy(proxy: Proxy): Request = {
+      copy(proxy = proxy)
+    }
+    
     def charset(cs: String): Request = copy(charset = cs)
 
     def sendBufferSize(numBytes: Int): Request = copy(sendBufferSize = numBytes)
