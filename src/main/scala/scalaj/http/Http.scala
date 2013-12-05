@@ -1,7 +1,7 @@
 package scalaj.http
 
 import java.lang.reflect.Field
-import java.net.{HttpURLConnection, InetSocketAddress, Proxy, URL, URLEncoder, URLDecoder}
+import java.net.{HttpURLConnection, InetSocketAddress, Proxy, URL, URLEncoder, URLDecoder, PasswordAuthentication, Authenticator}
 import java.io.{DataOutputStream, InputStream, BufferedReader, InputStreamReader, ByteArrayInputStream, 
   ByteArrayOutputStream}
 import java.security.cert.X509Certificate
@@ -129,6 +129,11 @@ object Http {
       copy(proxy = new Proxy(proxyType, new InetSocketAddress(host, port)))
     }
 
+    def setGlobalProxyAuth(username: String, password: String): Request = {
+      Authenticator.setDefault(new ProxyAuthenticator(username, password))
+      this
+    }
+    
     def charset(cs: String): Request = copy(charset = cs)
 
     def sendBufferSize(numBytes: Int): Request = copy(sendBufferSize = numBytes)
@@ -398,4 +403,10 @@ object Http {
     Request(postFunc, noopHttpUrl(url), "POST").header("content-type", "application/x-www-form-urlencoded")
   }
   val utf8 = "UTF-8"
+}
+
+class ProxyAuthenticator (username: String, password:String) extends Authenticator {
+  override def getPasswordAuthentication: PasswordAuthentication = {
+    new PasswordAuthentication(username, password.toCharArray)
+  }
 }
