@@ -1,3 +1,9 @@
+0.3.13
+------
+release: 06 February 2014
+
+ - Handle file uploads larger than 2GB
+
 0.3.12
 ------
 release: 26 November 2013
