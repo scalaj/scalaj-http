@@ -69,7 +69,7 @@ Http("http://foo.com").{responseCode, asString, asXml, asBytes, asParams}
 ### sbt
 
 ```scala
-val scalaj_http = "org.scalaj" %% "scalaj-http" % "0.3.12"
+val scalaj_http = "org.scalaj" %% "scalaj-http" % "0.3.13"
 ```
 
 ### maven
@@ -78,7 +78,7 @@ val scalaj_http = "org.scalaj" %% "scalaj-http" % "0.3.12"
 <dependency>
   <groupId>org.scalaj</groupId>
   <artifactId>scalaj-http_${scala.version}</artifactId>
-  <version>0.3.12</version>
+  <version>0.3.13</version>
 </dependency>  
 ```
 

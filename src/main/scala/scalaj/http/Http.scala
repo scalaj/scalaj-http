@@ -80,8 +80,8 @@ object MultiPart {
   }
 }
 
-case class MultiPart(val name: String, val filename: String, val mime: String, val data: InputStream, val numBytes: Int,
-  val writeCallBack: Int => Unit)
+case class MultiPart(val name: String, val filename: String, val mime: String, val data: InputStream, val numBytes: Long,
+  val writeCallBack: Long => Unit)
 
 case class HttpException(val code: Int, val message: String, val body: String, cause: Throwable) extends 
   RuntimeException(code + ": " + message, cause)
@@ -308,7 +308,7 @@ object Http {
 
       // we need to pre-calculate the Content-Length of this request because most servers don't
       // support chunked transfer
-      val totalBytesToSend = {
+      val totalBytesToSend: Long = {
         val paramOverhead = Pref.length + Boundary.length + ContentDisposition.length + 1 + (CrLf.length * 4)
         val paramsLength = paramBytes.map(p => p._1.length + p._2.length + paramOverhead).sum
 
