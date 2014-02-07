@@ -4,6 +4,25 @@
 
 This is a bare bones http client for scala which wraps HttpURLConnection
 
+## Installation
+
+### sbt
+
+```scala
+val scalaj_http = "org.scalaj" %% "scalaj-http" % "0.3.14"
+```
+
+### maven
+
+```xml
+<dependency>
+  <groupId>org.scalaj</groupId>
+  <artifactId>scalaj-http_${scala.version}</artifactId>
+  <version>0.3.14</version>
+</dependency>  
+```
+
+
 ## Usage
 
 ### Simple Get
@@ -62,24 +81,6 @@ println(Http("https://api.twitter.com/1.1/account/settings.json").oauth(consumer
 
 ```scala
 Http("http://foo.com").{responseCode, asString, asXml, asBytes, asParams}
-```
-
-## Installation
-
-### sbt
-
-```scala
-val scalaj_http = "org.scalaj" %% "scalaj-http" % "0.3.14"
-```
-
-### maven
-
-```xml
-<dependency>
-  <groupId>org.scalaj</groupId>
-  <artifactId>scalaj-http_${scala.version}</artifactId>
-  <version>0.3.14</version>
-</dependency>  
 ```
 
 ## Advanced Usage Examples
