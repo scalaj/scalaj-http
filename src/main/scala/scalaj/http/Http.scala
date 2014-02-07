@@ -288,6 +288,25 @@ object Http {
   val ContentDisposition = "Content-Disposition: form-data; name=\""
   val Filename = "\"; filename=\""
   val ContentType = "Content-Type: "
+
+  val setFixedLengthStreamingMode: (HttpURLConnection, Long) => Unit = {
+    val connClass = classOf[HttpURLConnection]
+    val (isLong, theMethod) = try {
+      true -> connClass.getDeclaredMethod("setFixedLengthStreamingMode", classOf[Long])
+    } catch {
+      case e: NoSuchMethodException =>
+        false -> connClass.getDeclaredMethod("setFixedLengthStreamingMode", classOf[Int])
+    }
+    (conn, length) => 
+      if (isLong) {
+        theMethod.invoke(conn, length: java.lang.Long)
+      } else {
+        if (length > Int.MaxValue) {
+          throw new RuntimeException("Failing attempt to upload file greater than 2GB on java version < 1.7")
+        }
+        theMethod.invoke(conn, length.toInt: java.lang.Integer)
+      }
+  }
  
   def multipart(url: String, parts: MultiPart*): Request = {
     val postFunc: Http.HttpExec = (req, conn) => {
@@ -323,7 +342,7 @@ object Http {
         paramsLength + filesLength + finaleBoundaryLength
       }
 
-      conn.setFixedLengthStreamingMode(totalBytesToSend)
+      setFixedLengthStreamingMode(conn, totalBytesToSend)
 
       val out = conn.getOutputStream()
 
