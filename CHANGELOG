@@ -1,6 +1,6 @@
 0.3.14
 ------
-release: 07 February 2014
+release: 07 February 2014 
 
  - use reflection to determine support for file upload > 2GB
    can only work on jvm >= 1.7.
