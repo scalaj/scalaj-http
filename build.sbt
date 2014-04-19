@@ -13,11 +13,11 @@ libraryDependencies ++= Seq(
 )
 
 libraryDependencies ++= (
-  if (scalaVersion.value startsWith "2.11") Seq("org.scala-lang.modules" %% "scala-xml" % "1.0.0-RC6")
+  if (scalaVersion.value startsWith "2.11") Seq("org.scala-lang.modules" %% "scala-xml" % "1.0.1")
   else Seq.empty
 )
 
-crossScalaVersions := Seq("2.9.2", "2.10.3", "2.11.0-M6")
+crossScalaVersions := Seq("2.9.2", "2.10.3", "2.11.0")
 
 javacOptions ++= Seq("-source", "1.6", "-target", "1.6")
 
