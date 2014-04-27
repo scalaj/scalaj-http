@@ -1,3 +1,10 @@
+0.3.15
+------
+release: 27 April 2014 
+
+ - artifacts for scala 2.11.0 final
+ - also bumped cross compiled versions to 2.9.3 and 2.10.4
+
 0.3.14
 ------
 release: 07 February 2014 

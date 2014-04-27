@@ -9,7 +9,7 @@ This is a bare bones http client for scala which wraps HttpURLConnection
 ### sbt
 
 ```scala
-val scalaj_http = "org.scalaj" %% "scalaj-http" % "0.3.14"
+val scalaj_http = "org.scalaj" %% "scalaj-http" % "0.3.15"
 ```
 
 ### maven
@@ -18,7 +18,7 @@ val scalaj_http = "org.scalaj" %% "scalaj-http" % "0.3.14"
 <dependency>
   <groupId>org.scalaj</groupId>
   <artifactId>scalaj-http_${scala.version}</artifactId>
-  <version>0.3.14</version>
+  <version>0.3.15</version>
 </dependency>  
 ```
 

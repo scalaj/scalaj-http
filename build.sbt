@@ -1,14 +1,14 @@
 name := "scalaj-http"
 
-version := "0.3.14"
+version := "0.3.15"
 
 organization := "org.scalaj"
 
-scalaVersion := "2.10.3"
+scalaVersion := "2.10.4"
 
 libraryDependencies ++= Seq(
   "junit"                % "junit"              % "4.10"          % "test",
-  "com.novocode"         % "junit-interface"    % "0.8"           % "test",
+  "com.novocode"         % "junit-interface"    % "0.10"           % "test",
   "com.github.kristofa"  % "mock-http-server"   % "1.3"           % "test"
 )
 
@@ -17,7 +17,7 @@ libraryDependencies ++= (
   else Seq.empty
 )
 
-crossScalaVersions := Seq("2.9.2", "2.10.3", "2.11.0")
+crossScalaVersions := Seq("2.9.3", "2.10.4", "2.11.0")
 
 javacOptions ++= Seq("-source", "1.6", "-target", "1.6")
 
