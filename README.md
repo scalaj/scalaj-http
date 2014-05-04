@@ -102,6 +102,12 @@ Http("http://foo.com"){inputStream =>
 Http.postData(url, data).header("content-type", "application/json").responseCode
 ```
 
+### Put raw Array[Byte] or String data and get response code
+
+```scala
+Http.putData(url, data).responseCode
+```
+
 ### Post multipart/form-data
 
 ```scala

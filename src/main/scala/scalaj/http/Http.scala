@@ -410,7 +410,17 @@ object Http {
     }
     Request(postFunc, noopHttpUrl(url), "POST")
   }
-  
+
+  def putData(url: String, data: String): Request = putData(url, data.getBytes(utf8))
+  def putData(url: String, data: Array[Byte]): Request = {
+    val putFunc: HttpExec = (req, conn) => {
+      conn.setDoOutput(true)
+      conn.connect
+      conn.getOutputStream.write(data)
+    }
+    Request(putFunc, noopHttpUrl(url), "PUT")
+  }
+
   def post(url: String): Request = {
     val postFunc: HttpExec = (req, conn) => {
       conn.setDoOutput(true)
