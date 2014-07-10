@@ -292,10 +292,10 @@ object Http {
   val setFixedLengthStreamingMode: (HttpURLConnection, Long) => Unit = {
     val connClass = classOf[HttpURLConnection]
     val (isLong, theMethod) = try {
-      true -> connClass.getDeclaredMethod("setFixedLengthStreamingMode", classOf[Long])
+      true -> connClass.getDeclaredMethod("setFixedLengthStreamingMode", java.lang.Long.TYPE)
     } catch {
       case e: NoSuchMethodException =>
-        false -> connClass.getDeclaredMethod("setFixedLengthStreamingMode", classOf[Int])
+        false -> connClass.getDeclaredMethod("setFixedLengthStreamingMode", java.lang.Integer.TYPE)
     }
     (conn, length) => 
       if (isLong) {
