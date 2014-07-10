@@ -1,3 +1,11 @@
+0.3.16
+------
+release: 10 July 2014 
+ 
+ - bumped cross compile scala version to 2.11.1
+ - fix for CLOSE_WAIT leak when calling responseCode
+ - fix for method not found in scala 2.11 (@vmorarian)
+
 0.3.15
 ------
 release: 27 April 2014 
