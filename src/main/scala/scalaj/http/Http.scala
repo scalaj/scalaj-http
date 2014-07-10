@@ -163,6 +163,8 @@ object Http {
             case e: java.io.IOException =>
               throw new HttpException(conn.getResponseCode, conn.getResponseMessage, 
                 getErrorBody(conn.getErrorStream), e)
+          } finally {
+            conn.disconnect()
           }
       }
     }
