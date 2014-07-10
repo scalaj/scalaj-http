@@ -175,9 +175,26 @@ object Http {
       }.groupBy(_._1).mapValues(_.map(_._2).toList)
     }
     
-    def responseCode: Int = process((conn:HttpURLConnection) => conn.getResponseCode)
+    private def closeStreams(conn:HttpURLConnection) {
+      try {
+        conn.getInputStream().close
+      } catch {
+        case e: Exception => //ignore
+      }
+      try {
+        conn.getErrorStream().close
+      } catch {
+        case e: Exception => //ignore
+      }
+    }
+
+    def responseCode: Int = process{(conn:HttpURLConnection) =>
+      closeStreams(conn)
+      conn.getResponseCode
+    }
     
-    def asCodeHeaders: (Int, Map[String, List[String]]) = process { conn: HttpURLConnection => 
+    def asCodeHeaders: (Int, Map[String, List[String]]) = process { conn: HttpURLConnection =>
+      closeStreams(conn)
       (conn.getResponseCode, getResponseHeaders(conn))
     }
     
