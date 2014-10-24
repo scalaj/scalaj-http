@@ -3,10 +3,8 @@ package scalaj.http
 import java.io.ByteArrayInputStream
 import java.net.{InetSocketAddress, Proxy}
 import org.junit.Assert._
-import org.junit.Test
-import org.junit.Before
-import org.junit.After
-import scalaj.http.Http._
+import org.junit.{After, Before, Test}
+import scalaj.http.HttpConstants._
 import com.github.kristofa.test.http._
 
 class HttpTest {
@@ -19,7 +17,6 @@ class HttpTest {
   
   val cType    = "text/html"
   val rCode    = 200
-  val response = "<html>ok</html>" 
 
   @Before
   def setUp(): Unit = {
@@ -32,58 +29,64 @@ class HttpTest {
   }
   
   @Test
-  def asCodeHeaders: Unit = {
-    rProvider.expect(Method.GET, "/").respondWith(rCode, cType, response);
+  def basicRequest: Unit = {
+    val expectedCode = 200
+    val expectedBody = "ok"
+    val expectedContentType = "text/text"
+    rProvider.expect(Method.GET, "/").respondWith(expectedCode, expectedContentType, expectedBody)
     
-    val (code, headers) = Http(url).asCodeHeaders
-    assertTrue(headers.contains("Content-Type"))
-    assertEquals(code, rCode)
+
+    object MyHttp extends BaseHttp(options = Seq(HttpOptions.readTimeout(1234)))
+    val request: HttpRequest = MyHttp(url)
+    val response: HttpResponse[String] = request.execute()
+    assertEquals(Some(expectedContentType), response.headers.get("Content-Type"))
+    assertEquals(expectedCode, response.code)
+    assertEquals(expectedBody, response.body)
   }
 
   @Test
-  def asXml: Unit = {
-    rProvider.expect(Method.GET, "/").respondWith(rCode, "text/xml", response);
-    
-    val xml = Http(url).asXml
-    assertEquals(xml.toString, response)
+  def serverError: Unit = {
+    rProvider.expect(Method.GET, "/").respondWith(500, "text/text", "error")
+    val response: HttpResponse[String] = DefaultHttp(url).execute()
+    assertEquals(500, response.code)
+    assertEquals("error", response.body)
+  }
+
+  @Test
+  def redirectShouldNotFollowByDefault: Unit = {
+    rProvider.expect(Method.GET, "/").respondWith(301, "text/text", "error")
+    val response: HttpResponse[String] = DefaultHttp(url).execute()
+    assertEquals(301, response.code)
+    assertEquals("error", response.body)
   }
   
   @Test
   def asParams: Unit = {
     rProvider.expect(Method.GET, "/").respondWith(rCode, cType, "foo=bar");
     
-    val result = Http(url).asParams
-    assertEquals(result, List(("foo", "bar")))
+    val response = DefaultHttp(url).asParams
+    assertEquals(Seq("foo" -> "bar"), response.body)
   }
 
   @Test
   def asParamMap: Unit = {
     rProvider.expect(Method.GET, "/").respondWith(rCode, cType, "foo=bar");
     
-    val result = Http(url).asParamMap
-    assertEquals(result, Map("foo" -> "bar"))
+    val response = DefaultHttp(url).asParamMap
+    assertEquals(Map("foo" -> "bar"), response.body)
   }
 
   @Test
   def asBytes: Unit = {
-    rProvider.expect(Method.GET, "/").respondWith(rCode, cType, response);
+    rProvider.expect(Method.GET, "/").respondWith(rCode, cType, "hi");
     
-    val result = Http(url).asBytes
-    assertNotNull(result)
-  }
-
-  @Test
-  def forceCharset: Unit = {
-    rProvider.expect(Method.GET, "/").respondWith(rCode, cType, response);
-    
-    val result = Http(url).charset("ISO-8859-1").asString
-    assertNotNull("the result should not be null", result)
-  }
-  
+    val response = DefaultHttp(url).asBytes
+    assertEquals("hi", new String(response.body, HttpConstants.utf8))
+  }  
 
   @Test
   def shouldPrependOptions: Unit = {
-    val http = Http(url)
+    val http = DefaultHttp(url)
     val origOptions = http.options
     val origOptionsLength = origOptions.length
     val newOptions: List[HttpOptions.HttpOption] = List(c => { }, c=> { }, c => {})
@@ -96,43 +99,43 @@ class HttpTest {
 
   @Test
   def lastTimeoutValueShouldWin: Unit = {
-    rProvider.expect(Method.GET, "/").respondWith(rCode, cType, response);
+    rProvider.expect(Method.GET, "/").respondWith(rCode, cType, "hi");
     
-    val getFunc: HttpExec = (req,conn) => {
-      
-    }
-
-    val r = Request(getFunc, Http.noopHttpUrl(url), "GET")
-      .options(HttpOptions.connTimeout(1234)).options(HttpOptions.readTimeout(1234))
-    r.process(c => {
+    val getFunc: HttpExec = (req, c) => {
       assertEquals(c.getReadTimeout, 1234)
       assertEquals(c.getConnectTimeout, 1234)
-      Http.readString(c.getInputStream())
-    })
+    }
+
+    val r = DefaultHttp(url).option(HttpOptions.connTimeout(1234)).option(HttpOptions.readTimeout(1234))
+      .copy(exec = getFunc)
+    r.execute()
   }
 
   @Test
   def readString: Unit = {
-    val bais = new ByteArrayInputStream("hello there".getBytes(Http.utf8))
-    assertEquals("hello there", Http.readString(bais))
+    val bais = new ByteArrayInputStream("hello there".getBytes(HttpConstants.utf8))
+    assertEquals("hello there", HttpConstants.readString(bais))
   }
 
   @Test
   def overrideTheMethod: Unit = {
-    rProvider.expect(Method.DELETE, "/").respondWith(rCode, cType, response)
-    val req = Http(url).method("DELETE")
-    req.process(c => {
-      assertEquals("DELETE", c.getRequestMethod)
-      Http.readString(c.getInputStream())
-    })
+    rProvider.expect(Method.DELETE, "/").respondWith(rCode, cType, "")
+    DefaultHttp(url).method("DELETE").asString
+    server.verify
   }
 
   @Test
   def unofficialOverrideTheMethod: Unit = {
-    val reqMethod = Http(url).method("FOO").process(c => {
-      c.getRequestMethod
-    })
-    assertEquals("should have overriden the request method", "FOO", reqMethod)
+    val fooFunc: HttpExec = (req, c) => {
+      throw new RuntimeException(c.getRequestMethod)
+    }
+    try {
+      DefaultHttp(url).method("FOO").copy(exec = fooFunc).execute()
+      fail("expected throw")
+    } catch {
+      case e: RuntimeException if e.getMessage == "FOO" => // ok
+    }
+    
   }
 
   @Test
@@ -142,7 +145,7 @@ class HttpTest {
     val headers = List("foo" -> "bar")
     val options = List(HttpOptions.readTimeout(1234))
 
-    var req = Http(url).params(params)
+    var req = DefaultHttp(url).params(params)
 
     req = req.proxy("host", 80)
 
@@ -160,7 +163,13 @@ class HttpTest {
     assertEquals("params", params, req.params)
     assertEquals("proxy", proxy, req.proxy)
     assertEquals("options", expectedNewOptions, req.options)
-    assertEquals("headers", headers, req.headers)
 
+  }
+
+  @Test(expected = classOf[java.net.ConnectException])
+  def serverDown {
+    server.stop
+    val response = DefaultHttp(url).execute()
+    assertEquals("", response.body)
   }
 }

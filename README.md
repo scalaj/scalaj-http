@@ -9,7 +9,7 @@ This is a bare bones http client for scala which wraps HttpURLConnection
 ### sbt
 
 ```scala
-val scalaj_http = "org.scalaj" %% "scalaj-http" % "0.3.16"
+val scalaj_http = "org.scalaj" %% "scalaj-http" % "1.0.0"
 ```
 
 ### maven
@@ -18,7 +18,7 @@ val scalaj_http = "org.scalaj" %% "scalaj-http" % "0.3.16"
 <dependency>
   <groupId>org.scalaj</groupId>
   <artifactId>scalaj-http_${scala.version}</artifactId>
-  <version>0.3.16</version>
+  <version>1.0.0</version>
 </dependency>  
 ```
 
@@ -28,34 +28,37 @@ val scalaj_http = "org.scalaj" %% "scalaj-http" % "0.3.16"
 ### Simple Get
 
 ```scala
-import scalaj.http.Http
+import scalaj.http._
   
-Http("http://foo.com/search").param("q","monkeys").asString
+val response: HttpResponse[String] = DefaultHttp("http://foo.com/search").param("q","monkeys").asString
+response.body
+response.code
+response.headers
 ```
 
 ### Immutable Request
 
-```Http(url)``` is just shorthead for a ```Http.apply``` which returns an immutable instance of ```Http.Request```.  
-You can create a ```Request``` and reuse it:
+```DefaultHttp(url)``` is just shorthead for a ```DefaultHttp.apply``` which returns an immutable instance of ```HttpRequest```.  
+You can create a ```HttpRequest``` and reuse it:
 
 ```scala
-val request: Http.Request = Http("http://date.jsontest.com/")
+val request: HttpRequest = DefaultHttp("http://date.jsontest.com/")
 
-val resultOne = request.asString
-val resultTwo = request.asString
+val responseOne = request.asString
+val responseTwo = request.asString
 ```
 
 #### Additive Request
 
-All the "modification" methods of a ```Request``` are actually returning a new instance. The param(s), option(s), header(s) 
-methods always add to their respective sets. So calling ```.headers(newHeaders)``` will return a ```Request``` instance 
+All the "modification" methods of a ```HttpRequest``` are actually returning a new instance. The param(s), option(s), header(s) 
+methods always add to their respective sets. So calling ```.headers(newHeaders)``` will return a ```HttpRequest``` instance 
 that has ```newHeaders``` appended to the previous ```req.headers```
 
 
-### Simple Post
+### Simple form encoded POST
 
 ```scala
-Http.post("http://foo.com/add").params("name" -> "jon", "age" -> "29").asString
+DefaultHttp("http://foo.com/add").postForm(Seq("name" -> "jon", "age" -> "29")).asString
 ```
 
 ### OAuth v1 Dance and Request
@@ -64,89 +67,84 @@ Http.post("http://foo.com/add").params("name" -> "jon", "age" -> "29").asString
 import scalaj.http.{Http, Token}
 
 val consumer = Token("key", "secret")
-val token = Http.post("https://api.twitter.com/oauth/request_token").param("oauth_callback","oob")
+val response = DefaultHttp("https://api.twitter.com/oauth/request_token").postForm(Seq("oauth_callback" -> "oob"))
   .oauth(consumer).asToken
 
-println("Go to https://api.twitter.com/oauth/authorize?oauth_token=" + token.key)
+println("Go to https://api.twitter.com/oauth/authorize?oauth_token=" + response.body.key)
 
 val verifier = Console.readLine("Enter verifier: ").trim
 
-val accessToken = Http.post("https://api.twitter.com/oauth/access_token")
+val accessToken = DefaultHttp("https://api.twitter.com/oauth/access_token").postForm.
   .oauth(consumer, token, verifier).asToken
 
-println(Http("https://api.twitter.com/1.1/account/settings.json").oauth(consumer, accessToken).asString)
+println(Http("https://api.twitter.com/1.1/account/settings.json").oauth(consumer, accessToken.body).asString)
 ```
 
 ### Parsing the response
 
 ```scala
-Http("http://foo.com").{responseCode, asString, asXml, asBytes, asParams}
+Http("http://foo.com").{asString, asBytes, asParams}
 ```
+Those methods will return an ```HttpResponse[String | Array[Byte] | Seq[(String, String)]]``` respectively
 
 ## Advanced Usage Examples
 
-### Parse the response InputStream to JSON
+### Parse the response InputStream directly to whatever you want
 
 ```scala
 import java.io.InputStreamReader
-import net.liftweb.json.JsonParser
+import foo.JsonParser
 
-Http("http://foo.com"){inputStream => 
+val response: HttpResponse[Json] = DefaultHttp("http://foo.com").execute(parser = {inputStream => 
   JsonParser.parse(new InputStreamReader(inputStream))
-}
+})
 ```
 
 ### Post raw Array[Byte] or String data and get response code
 
 ```scala
-Http.postData(url, data).header("content-type", "application/json").responseCode
+DefaultHttp(url).postData(data).header("content-type", "application/json").asString
 ```
 
 ### Post multipart/form-data
 
 ```scala
-Http.multipart(url, MultiPart("photo", "headshot.png", "image/png", fileBytes)).responseCode
+DefaultHttp(url).postMulti(MultiPart("photo", "headshot.png", "image/png", fileBytes)).asString
 ```
 
 You can also stream uploads and get a callback on progress:
 
 ```scala
-Http.multipart(url, MultiPart("photo", "headshot.png", "image/png", inputStream, bytesInStream, 
+DefaultHttp(url).postMulti(MultiPart("photo", "headshot.png", "image/png", inputStream, bytesInStream, 
   lenWritten => {
     println("Wrote %d bytes out of %d total for headshot.png".format(lenWritten, bytesInStream))
-  })).responseCode
+  })).asString
 ```
 
 ### Send https request to site with self-signed or otherwise shady certificate
 
 ```scala
-Http("https://localhost/").option(HttpOptions.allowUnsafeSSL).asString
+DefaultHttp("https://localhost/").option(HttpOptions.allowUnsafeSSL).asString
 ```
 
 ### Do a HEAD request
 
 ```scala
-Http(url).method("HEAD").asString
+DefaultHttp(url).method("HEAD").asString
 ```
 
 ### Custom connect and read timeouts
 
-_These are set to 100 and 500 milliseconds respectively by default_
+_These are set to 1000 and 5000 milliseconds respectively by default_
 
 ```scala
-Http(url).option(HttpOptions.connTimeout(1000)).option(HttpOptions.readTimeout(5000)).asString
-```
-
-### Get responseCode, responseHeaders and parsedResponse
-
-```scala
-val (responseCode, headersMap, resultString) = Http(url).asHeadersAndParse(Http.readString)
+DefaultHttp(url).option(HttpOptions.connTimeout(1000)).option(HttpOptions.readTimeout(5000)).asString
 ```
 
 ### Get request via a proxy
 
 ```scala
-val response = Http(url).proxy(proxyHost, proxyPort).asString
+val response = DefaultHttp(url).proxy(proxyHost, proxyPort).asString
 ```
 
 ### Other custom options
@@ -160,5 +158,19 @@ By default, the charset for all param encoding and string response parsing is UT
 can override with charset of your choice:
 
 ```scala
-Http(url).charset("ISO-8859-1").asString
+DefaultHttp(url).charset("ISO-8859-1").asString
+```
+
+### Create your own HttpRequest builder
+
+You don't have to use DefaultHttp. Create your own to set your own defaults:
+
+```scala
+object MyHttp extends BaseHttp (
+  proxy: Proxy = Proxy.NO_PROXY, 
+  options: Seq[HttpOptions.HttpOption] = HttpConstants.defaultOptions,
+  charset: String = HttpConstants.utf8,
+  sendBufferSize: Int = 4096,
+  userAgent: String = "scalaj-http/1.0"
+)
 ```

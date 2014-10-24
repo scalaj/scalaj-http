@@ -11,43 +11,43 @@ object OAuth {
   import javax.crypto.spec.SecretKeySpec
   val MAC = "HmacSHA1"
       
-  def sign(req: Http.Request, consumer: Token, token: Option[Token], verifier: Option[String]): Http.Request = {
+  def sign(req: HttpRequest, consumer: Token, token: Option[Token], verifier: Option[String]): HttpRequest = {
 
     
-    val baseParams:List[(String,String)] = List(
+    val baseParams:Seq[(String,String)] = Seq(
       ("oauth_timestamp", (System.currentTimeMillis/1000).toString),
       ("oauth_nonce", System.currentTimeMillis.toString)
     )
     
     var (oauthParams, signature) = getSig(baseParams, req, consumer, token, verifier)
     
-    oauthParams ::= ("oauth_signature", signature)
+    oauthParams +:= ("oauth_signature", signature)
     
     req.header("Authorization", "OAuth " + oauthParams.map(p => p._1 + "=\"" + percentEncode(p._2) +"\"").mkString(","))
   }
   
-  def getSig(baseParams: List[(String,String)], req: Http.Request, consumer: Token, token: Option[Token], verifier: Option[String]): (List[(String,String)], String) = {
-    var oauthParams = ("oauth_version", "1.0")::("oauth_consumer_key", consumer.key)::("oauth_signature_method", "HMAC-SHA1") :: baseParams
+  def getSig(baseParams: Seq[(String,String)], req: HttpRequest, consumer: Token, token: Option[Token], verifier: Option[String]): (Seq[(String,String)], String) = {
+    var oauthParams = ("oauth_version", "1.0") +: ("oauth_consumer_key", consumer.key) +: ("oauth_signature_method", "HMAC-SHA1") +: baseParams
     
     token.foreach{t =>
-      oauthParams ::= ("oauth_token", t.key)
+      oauthParams +:= ("oauth_token", t.key)
     }
     
     verifier.foreach{v =>
-      oauthParams ::= ("oauth_verifier", v)
+      oauthParams +:= ("oauth_verifier", v)
     }
     
-    val baseString = List(req.method.toUpperCase,normalizeUrl(req.url(req)),normalizeParams(req.params ++ oauthParams)).map(percentEncode).mkString("&")
+    val baseString = Seq(req.method.toUpperCase,normalizeUrl(new URL(req.url)),normalizeParams(req.params ++ oauthParams)).map(percentEncode).mkString("&")
     
     val keyString = percentEncode(consumer.secret) + "&" + token.map(t => percentEncode(t.secret)).getOrElse("")
-    val key = new SecretKeySpec(keyString.getBytes(Http.utf8), MAC)
+    val key = new SecretKeySpec(keyString.getBytes(HttpConstants.utf8), MAC)
     val mac = Mac.getInstance(MAC)
     mac.init(key)
-    val text = baseString.getBytes(Http.utf8)
-    (oauthParams, Http.base64(mac.doFinal(text)))
+    val text = baseString.getBytes(HttpConstants.utf8)
+    (oauthParams, HttpConstants.base64(mac.doFinal(text)))
   }
   
-  private def normalizeParams(params: List[(String,String)]) = {
+  private def normalizeParams(params: Seq[(String,String)]) = {
     percentEncode(params).sortWith(_ < _).mkString("&")
   }
   
@@ -71,13 +71,13 @@ object OAuth {
     scheme + "://" + authority + path
   }
   
-  def percentEncode(params: List[(String,String)]):List[String] = {
+  def percentEncode(params: Seq[(String,String)]): Seq[String] = {
     params.map(p => percentEncode(p._1) + "=" + percentEncode(p._2))
   }
   
   def percentEncode(s: String): String = {
     if (s == null) "" else {
-       Http.urlEncode(s, Http.utf8).replace("+", "%20").replace("*", "%2A").replace("%7E", "~")
+       HttpConstants.urlEncode(s, HttpConstants.utf8).replace("+", "%20").replace("*", "%2A").replace("%7E", "~")
      }
   }
 }
