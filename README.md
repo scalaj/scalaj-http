@@ -4,6 +4,14 @@
 
 This is a bare bones http client for scala which wraps HttpURLConnection
 
+**_Note:_ This is a new major version of scalaj-http which is both syntactically and behaviorally different than the 0.x.x version.**
+
+Big differences:
+* Executing the request always returns a HttpResponse[T] instance the contains the response code, headers, and body
+* Exceptions are no longer thrown for 4xx and 5xx response codes. Yay!
+* Http(url) is the starting point for every type of request (post, get, multi, etc)
+* You can easily create your own singleton instance to set your own defaults (timeouts, proxies, etc)
+
 ## Installation
 
 ### sbt
@@ -163,7 +171,7 @@ Http(url).charset("ISO-8859-1").asString
 
 ### Create your own HttpRequest builder
 
-You don't have to use Http. Create your own to set your own defaults:
+You don't have to use the default Http singleton. Create your own:
 
 ```scala
 object MyHttp extends BaseHttp (
