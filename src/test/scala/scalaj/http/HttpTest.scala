@@ -47,7 +47,7 @@ class HttpTest {
   @Test
   def serverError: Unit = {
     rProvider.expect(Method.GET, "/").respondWith(500, "text/text", "error")
-    val response: HttpResponse[String] = DefaultHttp(url).execute()
+    val response: HttpResponse[String] = Http(url).execute()
     assertEquals(500, response.code)
     assertEquals("error", response.body)
   }
@@ -55,7 +55,7 @@ class HttpTest {
   @Test
   def redirectShouldNotFollowByDefault: Unit = {
     rProvider.expect(Method.GET, "/").respondWith(301, "text/text", "error")
-    val response: HttpResponse[String] = DefaultHttp(url).execute()
+    val response: HttpResponse[String] = Http(url).execute()
     assertEquals(301, response.code)
     assertEquals("error", response.body)
   }
@@ -64,7 +64,7 @@ class HttpTest {
   def asParams: Unit = {
     rProvider.expect(Method.GET, "/").respondWith(rCode, cType, "foo=bar");
     
-    val response = DefaultHttp(url).asParams
+    val response = Http(url).asParams
     assertEquals(Seq("foo" -> "bar"), response.body)
   }
 
@@ -72,7 +72,7 @@ class HttpTest {
   def asParamMap: Unit = {
     rProvider.expect(Method.GET, "/").respondWith(rCode, cType, "foo=bar");
     
-    val response = DefaultHttp(url).asParamMap
+    val response = Http(url).asParamMap
     assertEquals(Map("foo" -> "bar"), response.body)
   }
 
@@ -80,13 +80,13 @@ class HttpTest {
   def asBytes: Unit = {
     rProvider.expect(Method.GET, "/").respondWith(rCode, cType, "hi");
     
-    val response = DefaultHttp(url).asBytes
+    val response = Http(url).asBytes
     assertEquals("hi", new String(response.body, HttpConstants.utf8))
   }  
 
   @Test
   def shouldPrependOptions: Unit = {
-    val http = DefaultHttp(url)
+    val http = Http(url)
     val origOptions = http.options
     val origOptionsLength = origOptions.length
     val newOptions: List[HttpOptions.HttpOption] = List(c => { }, c=> { }, c => {})
@@ -106,7 +106,7 @@ class HttpTest {
       assertEquals(c.getConnectTimeout, 1234)
     }
 
-    val r = DefaultHttp(url).option(HttpOptions.connTimeout(1234)).option(HttpOptions.readTimeout(1234))
+    val r = Http(url).option(HttpOptions.connTimeout(1234)).option(HttpOptions.readTimeout(1234))
       .copy(exec = getFunc)
     r.execute()
   }
@@ -120,7 +120,7 @@ class HttpTest {
   @Test
   def overrideTheMethod: Unit = {
     rProvider.expect(Method.DELETE, "/").respondWith(rCode, cType, "")
-    DefaultHttp(url).method("DELETE").asString
+    Http(url).method("DELETE").asString
     server.verify
   }
 
@@ -130,7 +130,7 @@ class HttpTest {
       throw new RuntimeException(c.getRequestMethod)
     }
     try {
-      DefaultHttp(url).method("FOO").copy(exec = fooFunc).execute()
+      Http(url).method("FOO").copy(exec = fooFunc).execute()
       fail("expected throw")
     } catch {
       case e: RuntimeException if e.getMessage == "FOO" => // ok
@@ -145,7 +145,7 @@ class HttpTest {
     val headers = List("foo" -> "bar")
     val options = List(HttpOptions.readTimeout(1234))
 
-    var req = DefaultHttp(url).params(params)
+    var req = Http(url).params(params)
 
     req = req.proxy("host", 80)
 
@@ -169,7 +169,7 @@ class HttpTest {
   @Test(expected = classOf[java.net.ConnectException])
   def serverDown {
     server.stop
-    val response = DefaultHttp(url).execute()
+    val response = Http(url).execute()
     assertEquals("", response.body)
   }
 }

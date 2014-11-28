@@ -441,7 +441,7 @@ object HttpConstants {
 
   val utf8 = "UTF-8"
 }
-object DefaultHttp extends BaseHttp
+object Http extends BaseHttp
 
 class BaseHttp (
   proxy: Proxy = Proxy.NO_PROXY, 
