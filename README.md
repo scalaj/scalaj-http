@@ -4,7 +4,7 @@
 
 This is a bare bones http client for scala which wraps HttpURLConnection
 
-**_Note:_ This is a new major version of scalaj-http which is both syntactically and behaviorally different than the 0.x.x version.**
+**_Note:_ 1.0.x is a new major version of scalaj-http which is both syntactically and behaviorally different than the 0.x.x version.**
 
 Previous version is branched here: https://github.com/scalaj/scalaj-http/tree/0.3.x
 
