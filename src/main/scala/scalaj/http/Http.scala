@@ -1,5 +1,21 @@
 package scalaj.http
 
+/** scalaj.http
+  Copyright 2010 Jonathan Hoffman
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+ */
+
 import java.lang.reflect.Field
 import java.net.{HttpURLConnection, InetSocketAddress, Proxy, URL, URLEncoder, URLDecoder}
 import java.io.{DataOutputStream, InputStream, BufferedReader, InputStreamReader, ByteArrayInputStream, 
@@ -14,7 +30,7 @@ import javax.net.ssl.X509TrustManager
 import javax.net.ssl.HostnameVerifier
 import java.util.zip.{GZIPInputStream, InflaterInputStream}
 
-
+/** Helper functions for modifying the underlying HttpURLConnection */
 object HttpOptions {
   type HttpOption = HttpURLConnection => Unit
 
@@ -50,6 +66,7 @@ object HttpOptions {
   
   def followRedirects(shouldFollow: Boolean): HttpOption = c => c.setInstanceFollowRedirects(shouldFollow)
 
+  /** Ignore the cert chain */
   def allowUnsafeSSL: HttpOption = c => c match {
     case httpsConn: HttpsURLConnection => 
       val hv = new HostnameVerifier() {
@@ -68,6 +85,8 @@ object HttpOptions {
       httpsConn.setSSLSocketFactory(sc.getSocketFactory())
     case _ => // do nothing
   }
+
+  /** Add your own SSLSocketFactory to do certificate authorization or pinning */
   def sslSocketFactory(sslSocketFactory: SSLSocketFactory): HttpOption = c => c match {
     case httpsConn: HttpsURLConnection =>
       httpsConn.setSSLSocketFactory(sslSocketFactory) 
@@ -89,9 +108,24 @@ case class MultiPart(val name: String, val filename: String, val mime: String, v
 
 case class HttpException(val message: String, cause: Throwable) extends RuntimeException(message, cause)
 
-
+/** Result of executing a [[scalaj.http.HttpRequest]]
+  * @tparam T the body response since it can be parsed directly to things other than String
+  * @param body the Http response body
+  * @param code the http response code from the status line
+  * @param headers the response headers
+ */
 case class HttpResponse[T](body: T, code: Int, headers: Map[String, String])
 
+/** Immutable builder for creating an http request
+  *
+  * This is the workhorse of the scalaj-http library.
+  *
+  * You shouldn't need to construct this manually. Use [[scalaj.http.Http.apply]] to get an instance
+  *
+  * The params, headers and options methods are all additive. They will always add things to the request. If you want to 
+  * replace those things completely, you can do something like {{{.copy(params=newparams)}}}
+  *
+  */
 case class HttpRequest(
   url: String,
   method: String,
@@ -105,47 +139,82 @@ case class HttpRequest(
   urlBuilder: (HttpRequest => String)
 ) {
 
+  /** Add params to the GET querystring or POST form request */
   def params(p: Map[String, String]): HttpRequest = params(p.toSeq)
+  /** Add params to the GET querystring or POST form request */
   def params(p: Seq[(String,String)]): HttpRequest = copy(params = params ++ p)
+  /** Add params to the GET querystring or POST form request */
   def params(p: (String,String), rest: (String, String)*): HttpRequest = params(p +: rest)
+  /** Add a param to the GET querystring or POST form request */
   def param(key: String, value: String): HttpRequest = params(key -> value)
 
+  /** Add http headers to the request */
   def headers(h: Map[String, String]): HttpRequest = headers(h.toSeq)
+  /** Add http headers to the request */
   def headers(h: Seq[(String,String)]): HttpRequest = copy(headers = headers ++ h)
+  /** Add http headers to the request */
   def headers(h: (String,String), rest: (String, String)*): HttpRequest = headers(h +: rest)
+  /** Add a http header to the request */
   def header(key: String, value: String): HttpRequest = headers(key -> value)
 
+  /** Entry point fo modifying the [[java.net.HttpURLConnection]] before the request is executed */
   def options(o: Seq[HttpOptions.HttpOption]): HttpRequest = copy(options = o ++ options)
+  /** Entry point fo modifying the [[java.net.HttpURLConnection]] before the request is executed */
   def options(o: HttpOptions.HttpOption, rest: HttpOptions.HttpOption*): HttpRequest = options(o +: rest)
+  /** Entry point fo modifying the [[java.net.HttpURLConnection]] before the request is executed */
   def option(o: HttpOptions.HttpOption): HttpRequest = options(o)
   
+  /** Add a standard basic authorization header */
   def auth(user: String, password: String) = header("Authorization", "Basic " + HttpConstants.base64(user + ":" + password))
   
+  /** OAuth v1 sign the request with the consumer token */
   def oauth(consumer: Token): HttpRequest = oauth(consumer, None, None)
+  /** OAuth v1 sign the request with with both the consumer and client token */
   def oauth(consumer: Token, token: Token): HttpRequest = oauth(consumer, Some(token), None)
+  /** OAuth v1 sign the request with with both the consumer and client token and a verifier*/
   def oauth(consumer: Token, token: Token, verifier: String): HttpRequest = oauth(consumer, Some(token), Some(verifier))
+  /** OAuth v1 sign the request with with both the consumer and client token and a verifier*/
   def oauth(consumer: Token, token: Option[Token], verifier: Option[String]): HttpRequest = {
     OAuth.sign(this, consumer, token, verifier)
   }
 
+  /** Change the http request method. 
+    * The library will allow you to set this to whatever you want. If you want to do a POST, just use the
+    * postData, postForm, or postMulti methods. If you want to setup your request as a form, data or multi request, but 
+    * want to change the method type, call this method after the post method:
+    *
+    * {{{Http(url).postData(dataBytes).method("PUT").asString}}}
+    */
   def method(m: String): HttpRequest = option(HttpOptions.method(m))
 
+  /** Send request via a standard http proxy */
   def proxy(host: String, port: Int): HttpRequest = proxy(host, port, Proxy.Type.HTTP)
+  /** Send request via a proxy. You choose the type (HTTP or SOCKS) */
   def proxy(host: String, port: Int, proxyType: Proxy.Type): HttpRequest = {
     copy(proxy = HttpConstants.proxy(host, port, proxyType))
   }
+  /** Send request via a proxy */
   def proxy(proxy: Proxy): HttpRequest = {
     copy(proxy = proxy)
   }
   
+  /** Change the charset used to encode the request and decode the response. UTF-8 by default */
   def charset(cs: String): HttpRequest = copy(charset = cs)
 
+  /** The buffer size to use when sending Multipart posts */
   def sendBufferSize(numBytes: Int): HttpRequest = copy(sendBufferSize = numBytes)
 
+  /** The socket connection and read timeouts in milliseconds. Defaults are 1000 and 5000 respectively */
   def timeout(connTimeoutMs: Int, readTimeoutMs: Int): HttpRequest = options(
     Seq(HttpOptions.connTimeout(connTimeoutMs), HttpOptions.readTimeout(readTimeoutMs))
   )
   
+  /** Executes this request
+    *
+    * @tparam T the type returned by the input stream parser
+    * @param parser function to process the response body InputStream. Will be used for all response codes
+    * @param stream set to true if you want to leave the InputStreams open. This might be used for streaming a firehose
+    */
   def execute[T](
     parser: InputStream => T = ((is: InputStream) => HttpConstants.readString(is, charset)),
     stream: Boolean = false
@@ -207,8 +276,10 @@ case class HttpRequest(
     }
   }
 
+  /** Standard form POST request */
   def postForm: HttpRequest = postForm(Nil)
 
+  /** Standard form POST request and set some parameters. Same as .postForm.params(params) */
   def postForm(params: Seq[(String, String)]): HttpRequest = {
     val postFunc: HttpConstants.HttpExec = (req, conn) => {
       conn.setDoOutput(true)
@@ -219,8 +290,10 @@ case class HttpRequest(
       .header("content-type", "application/x-www-form-urlencoded").params(params)
   }
 
+  /** Raw data POST request. String bytes written out in using configured charset */
   def postData(data: String): HttpRequest = postData(data.getBytes(charset))
 
+  /** Raw byte data POST request */
   def postData(data: Array[Byte]): HttpRequest = {
     val postFunc: HttpConstants.HttpExec = (req, conn) => {
       conn.setDoOutput(true)
@@ -230,8 +303,10 @@ case class HttpRequest(
     copy(method="POST", exec=postFunc, urlBuilder=(req => req.url))
   }
 
-
-
+  /** Multipart POST request.
+    *
+    * This is probably what you want if you need to upload a mix of form data and binary data (like a photo)
+    */
   def postMulti(parts: MultiPart*): HttpRequest = {
     val postFunc: HttpConstants.HttpExec = (req, conn) => {
       val CrLf = "\r\n"
@@ -331,15 +406,22 @@ case class HttpRequest(
     copy(method="POST", exec=postFunc, urlBuilder=(req => req.url))
   }
   
+  /** Execute this request and parse http body as Array[Byte] */
   def asBytes: HttpResponse[Array[Byte]] = execute(HttpConstants.readBytes)
+  /** Execute this request and parse http body as String using configured charset */
   def asString: HttpResponse[String] = execute(HttpConstants.readString(_, charset))
+  /** Execute this request and parse http body as query string key-value pairs */
   def asParams: HttpResponse[Seq[(String, String)]] = execute(HttpConstants.readParams(_, charset))
+  /** Execute this request and parse http body as query string key-value pairs */
   def asParamMap: HttpResponse[Map[String, String]] = execute(HttpConstants.readParamMap(_, charset))
+  /** Execute this request and parse http body as a querystring containing oauth_token and oauth_token_secret tupple */
   def asToken: HttpResponse[Token] = execute(HttpConstants.readToken)
 }
 
 
-
+/**
+  * Mostly helper methods
+  */
 object HttpConstants {
   type HttpExec = (HttpRequest, HttpURLConnection) => Unit
 
@@ -465,8 +547,19 @@ object HttpConstants {
 
   val utf8 = "UTF-8"
 }
+
+/** Default entry point to this library */
 object Http extends BaseHttp
 
+/**
+  * Extends and override this class to setup your own defaults
+  *
+  * @param proxy http proxy. You can use [[scalaj.http.HttpConstants.proxy]] to create one
+  * @param options set things like timeouts, ssl handling, redirect following
+  * @param charset charset to use for encoding request and decoding response
+  * @param sendBufferSize buffer size for multipart posts
+  * @param userAgent User-Agent request header
+  */
 class BaseHttp (
   proxy: Proxy = Proxy.NO_PROXY, 
   options: Seq[HttpOptions.HttpOption] = HttpConstants.defaultOptions,
@@ -475,7 +568,11 @@ class BaseHttp (
   userAgent: String = "scalaj-http/1.0"
 ) {
 
-  def apply(url: String): HttpRequest =  HttpRequest(
+  /** Create a new [[scalaj.http.HttpRequest]]
+   *
+   * @param url the full url of the request. Querystring params can be added to a get request with the .params methods
+   */
+  def apply(url: String): HttpRequest = HttpRequest(
     url = url,
     method = "GET",
     exec = (req,conn) => conn.connect,

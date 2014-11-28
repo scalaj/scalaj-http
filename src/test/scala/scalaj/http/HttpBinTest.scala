@@ -56,4 +56,12 @@ class HttpBinTest {
     assertEquals(Some("a"), binResponse.form.get("param1"))
     assertEquals(Some("b"), binResponse.form.get("param2"))
   }
+
+  @Test
+  def postForm {
+    val response = Http("http://httpbin.org/post").postForm.param("param1", "a").param("param2", "b").asString
+    val binResponse = Json.parse[BinResponse](response.body)
+    assertEquals(Some("a"), binResponse.form.get("param1"))
+    assertEquals(Some("b"), binResponse.form.get("param2"))
+  }
 }

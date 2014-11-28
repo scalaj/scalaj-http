@@ -1,0 +1,20 @@
+ Simple http request library. Makes it easy to issue an http request and get a result.
+ 
+ ==Overview==
+ The main entry point is the [[scalaj.http.Http]] singleton. Calling Http(url) will return
+ an instance of [[scalaj.http.HttpRequest]] which you can use to build up your request.
+ Execute the request by calling one of the asXXX methods and get a [[scalaj.http.HttpResponse]] which will contain
+ the responseCode, body and response headers.
+
+ ==Usage Example==
+ {{{
+ > import scalaj.http._
+ > val baseRequest: HttpRequest = Http("http://httpbin.org/post") // that's a get request by default
+ baseRequest: scalaj.http.HttpRequest = HttpRequest(http://httpbin.org/post,GET, ...
+
+ > val postRequest: HttpRequst = baseRequest.postForm.param("param1", "a").param("param2", "b") // create a post request
+ postRequest: scalaj.http.HttpRequest = HttpRequest(http://httpbin.org/post,POST, ...
+ 
+ > val response: HttpResponse[String] = postRequest.asString // execute the request
+ response: scalaj.http.HttpResponse[String] =  HttpResponse(body...,200,Map(Access-Control-Allow-Origin -> *, ...))
+ }}}

@@ -24,6 +24,8 @@ crossScalaVersions := Seq("2.9.3", "2.10.4", "2.11.4")
 
 javacOptions ++= Seq("-source", "1.6", "-target", "1.6")
 
+scalacOptions in (Compile, doc) ++= Seq("-doc-root-content", baseDirectory.value+"/root-doc.txt")
+
 publishTo <<= version { v: String =>
   val nexus = "https://oss.sonatype.org/"
   if (v.trim.endsWith("SNAPSHOT"))
