@@ -1,0 +1,253 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>http - scalaj.http</title>
+          <meta name="description" content="http - scalaj.http" />
+          <meta name="keywords" content="http scalaj.http" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../index.html';
+            var hash = 'scalaj.http.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="value">
+      <div id="definition">
+        <img src="../../lib/package_big.png" />
+        <p id="owner"><a href="../package.html" class="extype" name="scalaj">scalaj</a></p>
+        <h1>http</h1>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">http</span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        
+        
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="scalaj.http.Base64" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Base64extendsObject"></a>
+      <a id="Base64:Base64"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="Base64.html"><span class="name">Base64</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="scalaj.http.BaseHttp" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="BaseHttpextendsAnyRef"></a>
+      <a id="BaseHttp:BaseHttp"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="BaseHttp.html"><span class="name">BaseHttp</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Extends and override this class to setup your own defaults
+</p>
+    </li><li name="scalaj.http.HttpException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HttpExceptionextendsRuntimeExceptionwithProductwithSerializable"></a>
+      <a id="HttpException:HttpException"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpException.html"><span class="name">HttpException</span></a><span class="params">(<span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="cause">cause: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="result"> extends <span class="extype" name="scala.RuntimeException">RuntimeException</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="scalaj.http.HttpRequest" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HttpRequestextendsProductwithSerializable"></a>
+      <a id="HttpRequest:HttpRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpRequest.html"><span class="name">HttpRequest</span></a><span class="params">(<span name="url">url: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="method">method: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="exec">exec: (<a href="HttpRequest.html" class="extype" name="scalaj.http.HttpRequest">HttpRequest</a>, <span class="extype" name="java.net.HttpURLConnection">HttpURLConnection</span>) ⇒ <span class="extype" name="scala.Unit">Unit</span></span>, <span name="params">params: <span class="extype" name="scala.Seq">Seq</span>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)]</span>, <span name="headers">headers: <span class="extype" name="scala.Seq">Seq</span>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)]</span>, <span name="options">options: <span class="extype" name="scala.Seq">Seq</span>[(<span class="extype" name="java.net.HttpURLConnection">HttpURLConnection</span>) ⇒ <span class="extype" name="scala.Unit">Unit</span>]</span>, <span name="proxy">proxy: <span class="extype" name="java.net.Proxy">Proxy</span></span>, <span name="charset">charset: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="sendBufferSize">sendBufferSize: <span class="extype" name="scala.Int">Int</span></span>, <span name="urlBuilder">urlBuilder: (<a href="HttpRequest.html" class="extype" name="scalaj.http.HttpRequest">HttpRequest</a>) ⇒ <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Immutable builder for creating an http request</p>
+    </li><li name="scalaj.http.HttpResponse" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HttpResponse[T]extendsProductwithSerializable"></a>
+      <a id="HttpResponse[T]:HttpResponse[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpResponse.html"><span class="name">HttpResponse</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="body">body: <span class="extype" name="scalaj.http.HttpResponse.T">T</span></span>, <span name="code">code: <span class="extype" name="scala.Int">Int</span></span>, <span name="headers">headers: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Result of executing a <a href="HttpRequest.html" class="extype" name="scalaj.http.HttpRequest">scalaj.http.HttpRequest</a></p>
+    </li><li name="scalaj.http.MultiPart" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MultiPartextendsProductwithSerializable"></a>
+      <a id="MultiPart:MultiPart"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="MultiPart.html"><span class="name">MultiPart</span></a><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="filename">filename: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="mime">mime: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="data">data: <span class="extype" name="java.io.InputStream">InputStream</span></span>, <span name="numBytes">numBytes: <span class="extype" name="scala.Long">Long</span></span>, <span name="writeCallBack">writeCallBack: (<span class="extype" name="scala.Long">Long</span>) ⇒ <span class="extype" name="scala.Unit">Unit</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="scalaj.http.Token" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TokenextendsProductwithSerializable"></a>
+      <a id="Token:Token"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Token.html"><span class="name">Token</span></a><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="secret">secret: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+
+        
+
+        <div id="values" class="values members">
+              <h3>Value Members</h3>
+              <ol><li name="scalaj.http.Http" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Http"></a>
+      <a id="Http:Http"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Http$.html"><span class="name">Http</span></a><span class="result"> extends <a href="BaseHttp.html" class="extype" name="scalaj.http.BaseHttp">BaseHttp</a></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Default entry point to this library</p>
+    </li><li name="scalaj.http.HttpConstants" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HttpConstants"></a>
+      <a id="HttpConstants:HttpConstants"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpConstants$.html"><span class="name">HttpConstants</span></a>
+      </span>
+      </h4>
+      <p class="comment cmt">Mostly helper methods
+</p>
+    </li><li name="scalaj.http.HttpOptions" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HttpOptions"></a>
+      <a id="HttpOptions:HttpOptions"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpOptions$.html"><span class="name">HttpOptions</span></a>
+      </span>
+      </h4>
+      <p class="comment cmt">Helper functions for modifying the underlying HttpURLConnection</p>
+    </li><li name="scalaj.http.MultiPart" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MultiPart"></a>
+      <a id="MultiPart:MultiPart"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="MultiPart$.html"><span class="name">MultiPart</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="scalaj.http.OAuth" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="OAuth"></a>
+      <a id="OAuth:OAuth"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="OAuth$.html"><span class="name">OAuth</span></a>
+      </span>
+      </h4>
+      <p class="comment cmt">utility methods used by <a href="HttpRequest.html" class="extype" name="scalaj.http.HttpRequest">scalaj.http.HttpRequest</a></p>
+    </li></ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../lib/template.js"></script>
+    </body>
+      </html>

@@ -1,0 +1,116 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>root - _root_</title>
+          <meta name="description" content="root - root " />
+          <meta name="keywords" content="root root " />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = 'index.html';
+            var hash = 'package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="value">
+      <div id="definition">
+        <img src="lib/package_big.png" />
+        
+        <h1>root package</h1>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">root</span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Simple http request library. Makes it easy to issue an http request and get a result.</p><h4>Overview</h4><p> The main entry point is the <a href="scalaj/http/Http$.html" class="extype" name="scalaj.http.Http">scalaj.http.Http</a> singleton. Calling Http(url) will return
+ an instance of <a href="scalaj/http/HttpRequest.html" class="extype" name="scalaj.http.HttpRequest">scalaj.http.HttpRequest</a> which you can use to build up your request.
+ Execute the request by calling one of the asXXX methods and get a <a href="scalaj/http/HttpResponse.html" class="extype" name="scalaj.http.HttpResponse">scalaj.http.HttpResponse</a> which will contain
+ the responseCode, body and response headers.</p><h4>Usage Example</h4><pre>&gt; <span class="kw">import</span> scalaj.http._
+&gt; <span class="kw">val</span> baseRequest: HttpRequest = Http(<span class="lit">"http://httpbin.org/post"</span>) <span class="cmt">// that's a get request by default</span>
+baseRequest: scalaj.http.HttpRequest = HttpRequest(http:<span class="cmt">//httpbin.org/post,GET, ...</span>
+
+&gt; <span class="kw">val</span> postRequest: HttpRequst = baseRequest.postForm.param(<span class="lit">"param1"</span>, <span class="lit">"a"</span>).param(<span class="lit">"param2"</span>, <span class="lit">"b"</span>) <span class="cmt">// create a post request</span>
+postRequest: scalaj.http.HttpRequest = HttpRequest(http:<span class="cmt">//httpbin.org/post,POST, ...</span>
+
+&gt; <span class="kw">val</span> response: HttpResponse[<span class="std">String</span>] = postRequest.asString <span class="cmt">// execute the request</span>
+response: scalaj.http.HttpResponse[<span class="std">String</span>] =  HttpResponse(body...,<span class="num">200</span>,<span class="std">Map</span>(Access-Control-Allow-Origin -&gt; *, ...))</pre></div></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        
+        
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        
+
+        
+
+        <div id="values" class="values members">
+              <h3>Value Members</h3>
+              <ol><li name="_root_.scalaj" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="scalaj"></a>
+      <a id="scalaj:scalaj"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="scalaj/package.html"><span class="name">scalaj</span></a>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+      <script defer="defer" type="text/javascript" id="jquery-js" src="lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="lib/template.js"></script>
+    </body>
+      </html>
