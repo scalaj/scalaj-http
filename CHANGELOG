@@ -1,3 +1,14 @@
+1.0.0
+------
+release: 27 November 2014 
+
+NEW MAJOR VERSION!! syntactically and behaviorally different than the 0.x.x versions
+
+ - Executing the request always returns a HttpResponse[T] instance the contains the response code, headers, and body
+ - Exceptions are no longer thrown for 4xx and 5xx response codes. Yay!
+ - Http(url) is the starting point for every type of request (post, get, multi, etc)
+ - You can easily create your own singleton instance to set your own defaults (timeouts, proxies, etc)
+
 0.3.16
 ------
 release: 10 July 2014 
