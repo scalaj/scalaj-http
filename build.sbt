@@ -12,13 +12,10 @@ libraryDependencies ++= Seq(
   "com.github.kristofa"  % "mock-http-server"   % "4.0"           % "test"
 )
 
-libraryDependencies ++= (
-  if (scalaVersion.value startsWith "2.9") {
-    Seq("com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.3.3" % "test")
-  } else {
-    Seq("com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.4.2" % "test")
-  }
-)
+libraryDependencies += {
+  val jacksonVersion = if (scalaVersion.value startsWith "2.9") "2.3.3" else "2.4.2"
+  "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion % "test"
+}
 
 crossScalaVersions := Seq("2.9.3", "2.10.4", "2.11.4")
 

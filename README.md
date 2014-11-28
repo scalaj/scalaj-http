@@ -1,8 +1,22 @@
 [![Build Status](https://travis-ci.org/scalaj/scalaj-http.png)](https://travis-ci.org/scalaj/scalaj-http)
 
-# Simple Http
+# Simplified Http
 
-This is a bare bones http client for scala which wraps HttpURLConnection
+This is a fully featured http client for Scala which wraps [java.net.HttpURLConnection](https://docs.oracle.com/javase/8/docs/api/java/net/HttpURLConnection.html)
+
+Features:
+* Zero dependencies
+* Cross compiled for Scala 2.9.3, 2.10 and 2.11
+* OAuth v1 request signing
+* Automatic support of gzip and deflate encodings from server
+* Easy to add querystring or form params. URL encoding is handled for you.
+* Multipart file uploads
+
+Non-Features:
+* Async execution
+  * The library is thread safe. HttpRequest and HttpResponse are immutable. So it should be easy to wrap in an execution framework of your choice.
+
+Works in Google AppEngine and Android environments.
 
 **_Note:_ 1.0.x is a new major version which is both syntactically and behaviorally different than the 0.x.x version.**
 
@@ -14,13 +28,14 @@ Big differences:
 * Http(url) is the starting point for every type of request (post, get, multi, etc)
 * You can easily create your own singleton instance to set your own defaults (timeouts, proxies, etc)
 * Sends "Accept-Encoding: gzip,deflate" request header and gunzip/inflates as needed
+* Redirects are no longer followed by default. Use .option(HttpOptions.followRedirects(true)) to change.
 
 ## Installation
 
-### sbt
+### in your build.sbt
 
 ```scala
-val scalaj_http = "org.scalaj" %% "scalaj-http" % "1.0.1"
+libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "1.0.1"
 ```
 
 ### maven
@@ -33,6 +48,9 @@ val scalaj_http = "org.scalaj" %% "scalaj-http" % "1.0.1"
 </dependency>  
 ```
 
+If you're including this in some other public library. Do your users a favor and change the fully qualified name
+so they don't have version conflicts if they're using a different version of this library. 
+The easiest way to do that is just to copy the source into your project :)
 
 ## Usage
 
@@ -185,3 +203,7 @@ object MyHttp extends BaseHttp (
   userAgent: String = "scalaj-http/1.0"
 )
 ```
+
+### Full API documentation
+
+[scaladocs here](http://scalaj.github.io/scalaj-http)
