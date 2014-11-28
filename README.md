@@ -13,6 +13,7 @@ Big differences:
 * Exceptions are no longer thrown for 4xx and 5xx response codes. Yay!
 * Http(url) is the starting point for every type of request (post, get, multi, etc)
 * You can easily create your own singleton instance to set your own defaults (timeouts, proxies, etc)
+* Sends "Accept-Encoding: gzip,deflate" request header and gunzip/inflates as needed
 
 ## Installation
 
