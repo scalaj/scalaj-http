@@ -20,7 +20,7 @@ Big differences:
 ### sbt
 
 ```scala
-val scalaj_http = "org.scalaj" %% "scalaj-http" % "1.0.0"
+val scalaj_http = "org.scalaj" %% "scalaj-http" % "1.0.1"
 ```
 
 ### maven
@@ -29,7 +29,7 @@ val scalaj_http = "org.scalaj" %% "scalaj-http" % "1.0.0"
 <dependency>
   <groupId>org.scalaj</groupId>
   <artifactId>scalaj-http_${scala.version}</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
 </dependency>  
 ```
 
@@ -149,7 +149,7 @@ Http(url).method("HEAD").asString
 _These are set to 1000 and 5000 milliseconds respectively by default_
 
 ```scala
-Http(url).option(HttpOptions.connTimeout(1000)).option(HttpOptions.readTimeout(5000)).asString
+Http(url).timeout(connTimeoutMs = 1000, readTimeoutMs = 5000).asString
 ```
 
 ### Get request via a proxy
