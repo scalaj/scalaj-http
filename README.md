@@ -132,7 +132,7 @@ val response: HttpResponse[Json] = Http("http://foo.com").execute(parser = {inpu
 ### Post raw Array[Byte] or String data and get response code
 
 ```scala
-Http(url).postData(data).header("content-type", "application/json").asString
+Http(url).postData(data).header("content-type", "application/json").asString.code
 ```
 
 ### Post multipart/form-data
