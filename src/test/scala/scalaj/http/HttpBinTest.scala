@@ -15,6 +15,13 @@ class HttpBinTest {
   }
 
   @Test
+  def errorHasHeaders {
+    val response = Http("http://httpbin.org/status/500").asString
+    assertEquals(500, response.code)
+    assertTrue("Should have some headers", response.headers.contains("Date"))
+  }
+
+  @Test
   def gzipDecode {
     val response = Http("http://httpbin.org/gzip").asString
     assertEquals(200, response.code)

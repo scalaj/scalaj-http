@@ -172,4 +172,12 @@ class HttpTest {
     val response = Http(url).execute()
     assertEquals("", response.body)
   }
+
+  @Test
+  def varargs() {
+    val req = Http(url).params("a" -> "b", "b" -> "a")
+                       .headers("a" -> "b", "b" -> "a")
+                       .options(HttpOptions.connTimeout(100), HttpOptions.readTimeout(100))
+    assertEquals(2, req.params.size)
+  }
 }

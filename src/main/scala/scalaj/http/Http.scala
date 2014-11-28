@@ -107,12 +107,17 @@ case class HttpRequest(
 
   def params(p: Map[String, String]): HttpRequest = params(p.toSeq)
   def params(p: Seq[(String,String)]): HttpRequest = copy(params = params ++ p)
+  def params(p: (String,String), rest: (String, String)*): HttpRequest = params(p +: rest)
+  def param(key: String, value: String): HttpRequest = params(key -> value)
+
   def headers(h: Map[String, String]): HttpRequest = headers(h.toSeq)
   def headers(h: Seq[(String,String)]): HttpRequest = copy(headers = headers ++ h)
-  def param(key: String, value: String): HttpRequest = params(Seq(key -> value))
-  def header(key: String, value: String): HttpRequest = headers(Seq(key -> value))
+  def headers(h: (String,String), rest: (String, String)*): HttpRequest = headers(h +: rest)
+  def header(key: String, value: String): HttpRequest = headers(key -> value)
+
   def options(o: Seq[HttpOptions.HttpOption]): HttpRequest = copy(options = o ++ options)
-  def option(o: HttpOptions.HttpOption): HttpRequest = copy(options = o +: options)
+  def options(o: HttpOptions.HttpOption, rest: HttpOptions.HttpOption*): HttpRequest = options(o +: rest)
+  def option(o: HttpOptions.HttpOption): HttpRequest = options(o)
   
   def auth(user: String, password: String) = header("Authorization", "Basic " + HttpConstants.base64(user + ":" + password))
   
@@ -127,7 +132,7 @@ case class HttpRequest(
 
   def proxy(host: String, port: Int): HttpRequest = proxy(host, port, Proxy.Type.HTTP)
   def proxy(host: String, port: Int, proxyType: Proxy.Type): HttpRequest = {
-    copy(proxy = new Proxy(proxyType, new InetSocketAddress(host, port)))
+    copy(proxy = HttpConstants.proxy(host, port, proxyType))
   }
   def proxy(proxy: Proxy): HttpRequest = {
     copy(proxy = proxy)
@@ -136,6 +141,10 @@ case class HttpRequest(
   def charset(cs: String): HttpRequest = copy(charset = cs)
 
   def sendBufferSize(numBytes: Int): HttpRequest = copy(sendBufferSize = numBytes)
+
+  def timeout(connTimeoutMs: Int, readTimeoutMs: Int): HttpRequest = options(
+    Seq(HttpOptions.connTimeout(connTimeoutMs), HttpOptions.readTimeout(readTimeoutMs))
+  )
   
   def execute[T](
     parser: InputStream => T = ((is: InputStream) => HttpConstants.readString(is, charset)),
@@ -221,15 +230,16 @@ case class HttpRequest(
     copy(method="POST", exec=postFunc, urlBuilder=(req => req.url))
   }
 
-  val CrLf = "\r\n"
-  val Pref = "--"
-  val Boundary = "--gc0pMUlT1B0uNdArYc0p"
-  val ContentDisposition = "Content-Disposition: form-data; name=\""
-  val Filename = "\"; filename=\""
-  val ContentType = "Content-Type: "
+
 
   def postMulti(parts: MultiPart*): HttpRequest = {
     val postFunc: HttpConstants.HttpExec = (req, conn) => {
+      val CrLf = "\r\n"
+      val Pref = "--"
+      val Boundary = "--gc0pMUlT1B0uNdArYc0p"
+      val ContentDisposition = "Content-Disposition: form-data; name=\""
+      val Filename = "\"; filename=\""
+      val ContentType = "Content-Type: "
 
       conn.setDoOutput(true)
       conn.setDoInput(true)
@@ -348,7 +358,9 @@ object HttpConstants {
     try {
       parser(theStream)
     } finally {
-      theStream.close
+      if (theStream != null) {
+        theStream.close
+      }
     }
   }
 
@@ -391,18 +403,22 @@ object HttpConstants {
    * [lifted from lift]
    */
   def readString(is: InputStream, charset: String): String = {
-    val in = new InputStreamReader(is, charset)
-    val bos = new StringBuilder
-    val ba = new Array[Char](4096)
+    if (is == null) {
+      ""
+    } else {
+      val in = new InputStreamReader(is, charset)
+      val bos = new StringBuilder
+      val ba = new Array[Char](4096)
 
-    def readOnce {
-      val len = in.read(ba)
-      if (len > 0) bos.appendAll(ba, 0, len)
-      if (len >= 0) readOnce
+      def readOnce {
+        val len = in.read(ba)
+        if (len > 0) bos.appendAll(ba, 0, len)
+        if (len >= 0) readOnce
+      }
+
+      readOnce
+      bos.toString
     }
-
-    readOnce
-    bos.toString
   }
   
   
@@ -411,18 +427,22 @@ object HttpConstants {
    * Read all data from a stream into an Array[Byte]
    */
   def readBytes(in: InputStream): Array[Byte] = {
-    val bos = new ByteArrayOutputStream
-    val ba = new Array[Byte](4096)
+    if (in == null) {
+      Array[Byte]()
+    } else {
+      val bos = new ByteArrayOutputStream
+      val ba = new Array[Byte](4096)
 
-    def readOnce {
-      val len = in.read(ba)
-      if (len > 0) bos.write(ba, 0, len)
-      if (len >= 0) readOnce
+      def readOnce {
+        val len = in.read(ba)
+        if (len > 0) bos.write(ba, 0, len)
+        if (len >= 0) readOnce
+      }
+
+      readOnce
+
+      bos.toByteArray
     }
-
-    readOnce
-
-    bos.toByteArray
   }
 
   def readParams(in: InputStream, charset: String = utf8): Seq[(String,String)] = {
@@ -437,6 +457,10 @@ object HttpConstants {
   def readToken(in: InputStream): Token = {
     val params = readParamMap(in)
     Token(params("oauth_token"), params("oauth_token_secret"))
+  }
+
+  def proxy(host: String, port: Int, proxyType: Proxy.Type = Proxy.Type.HTTP): Proxy = {
+    new Proxy(proxyType, new InetSocketAddress(host, port))
   }
 
   val utf8 = "UTF-8"
