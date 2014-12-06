@@ -42,6 +42,10 @@ class HttpTest {
     assertEquals(Some(expectedContentType), response.headers.get("Content-Type"))
     assertEquals(expectedCode, response.code)
     assertEquals(expectedBody, response.body)
+    assertEquals("HTTP/1.1 200 OK", response.statusLine)
+    assertTrue(response.is2xx)
+    assertTrue(response.isSuccess)
+    assertTrue(response.isNotError)
   }
 
   @Test
@@ -50,6 +54,9 @@ class HttpTest {
     val response: HttpResponse[String] = Http(url).execute()
     assertEquals(500, response.code)
     assertEquals("error", response.body)
+    assertTrue(response.is5xx)
+    assertTrue(response.isServerError)
+    assertTrue(response.isError)
   }
 
   @Test
@@ -107,7 +114,7 @@ class HttpTest {
     }
 
     val r = Http(url).option(HttpOptions.connTimeout(1234)).option(HttpOptions.readTimeout(1234))
-      .copy(exec = getFunc)
+      .copy(connectFunc = getFunc)
     r.execute()
   }
 
@@ -130,7 +137,7 @@ class HttpTest {
       throw new RuntimeException(c.getRequestMethod)
     }
     try {
-      Http(url).method("FOO").copy(exec = fooFunc).execute()
+      Http(url).method("FOO").copy(connectFunc = fooFunc).execute()
       fail("expected throw")
     } catch {
       case e: RuntimeException if e.getMessage == "FOO" => // ok

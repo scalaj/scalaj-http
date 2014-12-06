@@ -114,7 +114,46 @@ case class HttpException(val message: String, cause: Throwable) extends RuntimeE
   * @param code the http response code from the status line
   * @param headers the response headers
  */
-case class HttpResponse[T](body: T, code: Int, headers: Map[String, String])
+case class HttpResponse[T](body: T, code: Int, headers: Map[String, String]) {
+  /** test if code is in beteween lower and upper inclusive */
+  def isCodeInRange(lower: Int, upper: Int): Boolean = lower <= code && code <= upper
+
+  /** is response code 2xx */
+  def is2xx: Boolean = isCodeInRange(200, 299)
+  /** same as is2xx */
+  def isSuccess: Boolean = is2xx
+
+  /** is response code 3xx */
+  def is3xx: Boolean = isCodeInRange(300, 399)
+  /** same as is3xx */
+  def isRedirect: Boolean = is3xx
+
+  /** is response code 4xx */
+  def is4xx: Boolean = isCodeInRange(400, 499)
+  /** same as is4xx */
+  def isClientError: Boolean = is4xx
+
+  /** is response code 5xx */
+  def is5xx: Boolean = isCodeInRange(500, 599)
+  /** same as is5xx */
+  def isServerError: Boolean = is5xx
+
+  /** same as (is4xx || is5xx) */
+  def isError: Boolean = is4xx || is5xx
+  /** same as !isError */
+  def isNotError: Boolean = !isError
+
+  /** The full status line. like "HTTP/1.1 200 OK"
+    * throws a RuntimeException if "Status" is not in headers
+    */
+  def statusLine: String = headers.get("Status").getOrElse(throw new RuntimeException("headers doesn't contain Status"))
+
+  /** Location header value sent for redirects. By default, this library will not follow redirects. */
+  def location: Option[String] = headers.get("Location")
+
+  /** Content-Type header value */
+  def contentType: Option[String] = headers.get("Content-Type")
+}
 
 /** Immutable builder for creating an http request
   *
@@ -129,7 +168,7 @@ case class HttpResponse[T](body: T, code: Int, headers: Map[String, String])
 case class HttpRequest(
   url: String,
   method: String,
-  exec: HttpConstants.HttpExec,
+  connectFunc: HttpConstants.HttpExec,
   params: Seq[(String,String)], 
   headers: Seq[(String,String)],
   options: Seq[HttpOptions.HttpOption],
@@ -213,12 +252,22 @@ case class HttpRequest(
     *
     * @tparam T the type returned by the input stream parser
     * @param parser function to process the response body InputStream. Will be used for all response codes
-    * @param stream set to true if you want to leave the InputStreams open. This might be used for streaming a firehose
     */
   def execute[T](
-    parser: InputStream => T = ((is: InputStream) => HttpConstants.readString(is, charset)),
-    stream: Boolean = false
+    parser: InputStream => T = (is: InputStream) => HttpConstants.readString(is, charset)
   ): HttpResponse[T] = {
+    exec((code: Int, headers: Map[String, String], is: InputStream) => parser(is))
+  }
+
+  /** Executes this request
+    *
+    * This is a power user method for parsing the response body. The parser function will be passed the response code,
+    * response headers and the InputStream
+    *
+    * @tparam T the type returned by the input stream parser
+    * @param parser function to process the response body InputStream
+    */
+  def exec[T](parser: (Int, Map[String, String], InputStream) => T): HttpResponse[T] = {
     new URL(urlBuilder(this)).openConnection(proxy) match {
       case conn: HttpURLConnection =>
         conn.setInstanceFollowRedirects(false)
@@ -227,29 +276,35 @@ case class HttpRequest(
         }
         options.reverse.foreach(_(conn))
 
-        exec(this, conn)
+        connectFunc(this, conn)
         try {
-          toResponse(conn, parser, conn.getInputStream, stream)
+          toResponse(conn, parser, conn.getInputStream)
         } catch {
           case e: java.io.IOException if conn.getResponseCode > 0 =>
-            toResponse(conn, parser, conn.getErrorStream, stream)
+            toResponse(conn, parser, conn.getErrorStream)
+        } finally {
+          closeStreams(conn)
         }
     }
   }
 
   private def toResponse[T](
     conn: HttpURLConnection,
-    parser: InputStream => T,
-    inputStream: InputStream,
-    isStreaming: Boolean
+    parser: (Int, Map[String, String], InputStream) => T,
+    inputStream: InputStream
   ): HttpResponse[T] = {
-    val headers = getResponseHeaders(conn)
-    val encoding = headers.get("Content-Encoding")
-    val body = HttpConstants.tryParse(inputStream, parser, encoding)
-    if (!isStreaming) {
-      closeStreams(conn)  
+    val responseCode: Int = conn.getResponseCode
+    val headers: Map[String, String] = getResponseHeaders(conn)
+    val encoding: Option[String] = headers.get("Content-Encoding")
+    val body: T = {
+      val theStream = if (encoding.exists(_.contains("gzip"))) {
+        new GZIPInputStream(inputStream)
+      } else if(encoding.exists(_.contains("deflate"))) {
+        new InflaterInputStream(inputStream)
+      } else inputStream
+      parser(responseCode, headers, theStream)
     }
-    HttpResponse[T](body, conn.getResponseCode, headers)
+    HttpResponse[T](body, responseCode, headers)
   }
 
   private def getResponseHeaders(conn: HttpURLConnection): Map[String, String] = {
@@ -286,7 +341,7 @@ case class HttpRequest(
       conn.connect
       conn.getOutputStream.write(HttpConstants.toQs(req.params, req.charset).getBytes(req.charset))
     }
-    copy(method="POST", exec=postFunc, urlBuilder=(req => req.url))
+    copy(method="POST", connectFunc=postFunc, urlBuilder=(req => req.url))
       .header("content-type", "application/x-www-form-urlencoded").params(params)
   }
 
@@ -300,7 +355,7 @@ case class HttpRequest(
       conn.connect
       conn.getOutputStream.write(data)
     }
-    copy(method="POST", exec=postFunc, urlBuilder=(req => req.url))
+    copy(method="POST", connectFunc=postFunc, urlBuilder=(req => req.url))
   }
 
   /** Multipart POST request.
@@ -403,7 +458,7 @@ case class HttpRequest(
       out.flush()
       out.close()
     }
-    copy(method="POST", exec=postFunc, urlBuilder=(req => req.url))
+    copy(method="POST", connectFunc=postFunc, urlBuilder=(req => req.url))
   }
   
   /** Execute this request and parse http body as Array[Byte] */
@@ -430,21 +485,6 @@ object HttpConstants {
     HttpOptions.readTimeout(5000),
     HttpOptions.followRedirects(false)
   )
-
-  def tryParse[E](is: InputStream, parser: InputStream => E, encoding: Option[String]): E = {
-    val theStream = if (encoding.exists(_.contains("gzip"))) {
-      new GZIPInputStream(is)
-    } else if(encoding.exists(_.contains("deflate"))) {
-      new InflaterInputStream(is)
-    } else is
-    try {
-      parser(theStream)
-    } finally {
-      if (theStream != null) {
-        theStream.close
-      }
-    }
-  }
 
   val setFixedLengthStreamingMode: (HttpURLConnection, Long) => Unit = {
     val connClass = classOf[HttpURLConnection]
@@ -575,7 +615,7 @@ class BaseHttp (
   def apply(url: String): HttpRequest = HttpRequest(
     url = url,
     method = "GET",
-    exec = (req,conn) => conn.connect,
+    connectFunc = (req, conn) => conn.connect,
     params = Nil,
     headers = Seq("User-Agent" -> userAgent, "Accept-Encoding" -> "gzip,deflate"),
     options = options,

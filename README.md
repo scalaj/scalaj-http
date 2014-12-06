@@ -118,14 +118,11 @@ Those methods will return an ```HttpResponse[String | Array[Byte] | Seq[(String,
 
 ## Advanced Usage Examples
 
-### Parse the response InputStream directly to whatever you want
+### Parse the response InputStream directly
 
 ```scala
-import java.io.InputStreamReader
-import foo.JsonParser
-
-val response: HttpResponse[Json] = Http("http://foo.com").execute(parser = {inputStream => 
-  JsonParser.parse(new InputStreamReader(inputStream))
+val response: HttpResponse[Map[String,String]] = Http("http://foo.com").execute(parser = {inputStream =>
+  Json.parse[Map[String,String]](inputStream)
 })
 ```
 

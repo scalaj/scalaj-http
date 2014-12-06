@@ -17,6 +17,7 @@ class HttpBinTest {
   @Test
   def errorHasHeaders {
     val response = Http("http://httpbin.org/status/500").asString
+    assertEquals("HTTP/1.1 500 INTERNAL SERVER ERROR", response.statusLine)
     assertEquals(500, response.code)
     assertTrue("Should have some headers", response.headers.contains("Date"))
   }
