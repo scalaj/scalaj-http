@@ -203,4 +203,4 @@ object MyHttp extends BaseHttp (
 
 ### Full API documentation
 
-[scaladocs here](http://scalaj.github.io/scalaj-http)
+[scaladocs here](http://scalaj.github.io/scalaj-http/1.1.0)
