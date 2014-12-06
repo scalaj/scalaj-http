@@ -18,7 +18,7 @@ Non-Features:
 
 Works in Google AppEngine and Android environments.
 
-**_Note:_ 1.0.x is a new major version which is both syntactically and behaviorally different than the 0.x.x version.**
+**_Note:_ 1.x.x is a new major version which is both syntactically and behaviorally different than the 0.x.x version.**
 
 Previous version is branched here: https://github.com/scalaj/scalaj-http/tree/0.3.x
 
@@ -27,7 +27,7 @@ Big differences:
 * Exceptions are no longer thrown for 4xx and 5xx response codes. Yay!
 * Http(url) is the starting point for every type of request (post, get, multi, etc)
 * You can easily create your own singleton instance to set your own defaults (timeouts, proxies, etc)
-* Sends "Accept-Encoding: gzip,deflate" request header and gunzip/inflates as needed
+* Sends "Accept-Encoding: gzip,deflate" request header and decompresses based on Content-Encoding (configurable)
 * Redirects are no longer followed by default. Use .option(HttpOptions.followRedirects(true)) to change.
 
 ## Installation
@@ -35,7 +35,7 @@ Big differences:
 ### in your build.sbt
 
 ```scala
-libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "1.0.1"
+libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "1.1.0"
 ```
 
 ### maven
@@ -44,7 +44,7 @@ libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "1.0.1"
 <dependency>
   <groupId>org.scalaj</groupId>
   <artifactId>scalaj-http_${scala.version}</artifactId>
-  <version>1.0.1</version>
+  <version>1.1.0</version>
 </dependency>  
 ```
 

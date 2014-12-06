@@ -1,3 +1,16 @@
+1.1.0
+------
+release: 6 December 2014
+
+Possibly breaking changes
+
+ - .execute method only takes one parameter, streaming parameter was removed
+ - new .exec method that takes a parser function that will be passed responseCode, headers, inputStream
+ - renamed HttpRequest.exec field to connectFunc
+ - isXXX convenience methods on HttpResponse for checking response codes
+ - http compression is now configuration with .compress(Boolean) method on HttpRequest or via BaseHttp
+ - fixed bug where .method(String) didn't set the method field in HttpRequest
+
 1.0.1
 ------
 release: 28 November 2014
