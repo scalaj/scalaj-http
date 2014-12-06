@@ -30,6 +30,13 @@ class HttpBinTest {
   }
 
   @Test
+  def gzipDecodeNoCompress {
+    val response = Http("http://httpbin.org/gzip").compress(false).asString
+    assertEquals(200, response.code)
+    assertNotEquals("{", response.body.substring(0,1))
+  }
+
+  @Test
   def deflateDecode {
     val response = Http("http://httpbin.org/deflate").asString
     assertEquals(200, response.code)

@@ -175,9 +175,9 @@ case class HttpRequest(
   proxy: Proxy,
   charset: String,
   sendBufferSize: Int,
-  urlBuilder: (HttpRequest => String)
+  urlBuilder: (HttpRequest => String),
+  compress: Boolean
 ) {
-
   /** Add params to the GET querystring or POST form request */
   def params(p: Map[String, String]): HttpRequest = params(p.toSeq)
   /** Add params to the GET querystring or POST form request */
@@ -226,6 +226,16 @@ case class HttpRequest(
     */
   def method(m: String): HttpRequest = option(HttpOptions.method(m))
 
+  /** Should HTTP compression be used
+    * If true, Accept-Encoding: gzip,deflate will be sent with request.
+    * If the server response with Content-Encoding: (gzip|deflate) the client will automatically handle decompression
+    *
+    * This is on by default
+    *
+    * @param c should compress
+    */
+  def compress(c: Boolean): HttpRequest = copy(compress=c)
+
   /** Send request via a standard http proxy */
   def proxy(host: String, port: Int): HttpRequest = proxy(host, port, Proxy.Type.HTTP)
   /** Send request via a proxy. You choose the type (HTTP or SOCKS) */
@@ -271,6 +281,9 @@ case class HttpRequest(
     new URL(urlBuilder(this)).openConnection(proxy) match {
       case conn: HttpURLConnection =>
         conn.setInstanceFollowRedirects(false)
+        if (compress) {
+          conn.setRequestProperty("Accept-Encoding", "gzip,deflate")
+        }
         headers.reverse.foreach{ case (name, value) => 
           conn.setRequestProperty(name, value)
         }
@@ -297,9 +310,9 @@ case class HttpRequest(
     val headers: Map[String, String] = getResponseHeaders(conn)
     val encoding: Option[String] = headers.get("Content-Encoding")
     val body: T = {
-      val theStream = if (encoding.exists(_.contains("gzip"))) {
+      val theStream = if (compress && encoding.exists(_.contains("gzip"))) {
         new GZIPInputStream(inputStream)
-      } else if(encoding.exists(_.contains("deflate"))) {
+      } else if(compress && encoding.exists(_.contains("deflate"))) {
         new InflaterInputStream(inputStream)
       } else inputStream
       parser(responseCode, headers, theStream)
@@ -599,13 +612,15 @@ object Http extends BaseHttp
   * @param charset charset to use for encoding request and decoding response
   * @param sendBufferSize buffer size for multipart posts
   * @param userAgent User-Agent request header
+  * @param compress use HTTP Compression
   */
 class BaseHttp (
   proxy: Proxy = Proxy.NO_PROXY, 
   options: Seq[HttpOptions.HttpOption] = HttpConstants.defaultOptions,
   charset: String = HttpConstants.utf8,
   sendBufferSize: Int = 4096,
-  userAgent: String = "scalaj-http/1.0"
+  userAgent: String = "scalaj-http/1.0",
+  compress: Boolean = true
 ) {
 
   /** Create a new [[scalaj.http.HttpRequest]]
@@ -617,11 +632,12 @@ class BaseHttp (
     method = "GET",
     connectFunc = (req, conn) => conn.connect,
     params = Nil,
-    headers = Seq("User-Agent" -> userAgent, "Accept-Encoding" -> "gzip,deflate"),
+    headers = Seq("User-Agent" -> userAgent),
     options = options,
     proxy = proxy,
     charset = charset,
     sendBufferSize = sendBufferSize,
-    urlBuilder = (req) => HttpConstants.appendQs(req.url, req.params, req.charset)
+    urlBuilder = (req) => HttpConstants.appendQs(req.url, req.params, req.charset),
+    compress = compress
   )  
 }
