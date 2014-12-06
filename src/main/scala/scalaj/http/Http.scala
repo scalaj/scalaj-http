@@ -224,7 +224,7 @@ case class HttpRequest(
     *
     * {{{Http(url).postData(dataBytes).method("PUT").asString}}}
     */
-  def method(m: String): HttpRequest = option(HttpOptions.method(m))
+  def method(m: String): HttpRequest = copy(method=m)
 
   /** Should HTTP compression be used
     * If true, Accept-Encoding: gzip,deflate will be sent with request.
@@ -281,6 +281,7 @@ case class HttpRequest(
     new URL(urlBuilder(this)).openConnection(proxy) match {
       case conn: HttpURLConnection =>
         conn.setInstanceFollowRedirects(false)
+        HttpOptions.method(method)(conn)
         if (compress) {
           conn.setRequestProperty("Accept-Encoding", "gzip,deflate")
         }
@@ -387,7 +388,6 @@ case class HttpRequest(
       conn.setDoOutput(true)
       conn.setDoInput(true)
       conn.setUseCaches(false)
-      conn.setRequestMethod("POST")
       conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + Boundary)
       conn.setRequestProperty("MIME-Version", "1.0")
 
