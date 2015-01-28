@@ -1,3 +1,10 @@
+1.1.1
+------
+release: 28 January 2015
+
+ - fixed bug with gzip decompression due to incorrect assumption that headers are case sensitive
+ - HttpRequest.headers are now a case-insensitive Map
+
 1.1.0
 ------
 release: 6 December 2014
