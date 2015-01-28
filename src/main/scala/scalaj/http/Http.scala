@@ -16,6 +16,7 @@ package scalaj.http
   limitations under the License.
  */
 
+import collection.immutable.TreeMap
 import java.lang.reflect.Field
 import java.net.{HttpURLConnection, InetSocketAddress, Proxy, URL, URLEncoder, URLDecoder}
 import java.io.{DataOutputStream, InputStream, BufferedReader, InputStreamReader, ByteArrayInputStream, 
@@ -311,9 +312,9 @@ case class HttpRequest(
     val headers: Map[String, String] = getResponseHeaders(conn)
     val encoding: Option[String] = headers.get("Content-Encoding")
     val body: T = {
-      val theStream = if (compress && encoding.exists(_.contains("gzip"))) {
+      val theStream = if (compress && encoding.exists(_.equalsIgnoreCase("gzip"))) {
         new GZIPInputStream(inputStream)
-      } else if(compress && encoding.exists(_.contains("deflate"))) {
+      } else if(compress && encoding.exists(_.equalsIgnoreCase("deflate"))) {
         new InflaterInputStream(inputStream)
       } else inputStream
       parser(responseCode, headers, theStream)
@@ -327,9 +328,11 @@ case class HttpRequest(
 
     // according to javadoc, there can be a headerField value where the HeaderFieldKey is null
     // at the 0th row in some implementations.  In that case it's the http status line
-    Stream.from(0).map(i => i -> conn.getHeaderField(i)).takeWhile(_._2 != null).map{ case (i, value) =>
-      Option(conn.getHeaderFieldKey(i)).getOrElse("Status") -> value
-    }.groupBy(_._1).mapValues(_.map(_._2).mkString(", "))
+    new TreeMap[String,String]()(Ordering.by(_.toLowerCase)) ++ {
+      Stream.from(0).map(i => i -> conn.getHeaderField(i)).takeWhile(_._2 != null).map{ case (i, value) =>
+        Option(conn.getHeaderFieldKey(i)).getOrElse("Status") -> value
+      }.groupBy(_._1).mapValues(_.map(_._2).mkString(", "))
+    }
   }
   
   private def closeStreams(conn: HttpURLConnection) {
