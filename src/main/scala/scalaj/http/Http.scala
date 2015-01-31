@@ -313,7 +313,12 @@ case class HttpRequest(
     val encoding: Option[String] = headers.get("Content-Encoding")
     val body: T = {
       val theStream = if (compress && encoding.exists(_.equalsIgnoreCase("gzip"))) {
-        new GZIPInputStream(inputStream)
+        try {
+          new GZIPInputStream(inputStream)
+          } catch {
+            case x: java.io.EOFException => inputStream
+          }
+        
       } else if(compress && encoding.exists(_.equalsIgnoreCase("deflate"))) {
         new InflaterInputStream(inputStream)
       } else inputStream
