@@ -1,6 +1,6 @@
 1.1.2
 ------
-release: 31 January 2015
+release: 1 February 2015
 
  - fixed npe on empty gzip/deflate response. thanks @fntzr
 
