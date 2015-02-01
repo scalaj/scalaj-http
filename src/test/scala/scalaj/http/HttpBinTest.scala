@@ -8,6 +8,12 @@ case class BinResponse(files: Map[String, String], form: Map[String, String])
 class HttpBinTest {
 
   @Test
+  def headRequest {
+    val response = Http("http://httpbin.org/status/200").method("HEAD").asString
+    assertEquals(200, response.code)
+  }
+
+  @Test
   def redirectShouldNotFollow {
     val response = Http("http://httpbin.org/redirect-to?url=http://foo.org").asString
     assertEquals(302, response.code)
@@ -22,6 +28,12 @@ class HttpBinTest {
     assertTrue("Should have some headers", response.headers.contains("Date"))
   }
 
+  @Test 
+  def gzipWithHead {
+    val response = Http("http://httpbin.org/gzip").method("HEAD").asString
+    assertEquals(200, response.code)
+  }
+
   @Test
   def gzipDecode {
     val response = Http("http://httpbin.org/gzip").asString
@@ -34,6 +46,12 @@ class HttpBinTest {
     val response = Http("http://httpbin.org/gzip").compress(false).asString
     assertEquals(200, response.code)
     assertNotEquals("{", response.body.substring(0,1))
+  }
+
+  @Test 
+  def deflateWithHead {
+    val response = Http("http://httpbin.org/deflate").method("HEAD").asString
+    assertEquals(200, response.code)
   }
 
   @Test
