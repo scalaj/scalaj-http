@@ -35,7 +35,7 @@ Big differences:
 ### in your build.sbt
 
 ```scala
-libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "1.1.2"
+libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "1.1.3"
 ```
 
 ### maven
@@ -44,7 +44,7 @@ libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "1.1.2"
 <dependency>
   <groupId>org.scalaj</groupId>
   <artifactId>scalaj-http_${scala.version}</artifactId>
-  <version>1.1.2</version>
+  <version>1.1.3</version>
 </dependency>  
 ```
 
