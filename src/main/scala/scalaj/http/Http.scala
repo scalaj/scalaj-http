@@ -373,7 +373,7 @@ case class HttpRequest(
       conn.connect
       conn.getOutputStream.write(data)
     }
-    copy(method="POST", connectFunc=postFunc, urlBuilder=(req => req.url))
+    copy(method="POST", connectFunc=postFunc)
   }
 
   /** Multipart POST request.

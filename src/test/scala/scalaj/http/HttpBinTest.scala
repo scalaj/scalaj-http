@@ -3,7 +3,7 @@ package scalaj.http
 import org.junit.Assert._
 import org.junit.Test
 
-case class BinResponse(files: Map[String, String], form: Map[String, String])
+case class BinResponse(files: Map[String, String], form: Map[String, String], args: Map[String, String])
 
 class HttpBinTest {
 
@@ -89,5 +89,13 @@ class HttpBinTest {
     val binResponse = Json.parse[BinResponse](response.body)
     assertEquals(Some("a"), binResponse.form.get("param1"))
     assertEquals(Some("b"), binResponse.form.get("param2"))
+  }
+
+    @Test
+  def postData {
+    val response = Http("http://httpbin.org/post").param("param1", "a").param("param2", "b").postData("foo").asString
+    val binResponse = Json.parse[BinResponse](response.body)
+    assertEquals(Some("a"), binResponse.args.get("param1"))
+    assertEquals(Some("b"), binResponse.args.get("param2"))
   }
 }
