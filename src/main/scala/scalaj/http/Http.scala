@@ -312,7 +312,7 @@ case class HttpRequest(
     val headers: Map[String, String] = getResponseHeaders(conn)
     val encoding: Option[String] = headers.get("Content-Encoding")
     val body: T = {
-      val shouldDecompress = compress && inputStream != null && inputStream.available > 0
+      val shouldDecompress = compress && inputStream != null
       val theStream = if (shouldDecompress && encoding.exists(_.equalsIgnoreCase("gzip"))) {
         new GZIPInputStream(inputStream)
       } else if(shouldDecompress && encoding.exists(_.equalsIgnoreCase("deflate"))) {
