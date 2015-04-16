@@ -162,13 +162,13 @@ class HttpTest {
     req = req.options(options)
 
     assertEquals("params", params, req.params)
-    assertEquals("proxy", proxy, req.proxy)
+    assertEquals("proxy", proxy, req.proxyConfig.get)
     assertEquals("options", expectedNewOptions, req.options)
 
     req = req.headers(headers)
 
     assertEquals("params", params, req.params)
-    assertEquals("proxy", proxy, req.proxy)
+    assertEquals("proxy", proxy, req.proxyConfig.get)
     assertEquals("options", expectedNewOptions, req.options)
 
   }
