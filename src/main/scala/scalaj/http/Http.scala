@@ -173,7 +173,7 @@ case class HttpRequest(
   params: Seq[(String,String)], 
   headers: Seq[(String,String)],
   options: Seq[HttpOptions.HttpOption],
-  proxy: Proxy,
+  proxyConfig: Option[Proxy],
   charset: String,
   sendBufferSize: Int,
   urlBuilder: (HttpRequest => String),
@@ -241,11 +241,11 @@ case class HttpRequest(
   def proxy(host: String, port: Int): HttpRequest = proxy(host, port, Proxy.Type.HTTP)
   /** Send request via a proxy. You choose the type (HTTP or SOCKS) */
   def proxy(host: String, port: Int, proxyType: Proxy.Type): HttpRequest = {
-    copy(proxy = HttpConstants.proxy(host, port, proxyType))
+    copy(proxyConfig = Some(HttpConstants.proxy(host, port, proxyType)))
   }
   /** Send request via a proxy */
   def proxy(proxy: Proxy): HttpRequest = {
-    copy(proxy = proxy)
+    copy(proxyConfig = Some(proxy))
   }
   
   /** Change the charset used to encode the request and decode the response. UTF-8 by default */
@@ -279,7 +279,8 @@ case class HttpRequest(
     * @param parser function to process the response body InputStream
     */
   def exec[T](parser: (Int, Map[String, String], InputStream) => T): HttpResponse[T] = {
-    new URL(urlBuilder(this)).openConnection(proxy) match {
+    val urlToFetch: URL = new URL(urlBuilder(this))
+    proxyConfig.map(urlToFetch.openConnection).getOrElse(urlToFetch.openConnection) match {
       case conn: HttpURLConnection =>
         conn.setInstanceFollowRedirects(false)
         HttpOptions.method(method)(conn)
@@ -611,7 +612,9 @@ object Http extends BaseHttp
 /**
   * Extends and override this class to setup your own defaults
   *
-  * @param proxy http proxy. You can use [[scalaj.http.HttpConstants.proxy]] to create one
+  * @param proxyConfig http proxy; defaults to the Java default proxy (see http://docs.oracle.com/javase/8/docs/technotes/guides/net/proxies.html).
+ *              You can use [[scalaj.http.HttpConstants.proxy]] to specify an alternate proxy, or specify
+ *              [[java.net.Proxy.NO_PROXY]] to explicitly use not use a proxy.
   * @param options set things like timeouts, ssl handling, redirect following
   * @param charset charset to use for encoding request and decoding response
   * @param sendBufferSize buffer size for multipart posts
@@ -619,7 +622,7 @@ object Http extends BaseHttp
   * @param compress use HTTP Compression
   */
 class BaseHttp (
-  proxy: Proxy = Proxy.NO_PROXY, 
+  proxyConfig: Option[Proxy] = None,
   options: Seq[HttpOptions.HttpOption] = HttpConstants.defaultOptions,
   charset: String = HttpConstants.utf8,
   sendBufferSize: Int = 4096,
@@ -638,7 +641,7 @@ class BaseHttp (
     params = Nil,
     headers = Seq("User-Agent" -> userAgent),
     options = options,
-    proxy = proxy,
+    proxyConfig = None,
     charset = charset,
     sendBufferSize = sendBufferSize,
     urlBuilder = (req) => HttpConstants.appendQs(req.url, req.params, req.charset),
