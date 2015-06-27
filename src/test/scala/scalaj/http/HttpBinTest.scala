@@ -3,7 +3,7 @@ package scalaj.http
 import org.junit.Assert._
 import org.junit.Test
 
-case class BinResponse(files: Map[String, String], form: Map[String, String], args: Map[String, String])
+case class BinResponse(files: Map[String, String], form: Map[String, String], args: Map[String, String], headers: Map[String, String])
 
 class HttpBinTest {
 
@@ -11,6 +11,13 @@ class HttpBinTest {
   def headRequest {
     val response = Http("http://httpbin.org/status/200").method("HEAD").asString
     assertEquals(200, response.code)
+  }
+
+  @Test
+  def overrideAcceptHeader {
+    val response = Http("http://httpbin.org/get").header("Accept", "foo/bar").asString
+    val binResponse = Json.parse[BinResponse](response.body)
+    assertEquals(Some("foo/bar"), binResponse.headers.get("Accept"))
   }
 
   @Test
