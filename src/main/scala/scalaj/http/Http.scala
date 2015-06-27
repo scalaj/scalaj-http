@@ -107,8 +107,6 @@ object MultiPart {
 case class MultiPart(val name: String, val filename: String, val mime: String, val data: InputStream, val numBytes: Long,
   val writeCallBack: Long => Unit)
 
-case class HttpException(val message: String, cause: Throwable) extends RuntimeException(message, cause)
-
 /** Result of executing a [[scalaj.http.HttpRequest]]
   * @tparam T the body response since it can be parsed directly to things other than String
   * @param body the Http response body
