@@ -204,3 +204,9 @@ object MyHttp extends BaseHttp (
 ### Full API documentation
 
 [scaladocs here](http://scalaj.github.io/scalaj-http/1.1.0)
+
+## Dealing with annoying java library issues
+#### Overriding the `Access-Control, Content-Length, Content-Transfer-Encoding, Host, Keep-Alive, Origin, Trailer, Transfer-Encoding, Upgrade, Via` headers
+Some of the headers are locked by the java library for "security" reasons and the behavior is that the library will just silently fail to set them. You can workaround by doing one of the following:
+   * Start your JVM with this command line parameter: `-Dsun.net.http.allowRestrictedHeaders=true`
+   * or, do this first thing at runtime: `System.setProperty("sun.net.http.allowRestrictedHeaders", "true")`
