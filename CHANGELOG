@@ -1,3 +1,10 @@
+1.1.5
+------
+release: 1 July 2015
+
+ - fix integer overflow on multi-part upload byte counter. thanks @takiri
+ - Allow a None proxy to use Java's default proxy. thanks @caspark
+
 1.1.4
 ------
 release: 9 February 2015
