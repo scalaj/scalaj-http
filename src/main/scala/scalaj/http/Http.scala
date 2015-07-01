@@ -450,7 +450,7 @@ case class HttpRequest(
           writeBytes("\"" + CrLf)
           writeBytes(ContentType + part.mime + CrLf + CrLf)
 
-          var bytesWritten = 0
+          var bytesWritten: Long = 0L
           def readOnce {
             val len = part.data.read(buffer)
             if (len > 0) {
