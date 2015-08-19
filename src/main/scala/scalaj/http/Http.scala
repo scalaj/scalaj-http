@@ -37,7 +37,7 @@ object HttpOptions {
 
   val officalHttpMethods = Set("GET", "POST", "HEAD", "OPTIONS", "PUT", "DELETE", "TRACE")
   
-  private val methodField: Field = {
+  private lazy val methodField: Field = {
     val m = classOf[HttpURLConnection].getDeclaredField("method")
     m.setAccessible(true)
     m
