@@ -22,6 +22,7 @@ import java.net.{HttpURLConnection, InetSocketAddress, Proxy, URL, URLEncoder, U
 import java.io.{DataOutputStream, InputStream, BufferedReader, InputStreamReader, ByteArrayInputStream, 
   ByteArrayOutputStream}
 import java.security.cert.X509Certificate
+import java.util.zip.Inflater
 import javax.net.ssl.HttpsURLConnection
 import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLSession
@@ -175,7 +176,8 @@ case class HttpRequest(
   charset: String,
   sendBufferSize: Int,
   urlBuilder: (HttpRequest => String),
-  compress: Boolean
+  compress: Boolean,
+  useNoWrapInflater: Boolean
 ) {
   /** Add params to the GET querystring or POST form request */
   def params(p: Map[String, String]): HttpRequest = params(p.toSeq)
@@ -225,15 +227,19 @@ case class HttpRequest(
     */
   def method(m: String): HttpRequest = copy(method=m)
 
+  /** Handle HTTP compression, using default inflater to handle deflate */
+  def compress(c: Boolean): HttpRequest = compress(c, false)
+
   /** Should HTTP compression be used
-    * If true, Accept-Encoding: gzip,deflate will be sent with request.
-    * If the server response with Content-Encoding: (gzip|deflate) the client will automatically handle decompression
     *
-    * This is on by default
+    * @param c - should compress. True by default.
+    *   If true, Accept-Encoding: gzip,deflate will be sent with request.
+    *   If the server response with Content-Encoding: (gzip|deflate) the client will automatically handle decompression
     *
-    * @param c should compress
+    * @param i - should use nowrap inflater on deflate. False by default.
+    *   Reference: http://stackoverflow.com/a/3932260/983220
     */
-  def compress(c: Boolean): HttpRequest = copy(compress=c)
+  def compress(c: Boolean, i: Boolean): HttpRequest = copy(compress=c, useNoWrapInflater=i)
 
   /** Send request via a standard http proxy */
   def proxy(host: String, port: Int): HttpRequest = proxy(host, port, Proxy.Type.HTTP)
@@ -315,7 +321,11 @@ case class HttpRequest(
       val theStream = if (shouldDecompress && encoding.exists(_.equalsIgnoreCase("gzip"))) {
         new GZIPInputStream(inputStream)
       } else if(shouldDecompress && encoding.exists(_.equalsIgnoreCase("deflate"))) {
-        new InflaterInputStream(inputStream)
+        if (useNoWrapInflater)
+          // Reference: http://stackoverflow.com/a/3932260/983220
+          new InflaterInputStream(inputStream, new Inflater(true))
+        else
+          new InflaterInputStream(inputStream)
       } else inputStream
       parser(responseCode, headers, theStream)
     }
@@ -618,6 +628,7 @@ object Http extends BaseHttp
   * @param sendBufferSize buffer size for multipart posts
   * @param userAgent User-Agent request header
   * @param compress use HTTP Compression
+  * @param useNoWrapInflater use nowrap inflater when handling deflate
   */
 class BaseHttp (
   proxyConfig: Option[Proxy] = None,
@@ -625,7 +636,8 @@ class BaseHttp (
   charset: String = HttpConstants.utf8,
   sendBufferSize: Int = 4096,
   userAgent: String = "scalaj-http/1.0",
-  compress: Boolean = true
+  compress: Boolean = true,
+  useNoWrapInflater: Boolean = false
 ) {
 
   /** Create a new [[scalaj.http.HttpRequest]]
@@ -643,6 +655,7 @@ class BaseHttp (
     charset = charset,
     sendBufferSize = sendBufferSize,
     urlBuilder = (req) => HttpConstants.appendQs(req.url, req.params, req.charset),
-    compress = compress
+    compress = compress,
+    useNoWrapInflater = useNoWrapInflater
   )  
 }
