@@ -16,7 +16,7 @@ package scalaj.http
   limitations under the License.
  */
 
-import java.net.URL
+import java.net.{HttpURLConnection, URL}
 
 case class Token(key: String, secret: String)
 
@@ -29,18 +29,17 @@ object OAuth {
   val MAC = "HmacSHA1"
       
   def sign(req: HttpRequest, consumer: Token, token: Option[Token], verifier: Option[String]): HttpRequest = {
-
-    
-    val baseParams:Seq[(String,String)] = Seq(
-      ("oauth_timestamp", (System.currentTimeMillis/1000).toString),
-      ("oauth_nonce", System.currentTimeMillis.toString)
-    )
-    
-    var (oauthParams, signature) = getSig(baseParams, req, consumer, token, verifier)
-    
-    oauthParams +:= ("oauth_signature", signature)
-    
-    req.header("Authorization", "OAuth " + oauthParams.map(p => p._1 + "=\"" + percentEncode(p._2) +"\"").mkString(","))
+    req.option(conn => {
+      val baseParams: Seq[(String,String)] = Seq(
+        ("oauth_timestamp", (System.currentTimeMillis / 1000).toString),
+        ("oauth_nonce", System.currentTimeMillis.toString)
+      )
+      
+      var (oauthParams, signature) = getSig(baseParams, req, consumer, token, verifier)
+      
+      oauthParams +:= ("oauth_signature", signature)
+      conn.setRequestProperty("Authorization", "OAuth " + oauthParams.map(p => p._1 + "=\"" + percentEncode(p._2) +"\"").mkString(","))
+    })
   }
   
   def getSig(baseParams: Seq[(String,String)], req: HttpRequest, consumer: Token, token: Option[Token], verifier: Option[String]): (Seq[(String,String)], String) = {

@@ -9,8 +9,8 @@ class OAuthTest {
   def oauthShoulCorrectlySign: Unit = {
     // from example http://hueniverse.com/2008/10/beginners-guide-to-oauth-part-iv-signing-requests/
     val params = List(
-        ("oauth_nonce","kllo9940pd9333jh"),
-        ("oauth_timestamp","1191242096")
+      ("oauth_nonce", "kllo9940pd9333jh"),
+      ("oauth_timestamp", "1191242096")
     )
     
     val url = "http://photos.example.net/photos"
