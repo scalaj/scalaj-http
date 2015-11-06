@@ -113,7 +113,7 @@ case class MultiPart(val name: String, val filename: String, val mime: String, v
   * @param code the http response code from the status line
   * @param headers the response headers
  */
-case class HttpResponse[T](body: T, code: Int, headers: Map[String, String]) {
+case class HttpResponse[T](body: T, code: Int, headers: Map[String, IndexedSeq[String]]) {
   /** test if code is in beteween lower and upper inclusive */
   def isCodeInRange(lower: Int, upper: Int): Boolean = lower <= code && code <= upper
 
@@ -142,16 +142,19 @@ case class HttpResponse[T](body: T, code: Int, headers: Map[String, String]) {
   /** same as !isError */
   def isNotError: Boolean = !isError
 
+  def header(key: String): Option[String] = headers.get(key).flatMap(_.headOption)
+  def headerSeq(key: String): IndexedSeq[String] = headers.getOrElse(key, IndexedSeq.empty)
+
   /** The full status line. like "HTTP/1.1 200 OK"
     * throws a RuntimeException if "Status" is not in headers
     */
-  def statusLine: String = headers.get("Status").getOrElse(throw new RuntimeException("headers doesn't contain Status"))
+  def statusLine: String = header("Status").getOrElse(throw new RuntimeException("headers doesn't contain Status"))
 
   /** Location header value sent for redirects. By default, this library will not follow redirects. */
-  def location: Option[String] = headers.get("Location")
+  def location: Option[String] = header("Location")
 
   /** Content-Type header value */
-  def contentType: Option[String] = headers.get("Content-Type")
+  def contentType: Option[String] = header("Content-Type")
 }
 
 /** Immutable builder for creating an http request
@@ -265,7 +268,7 @@ case class HttpRequest(
   def execute[T](
     parser: InputStream => T = (is: InputStream) => HttpConstants.readString(is, charset)
   ): HttpResponse[T] = {
-    exec((code: Int, headers: Map[String, String], is: InputStream) => parser(is))
+    exec((code: Int, headers: Map[String, IndexedSeq[String]], is: InputStream) => parser(is))
   }
 
   /** Executes this request
@@ -276,7 +279,7 @@ case class HttpRequest(
     * @tparam T the type returned by the input stream parser
     * @param parser function to process the response body InputStream
     */
-  def exec[T](parser: (Int, Map[String, String], InputStream) => T): HttpResponse[T] = {
+  def exec[T](parser: (Int, Map[String, IndexedSeq[String]], InputStream) => T): HttpResponse[T] = {
     val urlToFetch: URL = new URL(urlBuilder(this))
     proxyConfig.map(urlToFetch.openConnection).getOrElse(urlToFetch.openConnection) match {
       case conn: HttpURLConnection =>
@@ -304,12 +307,12 @@ case class HttpRequest(
 
   private def toResponse[T](
     conn: HttpURLConnection,
-    parser: (Int, Map[String, String], InputStream) => T,
+    parser: (Int, Map[String, IndexedSeq[String]], InputStream) => T,
     inputStream: InputStream
   ): HttpResponse[T] = {
     val responseCode: Int = conn.getResponseCode
-    val headers: Map[String, String] = getResponseHeaders(conn)
-    val encoding: Option[String] = headers.get("Content-Encoding")
+    val headers: Map[String, IndexedSeq[String]] = getResponseHeaders(conn)
+    val encoding: Option[String] = headers.get("Content-Encoding").flatMap(_.headOption)
     val body: T = {
       val shouldDecompress = compress && inputStream != null
       val theStream = if (shouldDecompress && encoding.exists(_.equalsIgnoreCase("gzip"))) {
@@ -322,16 +325,16 @@ case class HttpRequest(
     HttpResponse[T](body, responseCode, headers)
   }
 
-  private def getResponseHeaders(conn: HttpURLConnection): Map[String, String] = {
-    // combining duplicate header values with a comma: 
+  private def getResponseHeaders(conn: HttpURLConnection): Map[String, IndexedSeq[String]] = {
+    // There can be multiple values for the same response header key (this is common with Set-Cookie)
     // http://stackoverflow.com/questions/4371328/are-duplicate-http-response-headers-acceptable
 
     // according to javadoc, there can be a headerField value where the HeaderFieldKey is null
     // at the 0th row in some implementations.  In that case it's the http status line
-    new TreeMap[String,String]()(Ordering.by(_.toLowerCase)) ++ {
+    new TreeMap[String, IndexedSeq[String]]()(Ordering.by(_.toLowerCase)) ++ {
       Stream.from(0).map(i => i -> conn.getHeaderField(i)).takeWhile(_._2 != null).map{ case (i, value) =>
         Option(conn.getHeaderFieldKey(i)).getOrElse("Status") -> value
-      }.groupBy(_._1).mapValues(_.map(_._2).mkString(", "))
+      }.groupBy(_._1).mapValues(_.map(_._2).toIndexedSeq)
     }
   }
   

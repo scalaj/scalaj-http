@@ -24,7 +24,7 @@ class HttpBinTest {
   def redirectShouldNotFollow {
     val response = Http("http://httpbin.org/redirect-to?url=http://foo.org").asString
     assertEquals(302, response.code)
-    assertEquals(Some("http://foo.org"), response.headers.get("Location"))
+    assertEquals(Some("http://foo.org"), response.header("Location"))
   }
 
   @Test

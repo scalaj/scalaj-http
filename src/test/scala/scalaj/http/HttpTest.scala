@@ -39,7 +39,7 @@ class HttpTest {
     object MyHttp extends BaseHttp(options = Seq(HttpOptions.readTimeout(1234)))
     val request: HttpRequest = MyHttp(url)
     val response: HttpResponse[String] = request.execute()
-    assertEquals(Some(expectedContentType), response.headers.get("Content-Type"))
+    assertEquals(Some(expectedContentType), response.header("Content-Type"))
     assertEquals(expectedCode, response.code)
     assertEquals(expectedBody, response.body)
     assertEquals("HTTP/1.1 200 OK", response.statusLine)

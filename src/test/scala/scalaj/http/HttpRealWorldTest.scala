@@ -8,7 +8,7 @@ class HttpRealWorldTest {
   def gzipDecodeTwitter {
     val response = Http("https://twitter.com").asString
     assertEquals(200, response.code)
-    assertEquals(Some("gzip"), response.headers.get("content-encoding"))
+    assertEquals(Some("gzip"), response.header("content-encoding"))
     assertEquals("<!DOCTYPE", response.body.substring(0,9))
   }
 }
