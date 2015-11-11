@@ -205,7 +205,7 @@ object MyHttp extends BaseHttp (
 
 ### Full API documentation
 
-[scaladocs here](http://scalaj.github.io/scalaj-http/1.1.0)
+[scaladocs here](http://scalaj.github.io/scalaj-http/2.0.0)
 
 ## Dealing with annoying java library issues
 #### Overriding the `Access-Control, Content-Length, Content-Transfer-Encoding, Host, Keep-Alive, Origin, Trailer, Transfer-Encoding, Upgrade, Via` headers
