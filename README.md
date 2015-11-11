@@ -92,6 +92,8 @@ Http("http://foo.com/add").postForm(Seq("name" -> "jon", "age" -> "29")).asStrin
 
 ### OAuth v1 Dance and Request
 
+*Note: the `.oauth(...)` call must be the last method called in the request construction*
+
 ```scala
 import scalaj.http.{Http, Token}
 
