@@ -1,8 +1,6 @@
 2.0.0
 ------
 release: 11 November 2015
-
- - .oauth can now be called at any point in the request building
  
 BREAKING CHANGES:
  - HttpResponse.headers is now a Map[String, IndexedSeq[String]] this is a more correct way to access the headers.
