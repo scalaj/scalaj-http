@@ -1,6 +1,6 @@
 name := "scalaj-http"
 
-version := "1.1.6"
+version := "2.0.0"
 
 organization := "org.scalaj"
 

@@ -18,7 +18,7 @@ Non-Features:
 
 Works in Google AppEngine and Android environments.
 
-**_Note:_ 1.x.x is a new major version which is both syntactically and behaviorally different than the 0.x.x version.**
+**_Note:_ 2.x.x is a new major version which is both syntactically and behaviorally different than the 0.x.x version.**
 
 Previous version is branched here: https://github.com/scalaj/scalaj-http/tree/0.3.x
 
@@ -35,7 +35,7 @@ Big differences:
 ### in your build.sbt
 
 ```scala
-libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "1.1.6"
+libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "2.0.0"
 ```
 
 ### maven
@@ -44,7 +44,7 @@ libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "1.1.6"
 <dependency>
   <groupId>org.scalaj</groupId>
   <artifactId>scalaj-http_${scala.version}</artifactId>
-  <version>1.1.6</version>
+  <version>2.0.0</version>
 </dependency>  
 ```
 
