@@ -1,0 +1,1034 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>HttpRequest - scalaj.http.HttpRequest</title>
+          <meta name="description" content="HttpRequest - scalaj.http.HttpRequest" />
+          <meta name="keywords" content="HttpRequest scalaj.http.HttpRequest" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../index.html';
+            var hash = 'scalaj.http.HttpRequest';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="type">
+      <div id="definition">
+        <img src="../../lib/class_big.png" />
+        <p id="owner"><a href="../package.html" class="extype" name="scalaj">scalaj</a>.<a href="package.html" class="extype" name="scalaj.http">http</a></p>
+        <h1>HttpRequest</h1>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <span class="name">HttpRequest</span><span class="params">(<span name="url">url: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="method">method: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="connectFunc">connectFunc: (<a href="" class="extype" name="scalaj.http.HttpRequest">HttpRequest</a>, <span class="extype" name="java.net.HttpURLConnection">HttpURLConnection</span>) ⇒ <span class="extype" name="scala.Unit">Unit</span></span>, <span name="params">params: <span class="extype" name="scala.Seq">Seq</span>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)]</span>, <span name="headers">headers: <span class="extype" name="scala.Seq">Seq</span>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)]</span>, <span name="options">options: <span class="extype" name="scala.Seq">Seq</span>[(<span class="extype" name="java.net.HttpURLConnection">HttpURLConnection</span>) ⇒ <span class="extype" name="scala.Unit">Unit</span>]</span>, <span name="proxyConfig">proxyConfig: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="java.net.Proxy">Proxy</span>]</span>, <span name="charset">charset: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="sendBufferSize">sendBufferSize: <span class="extype" name="scala.Int">Int</span></span>, <span name="urlBuilder">urlBuilder: (<a href="" class="extype" name="scalaj.http.HttpRequest">HttpRequest</a>) ⇒ <span class="extype" name="scala.Predef.String">String</span></span>, <span name="compress">compress: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Immutable builder for creating an http request</p><p>This is the workhorse of the scalaj-http library.</p><p>You shouldn't need to construct this manually. Use <a href="Http$.html#apply(url:String):scalaj.http.HttpRequest" class="extmbr" name="scalaj.http.Http#apply">scalaj.http.Http.apply</a> to get an instance</p><p>The params, headers and options methods are all additive. They will always add things to the request. If you want to
+replace those things completely, you can do something like </p><pre>.copy(params=newparams)</pre></div><div class="toggleContainer block">
+          <span class="toggle">Linear Supertypes</span>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="scala.Product">Product</span>, <span class="extype" name="scala.Equals">Equals</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+        </div></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        <div id="order">
+              <span class="filtertype">Ordering</span>
+              <ol>
+                
+                <li class="alpha in"><span>Alphabetic</span></li>
+                <li class="inherit out"><span>By inheritance</span></li>
+              </ol>
+            </div>
+        <div id="ancestors">
+                <span class="filtertype">Inherited<br />
+                </span>
+                <ol id="linearization">
+                  <li class="in" name="scalaj.http.HttpRequest"><span>HttpRequest</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                </ol>
+              </div><div id="ancestors">
+            <span class="filtertype"></span>
+            <ol>
+              <li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show all</span></li>
+            </ol>
+            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
+          </div>
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        <div id="constructors" class="members">
+              <h3>Instance Constructors</h3>
+              <ol><li name="scalaj.http.HttpRequest#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;(url:String,method:String,connectFunc:(scalaj.http.HttpRequest,java.net.HttpURLConnection)=&gt;Unit,params:Seq[(String,String)],headers:Seq[(String,String)],options:Seq[java.net.HttpURLConnection=&gt;Unit],proxyConfig:Option[java.net.Proxy],charset:String,sendBufferSize:Int,urlBuilder:scalaj.http.HttpRequest=&gt;String,compress:Boolean):scalaj.http.HttpRequest"></a>
+      <a id="&lt;init&gt;:HttpRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">HttpRequest</span><span class="params">(<span name="url">url: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="method">method: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="connectFunc">connectFunc: (<a href="" class="extype" name="scalaj.http.HttpRequest">HttpRequest</a>, <span class="extype" name="java.net.HttpURLConnection">HttpURLConnection</span>) ⇒ <span class="extype" name="scala.Unit">Unit</span></span>, <span name="params">params: <span class="extype" name="scala.Seq">Seq</span>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)]</span>, <span name="headers">headers: <span class="extype" name="scala.Seq">Seq</span>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)]</span>, <span name="options">options: <span class="extype" name="scala.Seq">Seq</span>[(<span class="extype" name="java.net.HttpURLConnection">HttpURLConnection</span>) ⇒ <span class="extype" name="scala.Unit">Unit</span>]</span>, <span name="proxyConfig">proxyConfig: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="java.net.Proxy">Proxy</span>]</span>, <span name="charset">charset: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="sendBufferSize">sendBufferSize: <span class="extype" name="scala.Int">Int</span></span>, <span name="urlBuilder">urlBuilder: (<a href="" class="extype" name="scalaj.http.HttpRequest">HttpRequest</a>) ⇒ <span class="extype" name="scala.Predef.String">String</span></span>, <span name="compress">compress: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+
+        
+
+        
+
+        <div id="values" class="values members">
+              <h3>Value Members</h3>
+              <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!=(x$1:AnyRef):Boolean"></a>
+      <a id="!=(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.Any#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!=(x$1:Any):Boolean"></a>
+      <a id="!=(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="scala.AnyRef###" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="##():Int"></a>
+      <a id="##():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="==(x$1:AnyRef):Boolean"></a>
+      <a id="==(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.Any#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="==(x$1:Any):Boolean"></a>
+      <a id="==(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="scalaj.http.HttpRequest#asBytes" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="asBytes:scalaj.http.HttpResponse[Array[Byte]]"></a>
+      <a id="asBytes:HttpResponse[Array[Byte]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asBytes</span><span class="result">: <a href="HttpResponse.html" class="extype" name="scalaj.http.HttpResponse">HttpResponse</a>[<span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Execute this request and parse http body as Array[Byte]</p>
+    </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="asInstanceOf[T0]:T0"></a>
+      <a id="asInstanceOf[T0]:T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="scalaj.http.HttpRequest#asParamMap" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="asParamMap:scalaj.http.HttpResponse[Map[String,String]]"></a>
+      <a id="asParamMap:HttpResponse[Map[String,String]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asParamMap</span><span class="result">: <a href="HttpResponse.html" class="extype" name="scalaj.http.HttpResponse">HttpResponse</a>[<span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Execute this request and parse http body as query string key-value pairs</p>
+    </li><li name="scalaj.http.HttpRequest#asParams" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="asParams:scalaj.http.HttpResponse[Seq[(String,String)]]"></a>
+      <a id="asParams:HttpResponse[Seq[(String,String)]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asParams</span><span class="result">: <a href="HttpResponse.html" class="extype" name="scalaj.http.HttpResponse">HttpResponse</a>[<span class="extype" name="scala.Seq">Seq</span>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Execute this request and parse http body as query string key-value pairs</p>
+    </li><li name="scalaj.http.HttpRequest#asString" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="asString:scalaj.http.HttpResponse[String]"></a>
+      <a id="asString:HttpResponse[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asString</span><span class="result">: <a href="HttpResponse.html" class="extype" name="scalaj.http.HttpResponse">HttpResponse</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Execute this request and parse http body as String using configured charset</p>
+    </li><li name="scalaj.http.HttpRequest#asToken" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="asToken:scalaj.http.HttpResponse[scalaj.http.Token]"></a>
+      <a id="asToken:HttpResponse[Token]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asToken</span><span class="result">: <a href="HttpResponse.html" class="extype" name="scalaj.http.HttpResponse">HttpResponse</a>[<a href="Token.html" class="extype" name="scalaj.http.Token">Token</a>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Execute this request and parse http body as a querystring containing oauth_token and oauth_token_secret tupple</p>
+    </li><li name="scalaj.http.HttpRequest#auth" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="auth(user:String,password:String):scalaj.http.HttpRequest"></a>
+      <a id="auth(String,String):HttpRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">auth</span><span class="params">(<span name="user">user: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="password">password: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="" class="extype" name="scalaj.http.HttpRequest">HttpRequest</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Add a standard basic authorization header</p>
+    </li><li name="scalaj.http.HttpRequest#charset" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="charset(cs:String):scalaj.http.HttpRequest"></a>
+      <a id="charset(String):HttpRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">charset</span><span class="params">(<span name="cs">cs: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="" class="extype" name="scalaj.http.HttpRequest">HttpRequest</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Change the charset used to encode the request and decode the response.</p><div class="fullcomment"><div class="comment cmt"><p>Change the charset used to encode the request and decode the response. UTF-8 by default</p></div></div>
+    </li><li name="scalaj.http.HttpRequest#charset" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="charset:String"></a>
+      <a id="charset:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">charset</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="clone():Object"></a>
+      <a id="clone():AnyRef"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.CloneNotSupportedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scalaj.http.HttpRequest#compress" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="compress(c:Boolean):scalaj.http.HttpRequest"></a>
+      <a id="compress(Boolean):HttpRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">compress</span><span class="params">(<span name="c">c: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <a href="" class="extype" name="scalaj.http.HttpRequest">HttpRequest</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Should HTTP compression be used
+If true, Accept-Encoding: gzip,deflate will be sent with request.</p><div class="fullcomment"><div class="comment cmt"><p>Should HTTP compression be used
+If true, Accept-Encoding: gzip,deflate will be sent with request.
+If the server response with Content-Encoding: (gzip|deflate) the client will automatically handle decompression</p><p>This is on by default
+</p></div><dl class="paramcmts block"><dt class="param">c</dt><dd class="cmt"><p>should compress
+</p></dd></dl></div>
+    </li><li name="scalaj.http.HttpRequest#compress" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="compress:Boolean"></a>
+      <a id="compress:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">compress</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="scalaj.http.HttpRequest#connectFunc" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="connectFunc:(scalaj.http.HttpRequest,java.net.HttpURLConnection)=&gt;Unit"></a>
+      <a id="connectFunc:(HttpRequest,HttpURLConnection)⇒Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">connectFunc</span><span class="result">: (<a href="" class="extype" name="scalaj.http.HttpRequest">HttpRequest</a>, <span class="extype" name="java.net.HttpURLConnection">HttpURLConnection</span>) ⇒ <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="eq(x$1:AnyRef):Boolean"></a>
+      <a id="eq(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scalaj.http.HttpRequest#exec" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="exec[T](parser:(Int,Map[String,IndexedSeq[String]],java.io.InputStream)=&gt;T):scalaj.http.HttpResponse[T]"></a>
+      <a id="exec[T]((Int,Map[String,IndexedSeq[String]],InputStream)⇒T):HttpResponse[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">exec</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="parser">parser: (<span class="extype" name="scala.Int">Int</span>, <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.IndexedSeq">IndexedSeq</span>[<span class="extype" name="scala.Predef.String">String</span>]], <span class="extype" name="java.io.InputStream">InputStream</span>) ⇒ <span class="extype" name="scalaj.http.HttpRequest.exec.T">T</span></span>)</span><span class="result">: <a href="HttpResponse.html" class="extype" name="scalaj.http.HttpResponse">HttpResponse</a>[<span class="extype" name="scalaj.http.HttpRequest.exec.T">T</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Executes this request</p><div class="fullcomment"><div class="comment cmt"><p>Executes this request</p><p>This is a power user method for parsing the response body. The parser function will be passed the response code,
+response headers and the InputStream
+</p></div><dl class="paramcmts block"><dt class="tparam">T</dt><dd class="cmt"><p>the type returned by the input stream parser</p></dd><dt class="param">parser</dt><dd class="cmt"><p>function to process the response body InputStream
+</p></dd></dl></div>
+    </li><li name="scalaj.http.HttpRequest#execute" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="execute[T](parser:java.io.InputStream=&gt;T):scalaj.http.HttpResponse[T]"></a>
+      <a id="execute[T]((InputStream)⇒T):HttpResponse[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">execute</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="parser">parser: (<span class="extype" name="java.io.InputStream">InputStream</span>) ⇒ <span class="extype" name="scalaj.http.HttpRequest.execute.T">T</span> = <span class="defval" name='<span class="name"><a href="#charset:String">(is: InputStream) =&gt; HttpConstants.readString(is, charset)</a></span>'>...</span></span>)</span><span class="result">: <a href="HttpResponse.html" class="extype" name="scalaj.http.HttpResponse">HttpResponse</a>[<span class="extype" name="scalaj.http.HttpRequest.execute.T">T</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Executes this request
+</p><div class="fullcomment"><div class="comment cmt"><p>Executes this request
+</p></div><dl class="paramcmts block"><dt class="tparam">T</dt><dd class="cmt"><p>the type returned by the input stream parser</p></dd><dt class="param">parser</dt><dd class="cmt"><p>function to process the response body InputStream. Will be used for all response codes
+</p></dd></dl></div>
+    </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="finalize():Unit"></a>
+      <a id="finalize():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Throwable]</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getClass():Class[_]"></a>
+      <a id="getClass():Class[_]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scalaj.http.HttpRequest#header" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="header(key:String,value:String):scalaj.http.HttpRequest"></a>
+      <a id="header(String,String):HttpRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">header</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="value">value: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="" class="extype" name="scalaj.http.HttpRequest">HttpRequest</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Add a http header to the request</p>
+    </li><li name="scalaj.http.HttpRequest#headers" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="headers(h:(String,String),rest:(String,String)*):scalaj.http.HttpRequest"></a>
+      <a id="headers((String,String),(String,String)*):HttpRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">headers</span><span class="params">(<span name="h">h: (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)</span>, <span name="rest">rest: (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)*</span>)</span><span class="result">: <a href="" class="extype" name="scalaj.http.HttpRequest">HttpRequest</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Add http headers to the request</p>
+    </li><li name="scalaj.http.HttpRequest#headers" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="headers(h:Seq[(String,String)]):scalaj.http.HttpRequest"></a>
+      <a id="headers(Seq[(String,String)]):HttpRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">headers</span><span class="params">(<span name="h">h: <span class="extype" name="scala.Seq">Seq</span>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)]</span>)</span><span class="result">: <a href="" class="extype" name="scalaj.http.HttpRequest">HttpRequest</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Add http headers to the request</p>
+    </li><li name="scalaj.http.HttpRequest#headers" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="headers(h:Map[String,String]):scalaj.http.HttpRequest"></a>
+      <a id="headers(Map[String,String]):HttpRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">headers</span><span class="params">(<span name="h">h: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <a href="" class="extype" name="scalaj.http.HttpRequest">HttpRequest</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Add http headers to the request</p>
+    </li><li name="scalaj.http.HttpRequest#headers" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="headers:Seq[(String,String)]"></a>
+      <a id="headers:Seq[(String,String)]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">headers</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)]</span>
+      </span>
+      </h4>
+      
+    </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="scalaj.http.HttpRequest#method" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="method(m:String):scalaj.http.HttpRequest"></a>
+      <a id="method(String):HttpRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">method</span><span class="params">(<span name="m">m: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="" class="extype" name="scalaj.http.HttpRequest">HttpRequest</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Change the http request method.</p><div class="fullcomment"><div class="comment cmt"><p>Change the http request method.
+The library will allow you to set this to whatever you want. If you want to do a POST, just use the
+postData, postForm, or postMulti methods. If you want to setup your request as a form, data or multi request, but
+want to change the method type, call this method after the post method:</p><pre>Http(url).postData(dataBytes).method(<span class="lit">"PUT"</span>).asString</pre></div></div>
+    </li><li name="scalaj.http.HttpRequest#method" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="method:String"></a>
+      <a id="method:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">method</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ne(x$1:AnyRef):Boolean"></a>
+      <a id="ne(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notify():Unit"></a>
+      <a id="notify():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#notifyAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notifyAll():Unit"></a>
+      <a id="notifyAll():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scalaj.http.HttpRequest#oauth" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="oauth(consumer:scalaj.http.Token,token:Option[scalaj.http.Token],verifier:Option[String]):scalaj.http.HttpRequest"></a>
+      <a id="oauth(Token,Option[Token],Option[String]):HttpRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">oauth</span><span class="params">(<span name="consumer">consumer: <a href="Token.html" class="extype" name="scalaj.http.Token">Token</a></span>, <span name="token">token: <span class="extype" name="scala.Option">Option</span>[<a href="Token.html" class="extype" name="scalaj.http.Token">Token</a>]</span>, <span name="verifier">verifier: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <a href="" class="extype" name="scalaj.http.HttpRequest">HttpRequest</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">OAuth v1 sign the request with with both the consumer and client token and a verifier</p>
+    </li><li name="scalaj.http.HttpRequest#oauth" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="oauth(consumer:scalaj.http.Token,token:scalaj.http.Token,verifier:String):scalaj.http.HttpRequest"></a>
+      <a id="oauth(Token,Token,String):HttpRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">oauth</span><span class="params">(<span name="consumer">consumer: <a href="Token.html" class="extype" name="scalaj.http.Token">Token</a></span>, <span name="token">token: <a href="Token.html" class="extype" name="scalaj.http.Token">Token</a></span>, <span name="verifier">verifier: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="" class="extype" name="scalaj.http.HttpRequest">HttpRequest</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">OAuth v1 sign the request with with both the consumer and client token and a verifier</p>
+    </li><li name="scalaj.http.HttpRequest#oauth" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="oauth(consumer:scalaj.http.Token,token:scalaj.http.Token):scalaj.http.HttpRequest"></a>
+      <a id="oauth(Token,Token):HttpRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">oauth</span><span class="params">(<span name="consumer">consumer: <a href="Token.html" class="extype" name="scalaj.http.Token">Token</a></span>, <span name="token">token: <a href="Token.html" class="extype" name="scalaj.http.Token">Token</a></span>)</span><span class="result">: <a href="" class="extype" name="scalaj.http.HttpRequest">HttpRequest</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">OAuth v1 sign the request with with both the consumer and client token</p>
+    </li><li name="scalaj.http.HttpRequest#oauth" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="oauth(consumer:scalaj.http.Token):scalaj.http.HttpRequest"></a>
+      <a id="oauth(Token):HttpRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">oauth</span><span class="params">(<span name="consumer">consumer: <a href="Token.html" class="extype" name="scalaj.http.Token">Token</a></span>)</span><span class="result">: <a href="" class="extype" name="scalaj.http.HttpRequest">HttpRequest</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">OAuth v1 sign the request with the consumer token</p>
+    </li><li name="scalaj.http.HttpRequest#option" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="option(o:java.net.HttpURLConnection=&gt;Unit):scalaj.http.HttpRequest"></a>
+      <a id="option((HttpURLConnection)⇒Unit):HttpRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">option</span><span class="params">(<span name="o">o: (<span class="extype" name="java.net.HttpURLConnection">HttpURLConnection</span>) ⇒ <span class="extype" name="scala.Unit">Unit</span></span>)</span><span class="result">: <a href="" class="extype" name="scalaj.http.HttpRequest">HttpRequest</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Entry point fo modifying the <span class="extype" name="java.net.HttpURLConnection">java.net.HttpURLConnection</span> before the request is executed</p>
+    </li><li name="scalaj.http.HttpRequest#options" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="options(o:java.net.HttpURLConnection=&gt;Unit,rest:java.net.HttpURLConnection=&gt;Unit*):scalaj.http.HttpRequest"></a>
+      <a id="options((HttpURLConnection)⇒Unit,(HttpURLConnection)⇒Unit*):HttpRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">options</span><span class="params">(<span name="o">o: (<span class="extype" name="java.net.HttpURLConnection">HttpURLConnection</span>) ⇒ <span class="extype" name="scala.Unit">Unit</span></span>, <span name="rest">rest: (<span class="extype" name="java.net.HttpURLConnection">HttpURLConnection</span>) ⇒ <span class="extype" name="scala.Unit">Unit</span>*</span>)</span><span class="result">: <a href="" class="extype" name="scalaj.http.HttpRequest">HttpRequest</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Entry point fo modifying the <span class="extype" name="java.net.HttpURLConnection">java.net.HttpURLConnection</span> before the request is executed</p>
+    </li><li name="scalaj.http.HttpRequest#options" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="options(o:Seq[java.net.HttpURLConnection=&gt;Unit]):scalaj.http.HttpRequest"></a>
+      <a id="options(Seq[(HttpURLConnection)⇒Unit]):HttpRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">options</span><span class="params">(<span name="o">o: <span class="extype" name="scala.Seq">Seq</span>[(<span class="extype" name="java.net.HttpURLConnection">HttpURLConnection</span>) ⇒ <span class="extype" name="scala.Unit">Unit</span>]</span>)</span><span class="result">: <a href="" class="extype" name="scalaj.http.HttpRequest">HttpRequest</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Entry point fo modifying the <span class="extype" name="java.net.HttpURLConnection">java.net.HttpURLConnection</span> before the request is executed</p>
+    </li><li name="scalaj.http.HttpRequest#options" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="options:Seq[java.net.HttpURLConnection=&gt;Unit]"></a>
+      <a id="options:Seq[(HttpURLConnection)⇒Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">options</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[(<span class="extype" name="java.net.HttpURLConnection">HttpURLConnection</span>) ⇒ <span class="extype" name="scala.Unit">Unit</span>]</span>
+      </span>
+      </h4>
+      
+    </li><li name="scalaj.http.HttpRequest#param" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="param(key:String,value:String):scalaj.http.HttpRequest"></a>
+      <a id="param(String,String):HttpRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">param</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="value">value: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="" class="extype" name="scalaj.http.HttpRequest">HttpRequest</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Add a param to the GET querystring or POST form request</p>
+    </li><li name="scalaj.http.HttpRequest#params" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="params(p:(String,String),rest:(String,String)*):scalaj.http.HttpRequest"></a>
+      <a id="params((String,String),(String,String)*):HttpRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">params</span><span class="params">(<span name="p">p: (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)</span>, <span name="rest">rest: (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)*</span>)</span><span class="result">: <a href="" class="extype" name="scalaj.http.HttpRequest">HttpRequest</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Add params to the GET querystring or POST form request</p>
+    </li><li name="scalaj.http.HttpRequest#params" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="params(p:Seq[(String,String)]):scalaj.http.HttpRequest"></a>
+      <a id="params(Seq[(String,String)]):HttpRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">params</span><span class="params">(<span name="p">p: <span class="extype" name="scala.Seq">Seq</span>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)]</span>)</span><span class="result">: <a href="" class="extype" name="scalaj.http.HttpRequest">HttpRequest</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Add params to the GET querystring or POST form request</p>
+    </li><li name="scalaj.http.HttpRequest#params" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="params(p:Map[String,String]):scalaj.http.HttpRequest"></a>
+      <a id="params(Map[String,String]):HttpRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">params</span><span class="params">(<span name="p">p: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <a href="" class="extype" name="scalaj.http.HttpRequest">HttpRequest</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Add params to the GET querystring or POST form request</p>
+    </li><li name="scalaj.http.HttpRequest#params" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="params:Seq[(String,String)]"></a>
+      <a id="params:Seq[(String,String)]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">params</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)]</span>
+      </span>
+      </h4>
+      
+    </li><li name="scalaj.http.HttpRequest#postData" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="postData(data:Array[Byte]):scalaj.http.HttpRequest"></a>
+      <a id="postData(Array[Byte]):HttpRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">postData</span><span class="params">(<span name="data">data: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]</span>)</span><span class="result">: <a href="" class="extype" name="scalaj.http.HttpRequest">HttpRequest</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Raw byte data POST request</p>
+    </li><li name="scalaj.http.HttpRequest#postData" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="postData(data:String):scalaj.http.HttpRequest"></a>
+      <a id="postData(String):HttpRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">postData</span><span class="params">(<span name="data">data: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="" class="extype" name="scalaj.http.HttpRequest">HttpRequest</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Raw data POST request.</p><div class="fullcomment"><div class="comment cmt"><p>Raw data POST request. String bytes written out in using configured charset</p></div></div>
+    </li><li name="scalaj.http.HttpRequest#postForm" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="postForm(params:Seq[(String,String)]):scalaj.http.HttpRequest"></a>
+      <a id="postForm(Seq[(String,String)]):HttpRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">postForm</span><span class="params">(<span name="params">params: <span class="extype" name="scala.Seq">Seq</span>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)]</span>)</span><span class="result">: <a href="" class="extype" name="scalaj.http.HttpRequest">HttpRequest</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Standard form POST request and set some parameters.</p><div class="fullcomment"><div class="comment cmt"><p>Standard form POST request and set some parameters. Same as .postForm.params(params)</p></div></div>
+    </li><li name="scalaj.http.HttpRequest#postForm" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="postForm:scalaj.http.HttpRequest"></a>
+      <a id="postForm:HttpRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">postForm</span><span class="result">: <a href="" class="extype" name="scalaj.http.HttpRequest">HttpRequest</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Standard form POST request</p>
+    </li><li name="scalaj.http.HttpRequest#postMulti" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="postMulti(parts:scalaj.http.MultiPart*):scalaj.http.HttpRequest"></a>
+      <a id="postMulti(MultiPart*):HttpRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">postMulti</span><span class="params">(<span name="parts">parts: <a href="MultiPart.html" class="extype" name="scalaj.http.MultiPart">MultiPart</a>*</span>)</span><span class="result">: <a href="" class="extype" name="scalaj.http.HttpRequest">HttpRequest</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Multipart POST request.</p><div class="fullcomment"><div class="comment cmt"><p>Multipart POST request.</p><p>This is probably what you want if you need to upload a mix of form data and binary data (like a photo)
+</p></div></div>
+    </li><li name="scalaj.http.HttpRequest#proxy" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="proxy(proxy:java.net.Proxy):scalaj.http.HttpRequest"></a>
+      <a id="proxy(Proxy):HttpRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">proxy</span><span class="params">(<span name="proxy">proxy: <span class="extype" name="java.net.Proxy">Proxy</span></span>)</span><span class="result">: <a href="" class="extype" name="scalaj.http.HttpRequest">HttpRequest</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Send request via a proxy</p>
+    </li><li name="scalaj.http.HttpRequest#proxy" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="proxy(host:String,port:Int,proxyType:java.net.Proxy.Type):scalaj.http.HttpRequest"></a>
+      <a id="proxy(String,Int,Type):HttpRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">proxy</span><span class="params">(<span name="host">host: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="port">port: <span class="extype" name="scala.Int">Int</span></span>, <span name="proxyType">proxyType: <span class="extype" name="java.net.Proxy.Type">Type</span></span>)</span><span class="result">: <a href="" class="extype" name="scalaj.http.HttpRequest">HttpRequest</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Send request via a proxy.</p><div class="fullcomment"><div class="comment cmt"><p>Send request via a proxy. You choose the type (HTTP or SOCKS)</p></div></div>
+    </li><li name="scalaj.http.HttpRequest#proxy" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="proxy(host:String,port:Int):scalaj.http.HttpRequest"></a>
+      <a id="proxy(String,Int):HttpRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">proxy</span><span class="params">(<span name="host">host: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="port">port: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <a href="" class="extype" name="scalaj.http.HttpRequest">HttpRequest</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Send request via a standard http proxy</p>
+    </li><li name="scalaj.http.HttpRequest#proxyConfig" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="proxyConfig:Option[java.net.Proxy]"></a>
+      <a id="proxyConfig:Option[Proxy]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">proxyConfig</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="java.net.Proxy">Proxy</span>]</span>
+      </span>
+      </h4>
+      
+    </li><li name="scalaj.http.HttpRequest#sendBufferSize" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="sendBufferSize(numBytes:Int):scalaj.http.HttpRequest"></a>
+      <a id="sendBufferSize(Int):HttpRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">sendBufferSize</span><span class="params">(<span name="numBytes">numBytes: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <a href="" class="extype" name="scalaj.http.HttpRequest">HttpRequest</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">The buffer size to use when sending Multipart posts</p>
+    </li><li name="scalaj.http.HttpRequest#sendBufferSize" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="sendBufferSize:Int"></a>
+      <a id="sendBufferSize:Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">sendBufferSize</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
+      <a id="synchronized[T0](⇒T0):T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scalaj.http.HttpRequest#timeout" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="timeout(connTimeoutMs:Int,readTimeoutMs:Int):scalaj.http.HttpRequest"></a>
+      <a id="timeout(Int,Int):HttpRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">timeout</span><span class="params">(<span name="connTimeoutMs">connTimeoutMs: <span class="extype" name="scala.Int">Int</span></span>, <span name="readTimeoutMs">readTimeoutMs: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <a href="" class="extype" name="scalaj.http.HttpRequest">HttpRequest</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">The socket connection and read timeouts in milliseconds.</p><div class="fullcomment"><div class="comment cmt"><p>The socket connection and read timeouts in milliseconds. Defaults are 1000 and 5000 respectively</p></div></div>
+    </li><li name="scalaj.http.HttpRequest#url" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="url:String"></a>
+      <a id="url:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">url</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="scalaj.http.HttpRequest#urlBuilder" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="urlBuilder:scalaj.http.HttpRequest=&gt;String"></a>
+      <a id="urlBuilder:(HttpRequest)⇒String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">urlBuilder</span><span class="result">: (<a href="" class="extype" name="scalaj.http.HttpRequest">HttpRequest</a>) ⇒ <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait():Unit"></a>
+      <a id="wait():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long,x$2:Int):Unit"></a>
+      <a id="wait(Long,Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long):Unit"></a>
+      <a id="wait(Long):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li></ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        <div class="parent" name="scala.Serializable">
+              <h3>Inherited from <span class="extype" name="scala.Serializable">Serializable</span></h3>
+            </div><div class="parent" name="java.io.Serializable">
+              <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
+            </div><div class="parent" name="scala.Product">
+              <h3>Inherited from <span class="extype" name="scala.Product">Product</span></h3>
+            </div><div class="parent" name="scala.Equals">
+              <h3>Inherited from <span class="extype" name="scala.Equals">Equals</span></h3>
+            </div><div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div>
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../lib/template.js"></script>
+    </body>
+      </html>
