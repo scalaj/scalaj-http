@@ -145,7 +145,7 @@ You can also stream uploads and get a callback on progress:
 ```scala
 Http(url).postMulti(MultiPart("photo", "headshot.png", "image/png", inputStream, bytesInStream, 
   lenWritten => {
-    println("Wrote %d bytes out of %d total for headshot.png".format(lenWritten, bytesInStream))
+    println(s"Wrote $lenWritten bytes out of $bytesInStream total for headshot.png")
   })).asString
 ```
 
