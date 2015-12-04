@@ -1,7 +1,7 @@
 package scalaj.http
 
 import java.io.ByteArrayInputStream
-import java.net.{InetSocketAddress, Proxy}
+import java.net.{HttpCookie, InetSocketAddress, Proxy}
 import org.junit.Assert._
 import org.junit.{After, Before, Test}
 import scalaj.http.HttpConstants._
@@ -186,5 +186,11 @@ class HttpTest {
                        .headers("a" -> "b", "b" -> "a")
                        .options(HttpOptions.connTimeout(100), HttpOptions.readTimeout(100))
     assertEquals(2, req.params.size)
+  }
+
+  @Test
+  def parseCookies() {
+    val httpResponse = HttpResponse("hi", 200, Map("Set-Cookie" -> IndexedSeq("foo=bar", "baz=biz")))
+    assertEquals(IndexedSeq(new HttpCookie("foo", "bar"), new HttpCookie("baz", "biz")), httpResponse.cookies)
   }
 }

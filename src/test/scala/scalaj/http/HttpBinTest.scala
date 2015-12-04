@@ -1,9 +1,16 @@
 package scalaj.http
 
+import java.net.HttpCookie
 import org.junit.Assert._
 import org.junit.Test
 
-case class BinResponse(files: Map[String, String], form: Map[String, String], args: Map[String, String], headers: Map[String, String])
+case class BinResponse(
+  files: Map[String, String],
+  form: Map[String, String],
+  args: Map[String, String],
+  headers: Map[String, String],
+  cookies: Map[String, String]
+)
 
 class HttpBinTest {
 
@@ -98,11 +105,28 @@ class HttpBinTest {
     assertEquals(Some("b"), binResponse.form.get("param2"))
   }
 
-    @Test
+  @Test
   def postData {
     val response = Http("http://httpbin.org/post").param("param1", "a").param("param2", "b").postData("foo").asString
     val binResponse = Json.parse[BinResponse](response.body)
     assertEquals(Some("a"), binResponse.args.get("param1"))
     assertEquals(Some("b"), binResponse.args.get("param2"))
+  }
+
+  @Test
+  def cookie {
+    val response = Http("http://httpbin.org/cookies").cookie("foo", "bar").asString
+    val binResponse = Json.parse[BinResponse](response.body)
+    assertEquals(Some("bar"), binResponse.cookies.get("foo"))
+  }
+
+  @Test
+  def cookies {
+    val response = Http("http://httpbin.org/cookies").cookies(
+      Seq(new HttpCookie("foo", "bar"), new HttpCookie("baz", "biz"))
+    ).asString
+    val binResponse = Json.parse[BinResponse](response.body)
+    assertEquals(Some("bar"), binResponse.cookies.get("foo"))
+    assertEquals(Some("biz"), binResponse.cookies.get("baz"))
   }
 }

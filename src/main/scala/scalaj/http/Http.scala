@@ -18,7 +18,7 @@ package scalaj.http
 
 import collection.immutable.TreeMap
 import java.lang.reflect.Field
-import java.net.{HttpURLConnection, InetSocketAddress, Proxy, URL, URLEncoder, URLDecoder}
+import java.net.{HttpCookie, HttpURLConnection, InetSocketAddress, Proxy, URL, URLEncoder, URLDecoder}
 import java.io.{DataOutputStream, InputStream, BufferedReader, InputStreamReader, ByteArrayInputStream, 
   ByteArrayOutputStream}
 import java.security.cert.X509Certificate
@@ -30,6 +30,7 @@ import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 import javax.net.ssl.HostnameVerifier
 import java.util.zip.{GZIPInputStream, InflaterInputStream}
+import scala.collection.JavaConverters._
 
 /** Helper functions for modifying the underlying HttpURLConnection */
 object HttpOptions {
@@ -155,6 +156,8 @@ case class HttpResponse[T](body: T, code: Int, headers: Map[String, IndexedSeq[S
 
   /** Content-Type header value */
   def contentType: Option[String] = header("Content-Type")
+
+  def cookies: IndexedSeq[HttpCookie] = headerSeq("Set-Cookie").flatMap(HttpCookie.parse(_).asScala)
 }
 
 /** Immutable builder for creating an http request
@@ -197,6 +200,16 @@ case class HttpRequest(
   def headers(h: (String,String), rest: (String, String)*): HttpRequest = headers(h +: rest)
   /** Add a http header to the request */
   def header(key: String, value: String): HttpRequest = headers(key -> value)
+
+  /** Add Cookie header to the request */
+  def cookie(name: String, value: String): HttpRequest = header("Cookie", name + "=" + value + ";")
+  /** Add Cookie header to the request */
+  def cookie(ck: HttpCookie): HttpRequest = cookie(ck.getName, ck.getValue)
+  /** Add multiple cookies to the request. Usefull for round tripping cookies from HttpResponse.cookies */
+  def cookies(cks: Seq[HttpCookie]): HttpRequest = header(
+    "Cookie",
+    cks.map(ck => ck.getName + "=" + ck.getValue).mkString("; ")
+  )
 
   /** Entry point fo modifying the [[java.net.HttpURLConnection]] before the request is executed */
   def options(o: Seq[HttpOptions.HttpOption]): HttpRequest = copy(options = o ++ options)
