@@ -35,7 +35,7 @@ Big differences:
 ### in your build.sbt
 
 ```scala
-libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "2.0.0"
+libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "2.1.0"
 ```
 
 ### maven
@@ -44,7 +44,7 @@ libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "2.0.0"
 <dependency>
   <groupId>org.scalaj</groupId>
   <artifactId>scalaj-http_${scala.version}</artifactId>
-  <version>2.0.0</version>
+  <version>2.1.0</version>
 </dependency>  
 ```
 
@@ -63,6 +63,7 @@ val response: HttpResponse[String] = Http("http://foo.com/search").param("q","mo
 response.body
 response.code
 response.headers
+response.cookies
 ```
 
 ### Immutable Request

@@ -1,3 +1,9 @@
+2.1.0
+------
+release: 4 December 2015
+
+ - Methods on HttpResonse and HttpRequest for dealing with cookies
+
 2.0.0
 ------
 release: 11 November 2015
