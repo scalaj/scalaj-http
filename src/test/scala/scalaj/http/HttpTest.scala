@@ -146,7 +146,7 @@ class HttpTest {
   }
 
   @Test
-  def allModificationsAreAdditive() {
+  def allModificationsAreAdditive: Unit = {
     val params = List("a" -> "b")
     val proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("host", 80))
     val headers = List("foo" -> "bar")
@@ -174,14 +174,14 @@ class HttpTest {
   }
 
   @Test(expected = classOf[java.net.ConnectException])
-  def serverDown {
+  def serverDown: Unit = {
     server.stop
     val response = Http(url).execute()
     assertEquals("", response.body)
   }
 
   @Test
-  def varargs() {
+  def varargs: Unit = {
     val req = Http(url).params("a" -> "b", "b" -> "a")
                        .headers("a" -> "b", "b" -> "a")
                        .options(HttpOptions.connTimeout(100), HttpOptions.readTimeout(100))
@@ -189,8 +189,28 @@ class HttpTest {
   }
 
   @Test
-  def parseCookies() {
+  def parseCookies: Unit = {
     val httpResponse = HttpResponse("hi", 200, Map("Set-Cookie" -> IndexedSeq("foo=bar", "baz=biz")))
     assertEquals(IndexedSeq(new HttpCookie("foo", "bar"), new HttpCookie("baz", "biz")), httpResponse.cookies)
+  }
+
+  @Test(expected = classOf[scalaj.http.HttpStatusException])
+  def throwErrorThrowsWith401: Unit = {
+    HttpResponse("hi", 401, Map.empty).throwError
+  }
+
+  @Test(expected = classOf[scalaj.http.HttpStatusException])
+  def throwServerErrorThrowsWith400: Unit = {
+    HttpResponse("hi", 400, Map.empty).throwError
+  }
+
+  @Test
+  def throwErrorOkWith200: Unit = {
+    assertEquals(200, HttpResponse("hi", 200, Map.empty).throwError.code)
+  }
+
+  @Test
+  def throwServerErrorOkWith400: Unit = {
+    assertEquals(400, HttpResponse("hi", 400, Map.empty).throwServerError.code)
   }
 }

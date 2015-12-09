@@ -108,6 +108,12 @@ object MultiPart {
 case class MultiPart(val name: String, val filename: String, val mime: String, val data: InputStream, val numBytes: Long,
   val writeCallBack: Long => Unit)
 
+case class HttpStatusException(
+  code: Int,
+  statusLine: String,
+  body: String
+) extends RuntimeException(code + " Error: " + statusLine)
+
 /** Result of executing a [[scalaj.http.HttpRequest]]
   * @tparam T the body response since it can be parsed directly to things other than String
   * @param body the Http response body
@@ -143,7 +149,35 @@ case class HttpResponse[T](body: T, code: Int, headers: Map[String, IndexedSeq[S
   /** same as !isError */
   def isNotError: Boolean = !isError
 
+  /** helper method for throwing status exceptions */
+  private def throwIf(condition: Boolean): HttpResponse[T] = {
+    if (condition) {
+      throw HttpStatusException(code, header("Status").getOrElse("UNKNOWN"), body.toString)
+    }
+    this
+  }
+
+  /** Throw a {{{scalaj.http.HttpStatusException}} if {{{isError}}} is true. Otherwise returns reference to self
+   *
+   * Useful if you don't want to handle 4xx or 5xx error codes from the server and just want bubble up an Exception
+   * instead. HttpException.body will just be body.toString.
+   *
+   * Allows for chaining like this: {{{val result: String = Http(url).asString.throwError.body}}}
+   */
+  def throwError: HttpResponse[T] = throwIf(isError)
+
+  /** Throw a {{{scalaj.http.HttpStatusException}} if {{{isServerError}}} is true. Otherwise returns reference to self
+   *
+   * Useful if you don't want to 5xx error codes from the server and just want bubble up an Exception instead.
+   * HttpException.body will just be body.toString.
+   *
+   * Allows for chaining like this: {{{val result: String = Http(url).asString.throwServerError.body}}}
+   */
+  def throwServerError: HttpResponse[T] = throwIf(isServerError)
+
+  /** Get the response header value for a key */
   def header(key: String): Option[String] = headers.get(key).flatMap(_.headOption)
+  /** Get all the response header values for a repeated key */
   def headerSeq(key: String): IndexedSeq[String] = headers.getOrElse(key, IndexedSeq.empty)
 
   /** The full status line. like "HTTP/1.1 200 OK"
@@ -157,6 +191,7 @@ case class HttpResponse[T](body: T, code: Int, headers: Map[String, IndexedSeq[S
   /** Content-Type header value */
   def contentType: Option[String] = header("Content-Type")
 
+  /** Get the parsed cookies from the "Set-Cookie" header **/
   def cookies: IndexedSeq[HttpCookie] = headerSeq("Set-Cookie").flatMap(HttpCookie.parse(_).asScala)
 }
 
@@ -274,6 +309,9 @@ case class HttpRequest(
   )
   
   /** Executes this request
+    *
+    * Keep in mind that if you're parsing the response to something other than String, you may hit parsing error if
+    * the server responds with a different content type for error cases.
     *
     * @tparam T the type returned by the input stream parser
     * @param parser function to process the response body InputStream. Will be used for all response codes
