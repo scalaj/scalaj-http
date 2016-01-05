@@ -693,7 +693,7 @@ class BaseHttp (
     params = Nil,
     headers = Seq("User-Agent" -> userAgent),
     options = options,
-    proxyConfig = None,
+    proxyConfig = proxyConfig,
     charset = charset,
     sendBufferSize = sendBufferSize,
     urlBuilder = (req) => HttpConstants.appendQs(req.url, req.params, req.charset),
