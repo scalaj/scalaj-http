@@ -196,11 +196,12 @@ You don't have to use the default Http singleton. Create your own:
 
 ```scala
 object MyHttp extends BaseHttp (
-  proxy: Proxy = Proxy.NO_PROXY, 
+  proxyConfig: Option[Proxy] = None,
   options: Seq[HttpOptions.HttpOption] = HttpConstants.defaultOptions,
   charset: String = HttpConstants.utf8,
   sendBufferSize: Int = 4096,
-  userAgent: String = "scalaj-http/1.0"
+  userAgent: String = "scalaj-http/1.0",
+  compress: Boolean = true
 )
 ```
 
