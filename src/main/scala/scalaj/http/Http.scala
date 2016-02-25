@@ -545,7 +545,16 @@ case class HttpRequest(
   override def equals(that: Any): Boolean =
     that match {
       case that: HttpRequest =>
-        that.canEqual(this) && this.hashCode == that.hashCode
+        that.canEqual(this) &&
+        this.url == that.url &&
+        this.method == that.method &&
+        this.params == that.params &&
+        this.headers == that.headers &&
+        this.options == that.options &&
+        this.charset == that.charset &&
+        this.sendBufferSize == that.sendBufferSize &&
+        this.proxyConfig == that.proxyConfig &&
+        this.compress == that.compress
       case _ => false
     }
 
