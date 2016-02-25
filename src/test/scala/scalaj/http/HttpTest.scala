@@ -8,13 +8,13 @@ import scalaj.http.HttpConstants._
 import com.github.kristofa.test.http._
 
 class HttpTest {
-  
+
   val port = 51234
   val url  = "http://localhost:" + port
-  
+
   val rProvider = new SimpleHttpResponseProvider()
   val server    = new MockHttpServer(port, rProvider)
-  
+
   val cType    = "text/html"
   val rCode    = 200
 
@@ -23,18 +23,18 @@ class HttpTest {
     server.start()
   }
 
-  @After 
+  @After
   def tearDown(): Unit = {
     server.stop()
   }
-  
+
   @Test
   def basicRequest: Unit = {
     val expectedCode = 200
     val expectedBody = "ok"
     val expectedContentType = "text/text"
     rProvider.expect(Method.GET, "/").respondWith(expectedCode, expectedContentType, expectedBody)
-    
+
 
     object MyHttp extends BaseHttp(options = Seq(HttpOptions.readTimeout(1234)))
     val request: HttpRequest = MyHttp(url)
@@ -66,11 +66,11 @@ class HttpTest {
     assertEquals(301, response.code)
     assertEquals("error", response.body)
   }
-  
+
   @Test
   def asParams: Unit = {
     rProvider.expect(Method.GET, "/").respondWith(rCode, cType, "foo=bar");
-    
+
     val response = Http(url).asParams
     assertEquals(Seq("foo" -> "bar"), response.body)
   }
@@ -78,7 +78,7 @@ class HttpTest {
   @Test
   def asParamMap: Unit = {
     rProvider.expect(Method.GET, "/").respondWith(rCode, cType, "foo=bar");
-    
+
     val response = Http(url).asParamMap
     assertEquals(Map("foo" -> "bar"), response.body)
   }
@@ -86,10 +86,10 @@ class HttpTest {
   @Test
   def asBytes: Unit = {
     rProvider.expect(Method.GET, "/").respondWith(rCode, cType, "hi");
-    
+
     val response = Http(url).asBytes
     assertEquals("hi", new String(response.body, HttpConstants.utf8))
-  }  
+  }
 
   @Test
   def shouldPrependOptions: Unit = {
@@ -98,7 +98,7 @@ class HttpTest {
     val origOptionsLength = origOptions.length
     val newOptions: List[HttpOptions.HttpOption] = List(c => { }, c=> { }, c => {})
     val http2 = http.options(newOptions)
-    
+
     assertEquals(http2.options.length, origOptionsLength + 3)
     assertEquals(http2.options.take(3), newOptions)
     assertEquals(origOptions.length, origOptionsLength)
@@ -107,7 +107,7 @@ class HttpTest {
   @Test
   def lastTimeoutValueShouldWin: Unit = {
     rProvider.expect(Method.GET, "/").respondWith(rCode, cType, "hi");
-    
+
     val getFunc: HttpExec = (req, c) => {
       assertEquals(c.getReadTimeout, 1234)
       assertEquals(c.getConnectTimeout, 1234)
@@ -142,7 +142,7 @@ class HttpTest {
     } catch {
       case e: RuntimeException if e.getMessage == "FOO" => // ok
     }
-    
+
   }
 
   @Test
@@ -212,5 +212,43 @@ class HttpTest {
   @Test
   def throwServerErrorOkWith400: Unit = {
     assertEquals(400, HttpResponse("hi", 400, Map.empty).throwServerError.code)
+  }
+
+  @Test
+  def shouldNotEqual: Unit = {
+    val req = Http(url)
+      .method("POST")
+      .params(List("a" -> "b", "b" -> "a"))
+      .headers(List("foo" -> "bar", "bar" -> "foo"))
+      .proxy("host", 80)
+      .options(HttpOptions.readTimeout(1234))
+      .charset("UTF-8")
+      .compress(false)
+      .sendBufferSize(20)
+
+    assertNotEquals(req, req.copy(url=url.concat("dummy")))
+    assertNotEquals(req, req.method("GET"))
+    assertNotEquals(req, req.params("c" -> "d"))
+    assertNotEquals(req, req.headers("c" -> "d"))
+    assertNotEquals(req, req.proxy("host", 81))
+    assertNotEquals(req, req.options(HttpOptions.readTimeout(4321)))
+    assertNotEquals(req, req.charset("UTF-9"))
+    assertNotEquals(req, req.sendBufferSize(40))
+    assertNotEquals(req, req.compress(true))
+  }
+
+  @Test
+  def shouldEqual: Unit = {
+    val req = Http(url)
+      .method("POST")
+      .params(List("a" -> "b", "b" -> "a"))
+      .headers(List("foo" -> "bar", "bar" -> "foo"))
+      .proxy("host", 80)
+      .options(HttpOptions.readTimeout(1234))
+      .charset("UTF-8")
+      .compress(false)
+      .sendBufferSize(20)
+
+    assertEquals(req, req.compress(req.compress))
   }
 }
