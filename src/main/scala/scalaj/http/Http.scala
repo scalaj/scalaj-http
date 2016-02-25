@@ -542,8 +542,6 @@ case class HttpRequest(
   /** Execute this request and parse http body as a querystring containing oauth_token and oauth_token_secret tupple */
   def asToken: HttpResponse[Token] = execute(HttpConstants.readToken)
 
-  override def canEqual(that: Any) = that.isInstanceOf[HttpRequest]
-
   override def equals(that: Any): Boolean =
     that match {
       case that: HttpRequest =>
