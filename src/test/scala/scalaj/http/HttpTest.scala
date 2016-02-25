@@ -213,4 +213,42 @@ class HttpTest {
   def throwServerErrorOkWith400: Unit = {
     assertEquals(400, HttpResponse("hi", 400, Map.empty).throwServerError.code)
   }
+
+  @Test
+  def shouldNotEqual: Unit = {
+    val req = Http(url)
+      .method("POST")
+      .params(List("a" -> "b", "b" -> "a"))
+      .headers(List("foo" -> "bar", "bar" -> "foo"))
+      .proxy("host", 80)
+      .options(HttpOptions.readTimeout(1234))
+      .charset("UTF-8")
+      .compress(false)
+      .sendBufferSize(20)
+
+    assertNotEquals(req, req.copy(url=url.concat("dummy")))
+    assertNotEquals(req, req.method("GET"))
+    assertNotEquals(req, req.params("c" -> "d"))
+    assertNotEquals(req, req.headers("c" -> "d"))
+    assertNotEquals(req, req.proxy("host", 81))
+    assertNotEquals(req, req.options(HttpOptions.readTimeout(4321)))
+    assertNotEquals(req, req.charset("UTF-9"))
+    assertNotEquals(req, req.sendBufferSize(40))
+    assertNotEquals(req, req.compress(true))
+  }
+
+  @Test
+  def shouldEqual: Unit = {
+    val req = Http(url)
+      .method("POST")
+      .params(List("a" -> "b", "b" -> "a"))
+      .headers(List("foo" -> "bar", "bar" -> "foo"))
+      .proxy("host", 80)
+      .options(HttpOptions.readTimeout(1234))
+      .charset("UTF-8")
+      .compress(false)
+      .sendBufferSize(20)
+
+    assertEquals(req, req.compress(req.compress))
+  }
 }

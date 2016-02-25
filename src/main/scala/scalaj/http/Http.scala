@@ -541,8 +541,35 @@ case class HttpRequest(
   def asParamMap: HttpResponse[Map[String, String]] = execute(HttpConstants.readParamMap(_, charset))
   /** Execute this request and parse http body as a querystring containing oauth_token and oauth_token_secret tupple */
   def asToken: HttpResponse[Token] = execute(HttpConstants.readToken)
-}
 
+  override def canEqual(that: Any) = that.isInstanceOf[HttpRequest]
+
+  override def equals(that: Any): Boolean =
+    that match {
+      case that: HttpRequest =>
+        that.canEqual(this) && this.hashCode == that.hashCode
+      case _ => false
+    }
+
+  override def hashCode: Int =
+    41 * (
+      41 * (
+        41 * (
+          41 * (
+            41 * (
+              41 * (
+                41 * (
+                  41 * (
+                    41 + url.hashCode
+                  ) + method.hashCode
+                ) + params.hashCode
+              ) + headers.hashCode
+            ) + options.hashCode
+          ) + charset.hashCode
+        ) + sendBufferSize.hashCode
+      ) + proxyConfig.hashCode
+    ) + compress.hashCode
+}
 
 /**
   * Mostly helper methods
