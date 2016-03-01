@@ -402,6 +402,19 @@ case class HttpRequest(
     }
   }
 
+  /** Raw data PUT */
+  def put(data: String): HttpRequest = put(data.getBytes(charset))  
+  
+  /** Raw byte data PUT request */
+  def put(data: Array[Byte]): HttpRequest = {
+    val postFunc: HttpConstants.HttpExec = (req, conn) => {
+      conn.setDoOutput(true)
+      conn.connect
+      conn.getOutputStream.write(data)
+    }
+    copy(method="PUT", connectFunc=postFunc)
+  }  
+  
   /** Standard form POST request */
   def postForm: HttpRequest = postForm(Nil)
 
