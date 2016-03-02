@@ -411,15 +411,20 @@ case class HttpRequest(
       .header("content-type", "application/x-www-form-urlencoded").params(params)
   }
 
-  /** Raw data POST request. String bytes written out in using configured charset */
-  def postData(data: String): HttpRequest = {
-    copy(method="POST", connectFunc=StringBodyConnectFunc(data))
-  }
+  /** Raw data POST request. String bytes written out using configured charset */
+  def postData(data: String): HttpRequest = body(data).method("POST")
 
   /** Raw byte data POST request */
-  def postData(data: Array[Byte]): HttpRequest = {
-    copy(method="POST", connectFunc=ByteBodyConnectFunc(data))
-  }
+  def postData(data: Array[Byte]): HttpRequest = body(data).method("POST")
+
+  /** Raw data PUT request. String bytes written out using configured charset */
+  def put(data: String): HttpRequest = body(data).method("PUT")
+
+  /** Raw byte data PUT request */
+  def put(data: Array[Byte]): HttpRequest = body(data).method("PUT")
+
+  private def body(data: String): HttpRequest = copy(connectFunc=StringBodyConnectFunc(data))
+  private def body(data: Array[Byte]): HttpRequest = copy(connectFunc=ByteBodyConnectFunc(data))
 
   /** Multipart POST request.
     *
