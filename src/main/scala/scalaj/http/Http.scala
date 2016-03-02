@@ -426,101 +426,7 @@ case class HttpRequest(
     * This is probably what you want if you need to upload a mix of form data and binary data (like a photo)
     */
   def postMulti(parts: MultiPart*): HttpRequest = {
-    val postFunc: HttpConstants.HttpExec = (req, conn) => {
-      val CrLf = "\r\n"
-      val Pref = "--"
-      val Boundary = "--gc0pMUlT1B0uNdArYc0p"
-      val ContentDisposition = "Content-Disposition: form-data; name=\""
-      val Filename = "\"; filename=\""
-      val ContentType = "Content-Type: "
-
-      conn.setDoOutput(true)
-      conn.setDoInput(true)
-      conn.setUseCaches(false)
-      conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + Boundary)
-      conn.setRequestProperty("MIME-Version", "1.0")
-
-      // encode params up front for the length calculation
-      val paramBytes = req.params.map(p => (p._1.getBytes(req.charset) -> p._2.getBytes(req.charset)))
-
-      val partBytes = parts.map(p => (p.name.getBytes(req.charset), 
-                                      p.filename.getBytes(req.charset),
-                                      p))
-
-      // we need to pre-calculate the Content-Length of this HttpRequest because most servers don't
-      // support chunked transfer
-      val totalBytesToSend: Long = {
-        val paramOverhead = Pref.length + Boundary.length + ContentDisposition.length + 1 + (CrLf.length * 4)
-        val paramsLength = paramBytes.map(p => p._1.length + p._2.length + paramOverhead).sum
-
-        val fileOverhead = Pref.length + Boundary.length + ContentDisposition.length + Filename.length + 1 +
-          (CrLf.length * 5) + ContentType.length
-
-        val filesLength =
-          partBytes.map(p => fileOverhead + p._1.length + p._2.length + p._3.mime.length + p._3.numBytes).sum
-
-        val finaleBoundaryLength = (Pref.length * 2) + Boundary.length + CrLf.length
-        
-        paramsLength + filesLength + finaleBoundaryLength
-      }
-
-      HttpConstants.setFixedLengthStreamingMode(conn, totalBytesToSend)
-
-      val out = conn.getOutputStream()
-
-      def writeBytes(s: String) {
-        // this is only used for the structural pieces, not user input, so should be plain old ascii
-        out.write(s.getBytes(HttpConstants.utf8))
-      }
-
-      paramBytes.foreach {
-       case (name, value) =>
-         writeBytes(Pref + Boundary + CrLf)
-         writeBytes(ContentDisposition)
-         out.write(name)
-         writeBytes("\"" + CrLf)
-         writeBytes(CrLf)
-         out.write(value)
-         writeBytes(CrLf)
-      }
-
-      val buffer = new Array[Byte](req.sendBufferSize)
-
-      partBytes.foreach { 
-        case(name, filename, part) =>
-          writeBytes(Pref + Boundary + CrLf)
-          writeBytes(ContentDisposition)
-          out.write(name)
-          writeBytes(Filename)
-          out.write(filename)
-          writeBytes("\"" + CrLf)
-          writeBytes(ContentType + part.mime + CrLf + CrLf)
-
-          var bytesWritten: Long = 0L
-          def readOnce {
-            val len = part.data.read(buffer)
-            if (len > 0) {
-              out.write(buffer, 0, len)
-              bytesWritten += len
-              part.writeCallBack(bytesWritten)
-            }
-
-            if (len >= 0) {
-              readOnce
-            }
-          }
-
-          readOnce
-
-          writeBytes(CrLf)
-      }
-
-      writeBytes(Pref + Boundary + Pref + CrLf)
-
-      out.flush()
-      out.close()
-    }
-    copy(method="POST", connectFunc=postFunc, urlBuilder=PlainUrlFunc)
+    copy(method="POST", connectFunc=MultiPartConnectFunc(parts), urlBuilder=PlainUrlFunc)
   }
   
   /** Execute this request and parse http body as Array[Byte] */
@@ -571,6 +477,105 @@ case class StringBodyConnectFunc(data: String) extends Function2[HttpRequest, Ht
   }
 
   override def toString = s"StringBodyConnectFunc($data)"
+}
+
+case class MultiPartConnectFunc(parts: Seq[MultiPart]) extends Function2[HttpRequest, HttpURLConnection, Unit] {
+  def apply(req: HttpRequest, conn: HttpURLConnection): Unit = {
+    val CrLf = "\r\n"
+    val Pref = "--"
+    val Boundary = "--gc0pMUlT1B0uNdArYc0p"
+    val ContentDisposition = "Content-Disposition: form-data; name=\""
+    val Filename = "\"; filename=\""
+    val ContentType = "Content-Type: "
+
+    conn.setDoOutput(true)
+    conn.setDoInput(true)
+    conn.setUseCaches(false)
+    conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + Boundary)
+    conn.setRequestProperty("MIME-Version", "1.0")
+
+    // encode params up front for the length calculation
+    val paramBytes = req.params.map(p => (p._1.getBytes(req.charset) -> p._2.getBytes(req.charset)))
+
+    val partBytes = parts.map(p => (p.name.getBytes(req.charset),
+                                    p.filename.getBytes(req.charset),
+                                    p))
+
+    // we need to pre-calculate the Content-Length of this HttpRequest because most servers don't
+    // support chunked transfer
+    val totalBytesToSend: Long = {
+      val paramOverhead = Pref.length + Boundary.length + ContentDisposition.length + 1 + (CrLf.length * 4)
+      val paramsLength = paramBytes.map(p => p._1.length + p._2.length + paramOverhead).sum
+
+      val fileOverhead = Pref.length + Boundary.length + ContentDisposition.length + Filename.length + 1 +
+        (CrLf.length * 5) + ContentType.length
+
+      val filesLength =
+        partBytes.map(p => fileOverhead + p._1.length + p._2.length + p._3.mime.length + p._3.numBytes).sum
+
+      val finaleBoundaryLength = (Pref.length * 2) + Boundary.length + CrLf.length
+
+      paramsLength + filesLength + finaleBoundaryLength
+    }
+
+    HttpConstants.setFixedLengthStreamingMode(conn, totalBytesToSend)
+
+    val out = conn.getOutputStream()
+
+    def writeBytes(s: String) {
+      // this is only used for the structural pieces, not user input, so should be plain old ascii
+      out.write(s.getBytes(HttpConstants.utf8))
+    }
+
+    paramBytes.foreach {
+     case (name, value) =>
+       writeBytes(Pref + Boundary + CrLf)
+       writeBytes(ContentDisposition)
+       out.write(name)
+       writeBytes("\"" + CrLf)
+       writeBytes(CrLf)
+       out.write(value)
+       writeBytes(CrLf)
+    }
+
+    val buffer = new Array[Byte](req.sendBufferSize)
+
+    partBytes.foreach {
+      case(name, filename, part) =>
+        writeBytes(Pref + Boundary + CrLf)
+        writeBytes(ContentDisposition)
+        out.write(name)
+        writeBytes(Filename)
+        out.write(filename)
+        writeBytes("\"" + CrLf)
+        writeBytes(ContentType + part.mime + CrLf + CrLf)
+
+        var bytesWritten: Long = 0L
+        def readOnce {
+          val len = part.data.read(buffer)
+          if (len > 0) {
+            out.write(buffer, 0, len)
+            bytesWritten += len
+            part.writeCallBack(bytesWritten)
+          }
+
+          if (len >= 0) {
+            readOnce
+          }
+        }
+
+        readOnce
+
+        writeBytes(CrLf)
+    }
+
+    writeBytes(Pref + Boundary + Pref + CrLf)
+
+    out.flush()
+    out.close()
+  }
+
+  override def toString = s"MultiPartConnectFunc($parts)"
 }
 
 case object QueryStringUrlFunc extends Function1[HttpRequest, String] {
