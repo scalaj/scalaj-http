@@ -471,7 +471,7 @@ case class ByteBodyConnectFunc(data: Array[Byte]) extends Function2[HttpRequest,
     conn.getOutputStream.write(data)
   }
 
-  override def toString = s"ByteBodyConnectFunc(Array[Byte]{${data.length}})"
+  override def toString = "ByteBodyConnectFunc(Array[Byte]{" + data.length + "})"
 }
 
 case class StringBodyConnectFunc(data: String) extends Function2[HttpRequest, HttpURLConnection, Unit] {
@@ -481,7 +481,7 @@ case class StringBodyConnectFunc(data: String) extends Function2[HttpRequest, Ht
     conn.getOutputStream.write(data.getBytes(req.charset))
   }
 
-  override def toString = s"StringBodyConnectFunc($data)"
+  override def toString = "StringBodyConnectFunc(" + data + ")"
 }
 
 case class MultiPartConnectFunc(parts: Seq[MultiPart]) extends Function2[HttpRequest, HttpURLConnection, Unit] {
@@ -580,7 +580,7 @@ case class MultiPartConnectFunc(parts: Seq[MultiPart]) extends Function2[HttpReq
     out.close()
   }
 
-  override def toString = s"MultiPartConnectFunc($parts)"
+  override def toString = "MultiPartConnectFunc(" + parts + ")"
 }
 
 case object QueryStringUrlFunc extends Function1[HttpRequest, String] {
