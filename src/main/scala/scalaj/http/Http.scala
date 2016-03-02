@@ -407,26 +407,18 @@ case class HttpRequest(
 
   /** Standard form POST request and set some parameters. Same as .postForm.params(params) */
   def postForm(params: Seq[(String, String)]): HttpRequest = {
-    val postFunc: HttpConstants.HttpExec = (req, conn) => {
-      conn.setDoOutput(true)
-      conn.connect
-      conn.getOutputStream.write(HttpConstants.toQs(req.params, req.charset).getBytes(req.charset))
-    }
-    copy(method="POST", connectFunc=postFunc, urlBuilder=(req => req.url))
+    copy(method="POST", connectFunc=FormBodyConnectFunc, urlBuilder=PlainUrlFunc)
       .header("content-type", "application/x-www-form-urlencoded").params(params)
   }
 
   /** Raw data POST request. String bytes written out in using configured charset */
-  def postData(data: String): HttpRequest = postData(data.getBytes(charset))
+  def postData(data: String): HttpRequest = {
+    copy(method="POST", connectFunc=StringBodyConnectFunc(data))
+  }
 
   /** Raw byte data POST request */
   def postData(data: Array[Byte]): HttpRequest = {
-    val postFunc: HttpConstants.HttpExec = (req, conn) => {
-      conn.setDoOutput(true)
-      conn.connect
-      conn.getOutputStream.write(data)
-    }
-    copy(method="POST", connectFunc=postFunc)
+    copy(method="POST", connectFunc=ByteBodyConnectFunc(data))
   }
 
   /** Multipart POST request.
@@ -528,7 +520,7 @@ case class HttpRequest(
       out.flush()
       out.close()
     }
-    copy(method="POST", connectFunc=postFunc, urlBuilder=(req => req.url))
+    copy(method="POST", connectFunc=postFunc, urlBuilder=PlainUrlFunc)
   }
   
   /** Execute this request and parse http body as Array[Byte] */
@@ -543,6 +535,57 @@ case class HttpRequest(
   def asToken: HttpResponse[Token] = execute(HttpConstants.readToken)
 }
 
+case object DefaultConnectFunc extends Function2[HttpRequest, HttpURLConnection, Unit] {
+  def apply(req: HttpRequest, conn: HttpURLConnection): Unit = {
+    conn.connect
+  }
+
+  override def toString = "DefaultConnectFunc"
+}
+
+case object FormBodyConnectFunc extends Function2[HttpRequest, HttpURLConnection, Unit] {
+  def apply(req: HttpRequest, conn: HttpURLConnection): Unit = {
+    conn.setDoOutput(true)
+    conn.connect
+    conn.getOutputStream.write(HttpConstants.toQs(req.params, req.charset).getBytes(req.charset))
+  }
+
+  override def toString = "FormBodyConnectFunc"
+}
+
+case class ByteBodyConnectFunc(data: Array[Byte]) extends Function2[HttpRequest, HttpURLConnection, Unit] {
+  def apply(req: HttpRequest, conn: HttpURLConnection): Unit = {
+    conn.setDoOutput(true)
+    conn.connect
+    conn.getOutputStream.write(data)
+  }
+
+  override def toString = s"ByteBodyConnectFunc(Array[Byte]{${data.length}})"
+}
+
+case class StringBodyConnectFunc(data: String) extends Function2[HttpRequest, HttpURLConnection, Unit] {
+  def apply(req: HttpRequest, conn: HttpURLConnection): Unit = {
+    conn.setDoOutput(true)
+    conn.connect
+    conn.getOutputStream.write(data.getBytes(req.charset))
+  }
+
+  override def toString = s"StringBodyConnectFunc($data)"
+}
+
+case object QueryStringUrlFunc extends Function1[HttpRequest, String] {
+  def apply(req: HttpRequest): String = {
+    HttpConstants.appendQs(req.url, req.params, req.charset)
+  }
+
+  override def toString = "QueryStringUrlFunc"
+}
+
+case object PlainUrlFunc extends Function1[HttpRequest, String] {
+  def apply(req: HttpRequest): String = req.url
+
+  override def toString = "QueryStringUrlFunc"
+}
 
 /**
   * Mostly helper methods
@@ -656,6 +699,7 @@ object HttpConstants {
   }
 
   val utf8 = "UTF-8"
+
 }
 
 /** Default entry point to this library */
@@ -689,14 +733,14 @@ class BaseHttp (
   def apply(url: String): HttpRequest = HttpRequest(
     url = url,
     method = "GET",
-    connectFunc = (req, conn) => conn.connect,
+    connectFunc = DefaultConnectFunc,
     params = Nil,
     headers = Seq("User-Agent" -> userAgent),
     options = options,
     proxyConfig = proxyConfig,
     charset = charset,
     sendBufferSize = sendBufferSize,
-    urlBuilder = (req) => HttpConstants.appendQs(req.url, req.params, req.charset),
+    urlBuilder = QueryStringUrlFunc,
     compress = compress
   )  
 }

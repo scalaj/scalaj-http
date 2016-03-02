@@ -213,4 +213,14 @@ class HttpTest {
   def throwServerErrorOkWith400: Unit = {
     assertEquals(400, HttpResponse("hi", 400, Map.empty).throwServerError.code)
   }
+
+  @Test
+  def testGetEquals: Unit = {
+    assertEquals(Http(url), Http(url))
+  }
+
+  @Test
+  def testPostEquals: Unit = {
+    assertEquals(Http(url).postData("hi"), Http(url).postData("hi"))
+  }
 }
