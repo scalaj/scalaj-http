@@ -7,3 +7,5 @@ jdk:
   - oraclejdk7
   - openjdk7
   - openjdk6
+addons:
+  hostname: localhost
