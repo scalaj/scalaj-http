@@ -1,3 +1,12 @@
+2.2.2
+------
+release: 2 April 2016
+
+ - Allow .equals comparisons around different HttpRequests to work correctly by using instances of case classes over
+   anonymous functions for Connect and Url functions. thanks @heldersantosmoreira for reporting
+ - .asString will now use the charset in the response Content-Type header first, and then fall back to the charset
+   configured in the request. thanks @JustAHappyKid for reporting
+
 2.2.1
 ------
 release: 5 January 2016
