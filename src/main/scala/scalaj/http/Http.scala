@@ -31,6 +31,7 @@ import javax.net.ssl.X509TrustManager
 import javax.net.ssl.HostnameVerifier
 import java.util.zip.{GZIPInputStream, InflaterInputStream}
 import scala.collection.JavaConverters._
+import scala.util.matching.Regex
 
 /** Helper functions for modifying the underlying HttpURLConnection */
 object HttpOptions {
@@ -436,8 +437,13 @@ case class HttpRequest(
   
   /** Execute this request and parse http body as Array[Byte] */
   def asBytes: HttpResponse[Array[Byte]] = execute(HttpConstants.readBytes)
-  /** Execute this request and parse http body as String using configured charset */
-  def asString: HttpResponse[String] = execute(HttpConstants.readString(_, charset))
+  /** Execute this request and parse http body as String using server charset or configured charset*/
+  def asString: HttpResponse[String] = exec((code: Int, headers: Map[String, IndexedSeq[String]], is: InputStream) => {
+    val reqCharset: String = headers.get("content-type").flatMap(_.headOption).flatMap(ct => {
+      HttpConstants.CharsetRegex.findFirstMatchIn(ct).map(_.group(1))
+    }).getOrElse(charset)
+    HttpConstants.readString(is, reqCharset)
+  })
   /** Execute this request and parse http body as query string key-value pairs */
   def asParams: HttpResponse[Seq[(String, String)]] = execute(HttpConstants.readParams(_, charset))
   /** Execute this request and parse http body as query string key-value pairs */
@@ -601,6 +607,8 @@ case object PlainUrlFunc extends Function1[HttpRequest, String] {
   * Mostly helper methods
   */
 object HttpConstants {
+  val CharsetRegex = new Regex("(?i)\\bcharset=\\s*\"?([^\\s;\"]*)")
+
   type HttpExec = (HttpRequest, HttpURLConnection) => Unit
 
   def defaultOptions: Seq[HttpOptions.HttpOption] = Seq(
