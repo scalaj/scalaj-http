@@ -35,6 +35,13 @@ class HttpBinTest {
   }
 
   @Test
+  def shouldFollowHttpsRedirect {
+    val response = Http("http://httpbin.org/redirect-to?url=https://httpbin.org/get")
+      .option(HttpOptions.followRedirects(true)).asString
+    assertEquals(200, response.code)
+  }
+
+  @Test
   def errorHasHeaders {
     val response = Http("http://httpbin.org/status/500").asString
     assertEquals("HTTP/1.1 500 INTERNAL SERVER ERROR", response.statusLine)

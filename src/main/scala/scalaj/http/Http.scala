@@ -332,7 +332,14 @@ case class HttpRequest(
     * @param parser function to process the response body InputStream
     */
   def exec[T](parser: (Int, Map[String, IndexedSeq[String]], InputStream) => T): HttpResponse[T] = {
-    val urlToFetch: URL = new URL(urlBuilder(this))
+    doConnection(parser, new URL(urlBuilder(this)), connectFunc)
+  }
+
+  private def doConnection[T](
+    parser: (Int, Map[String, IndexedSeq[String]], InputStream) => T,
+    urlToFetch: URL,
+    connectFunc: (HttpRequest, HttpURLConnection) => Unit
+  ): HttpResponse[T] = {
     proxyConfig.map(urlToFetch.openConnection).getOrElse(urlToFetch.openConnection) match {
       case conn: HttpURLConnection =>
         conn.setInstanceFollowRedirects(false)
@@ -365,16 +372,23 @@ case class HttpRequest(
     val responseCode: Int = conn.getResponseCode
     val headers: Map[String, IndexedSeq[String]] = getResponseHeaders(conn)
     val encoding: Option[String] = headers.get("Content-Encoding").flatMap(_.headOption)
-    val body: T = {
-      val shouldDecompress = compress && inputStream != null
-      val theStream = if (shouldDecompress && encoding.exists(_.equalsIgnoreCase("gzip"))) {
-        new GZIPInputStream(inputStream)
-      } else if(shouldDecompress && encoding.exists(_.equalsIgnoreCase("deflate"))) {
-        new InflaterInputStream(inputStream)
-      } else inputStream
-      parser(responseCode, headers, theStream)
+    // HttpURLConnection won't redirect from https <-> http, so we handle manually here
+    (if (conn.getInstanceFollowRedirects && (responseCode == 301 || responseCode == 302)) {
+      headers.get("Location").flatMap(_.headOption).map(location => {
+        doConnection(parser, new URL(location), DefaultConnectFunc)
+      })
+    } else None).getOrElse{
+      val body: T = {
+        val shouldDecompress = compress && inputStream != null
+        val theStream = if (shouldDecompress && encoding.exists(_.equalsIgnoreCase("gzip"))) {
+          new GZIPInputStream(inputStream)
+        } else if(shouldDecompress && encoding.exists(_.equalsIgnoreCase("deflate"))) {
+          new InflaterInputStream(inputStream)
+        } else inputStream
+        parser(responseCode, headers, theStream)
+      }
+      HttpResponse[T](body, responseCode, headers)
     }
-    HttpResponse[T](body, responseCode, headers)
   }
 
   private def getResponseHeaders(conn: HttpURLConnection): Map[String, IndexedSeq[String]] = {
