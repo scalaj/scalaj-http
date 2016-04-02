@@ -1,3 +1,10 @@
+2.3.0
+------
+release: 2 April 2016
+
+ - handle redirects from http <-> https correctly. see https://github.com/scalaj/scalaj-http/issues/92
+   thanks @jirihelmich for reporting
+
 2.2.2
 ------
 release: 2 April 2016
