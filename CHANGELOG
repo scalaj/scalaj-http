@@ -6,6 +6,7 @@ release: 2 April 2016
    anonymous functions for Connect and Url functions. thanks @heldersantosmoreira for reporting
  - .asString will now use the charset in the response Content-Type header first, and then fall back to the charset
    configured in the request. thanks @JustAHappyKid for reporting
+ - new HttpRequest.put methods for first class support of PUT. thanks @matanster
 
 2.2.1
 ------
