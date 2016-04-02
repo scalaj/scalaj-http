@@ -150,6 +150,16 @@ Http(url).postMulti(MultiPart("photo", "headshot.png", "image/png", inputStream,
   })).asString
 ```
 
+### Stream a chunked transfer response (like an event stream)
+
+```scala
+Http("http://httpbin.org/stream/20").execute(is => {
+  scala.io.Source.fromInputStream(is).getLines().foreach(println)
+})
+```
+
+_note that you may have to wrap in a while loop and set a long readTimeout to stay connected_
+
 ### Send https request to site with self-signed or otherwise shady certificate
 
 ```scala
