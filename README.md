@@ -68,7 +68,7 @@ response.cookies
 
 ### Immutable Request
 
-```Http(url)``` is just shorthead for a ```Http.apply``` which returns an immutable instance of ```HttpRequest```.  
+```Http(url)``` is just shorthand for a ```Http.apply``` which returns an immutable instance of ```HttpRequest```.  
 You can create a ```HttpRequest``` and reuse it:
 
 ```scala
