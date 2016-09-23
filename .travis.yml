@@ -9,3 +9,7 @@ jdk:
   - openjdk6
 addons:
   hostname: localhost
+matrix:
+  include:
+  - scala: 2.12.0-RC1
+    jdk: oraclejdk8
