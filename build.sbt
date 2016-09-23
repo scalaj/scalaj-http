@@ -12,12 +12,30 @@ libraryDependencies ++= Seq(
   "org.eclipse.jetty"    % "jetty-server"       % "8.1.19.v20160209" % "test"
 )
 
-libraryDependencies += {
-  val jacksonVersion = if (scalaVersion.value startsWith "2.9") "2.3.3" else "2.4.2"
-  "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion % "test"
+libraryDependencies ++= {
+  CrossVersion.partialVersion(scalaVersion.value) match {
+    case Some((2, 9)) =>
+      Seq("com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.3.3" % "test")
+    case Some((2, 10 | 11)) =>
+      Seq("com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.4.2" % "test")
+    case _ =>
+      Nil
+  }
 }
 
-crossScalaVersions := Seq("2.9.3", "2.10.5", "2.11.7")
+// TODO enable all tests when released jackson-module-scala_2.12
+sources in Test := {
+  val testSources = (sources in Test).value
+  CrossVersion.partialVersion(scalaVersion.value) match {
+    case Some((2, v)) if v <= 11 =>
+      testSources
+    case _ =>
+      val excludeTests = Set("HttpBinTest.scala", "Json.scala")
+      testSources.filterNot(f => excludeTests(f.getName))
+  }
+}
+
+crossScalaVersions := Seq("2.9.3", "2.10.5", "2.11.7", "2.12.0-RC1")
 
 javacOptions ++= Seq("-source", "1.6", "-target", "1.6")
 
