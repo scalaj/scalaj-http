@@ -247,11 +247,11 @@ case class HttpRequest(
     cks.map(ck => ck.getName + "=" + ck.getValue).mkString("; ")
   )
 
-  /** Entry point fo modifying the [[java.net.HttpURLConnection]] before the request is executed */
+  /** Entry point for modifying the [[java.net.HttpURLConnection]] before the request is executed */
   def options(o: Seq[HttpOptions.HttpOption]): HttpRequest = copy(options = o ++ options)
-  /** Entry point fo modifying the [[java.net.HttpURLConnection]] before the request is executed */
+  /** Entry point for modifying the [[java.net.HttpURLConnection]] before the request is executed */
   def options(o: HttpOptions.HttpOption, rest: HttpOptions.HttpOption*): HttpRequest = options(o +: rest)
-  /** Entry point fo modifying the [[java.net.HttpURLConnection]] before the request is executed */
+  /** Entry point for modifying the [[java.net.HttpURLConnection]] before the request is executed */
   def option(o: HttpOptions.HttpOption): HttpRequest = options(o)
   
   /** Add a standard basic authorization header */
