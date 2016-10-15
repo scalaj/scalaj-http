@@ -35,7 +35,7 @@ sources in Test := {
   }
 }
 
-crossScalaVersions := Seq("2.9.3", "2.10.5", "2.11.7", "2.12.0-RC1")
+crossScalaVersions := Seq("2.9.3", "2.10.5", "2.11.7", "2.12.0-RC2")
 
 javacOptions ++= Seq("-source", "1.6", "-target", "1.6")
 
