@@ -6,7 +6,7 @@ This is a fully featured http client for Scala which wraps [java.net.HttpURLConn
 
 Features:
 * Zero dependencies
-* Cross compiled for Scala 2.9.3, 2.10, 2.11, and 2.12-RC1
+* Cross compiled for Scala 2.9.3, 2.10, 2.11, and 2.12
 * OAuth v1 request signing
 * Automatic support of gzip and deflate encodings from server
 * Easy to add querystring or form params. URL encoding is handled for you.
