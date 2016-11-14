@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/scalaj/scalaj-http.png)](https://travis-ci.org/scalaj/scalaj-http)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.scalaj/scalaj-http_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.scalaj/scalaj-http_2.11)
 
 # Simplified Http
 
