@@ -19,19 +19,7 @@ libraryDependencies ++= {
     case Some((2, 10 | 11)) =>
       Seq("com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.4.2" % "test")
     case _ =>
-      Nil
-  }
-}
-
-// TODO enable all tests when released jackson-module-scala_2.12
-sources in Test := {
-  val testSources = (sources in Test).value
-  CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((2, v)) if v <= 11 =>
-      testSources
-    case _ =>
-      val excludeTests = Set("HttpBinTest.scala", "Json.scala")
-      testSources.filterNot(f => excludeTests(f.getName))
+      Seq("com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.8.4" % "test")
   }
 }
 
