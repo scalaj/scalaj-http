@@ -108,7 +108,7 @@ println("Go to https://api.twitter.com/oauth/authorize?oauth_token=" + response.
 val verifier = Console.readLine("Enter verifier: ").trim
 
 val accessToken = Http("https://api.twitter.com/oauth/access_token").postForm.
-  .oauth(consumer, token, verifier).asToken
+  .oauth(consumer, response.body, verifier).asToken
 
 println(Http("https://api.twitter.com/1.1/account/settings.json").oauth(consumer, accessToken.body).asString)
 ```
