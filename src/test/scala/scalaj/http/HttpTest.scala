@@ -1,7 +1,8 @@
 package scalaj.http
 
-import java.io.ByteArrayInputStream
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import java.net.{HttpCookie, InetSocketAddress, Proxy}
+import java.util.zip.GZIPOutputStream
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.eclipse.jetty.server.{Request, Server}
 import org.eclipse.jetty.server.handler.AbstractHandler
@@ -85,6 +86,26 @@ class HttpTest {
       val response: HttpResponse[String] = Http(url).execute()
       assertEquals(301, response.code)
       assertEquals("moved", response.body)
+    })
+  }
+
+  @Test
+  def headersShouldBeCaseInsensitive: Unit = {
+    makeRequest((req, resp) => {
+      // special check for content-encoding header, though it seems like jetty normalizes it.
+      resp.setHeader("content-ENCODING", "gzip")
+      val byteStream = new ByteArrayOutputStream()
+      val gzipStream = new GZIPOutputStream(byteStream)
+      resp.setHeader("X-FOO", "foobar")
+      gzipStream.write("hello".getBytes("UTF-8"))
+      gzipStream.close()
+      resp.getOutputStream.write(byteStream.toByteArray)
+    })(url => {
+      val response: HttpResponse[String] = Http(url).execute()
+      assertEquals(200, response.code)
+      assertEquals("hello", response.body)
+      assertEquals(Some("foobar"), response.header("x-foo"))
+      assertEquals(Some("foobar"), response.header("x-FOO"))
     })
   }
   
