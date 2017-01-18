@@ -347,7 +347,7 @@ case class HttpRequest(
         if (compress) {
           conn.setRequestProperty("Accept-Encoding", "gzip,deflate")
         }
-        headers.reverse.foreach{ case (name, value) => 
+        headers.foreach{ case (name, value) =>
           conn.setRequestProperty(name, value)
         }
         options.reverse.foreach(_(conn))

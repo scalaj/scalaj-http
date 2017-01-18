@@ -3,11 +3,15 @@ package scalaj.http
 import java.io.ByteArrayInputStream
 import java.net.{HttpCookie, InetSocketAddress, Proxy}
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
-import org.eclipse.jetty.server.{Request, Server}
+
+import org.eclipse.jetty.server.{Request, Server, ServerConnector}
 import org.eclipse.jetty.server.handler.AbstractHandler
 import org.junit.Assert._
 import org.junit.Test
+
+import scala.collection.JavaConverters._
 import scalaj.http.HttpConstants._
+
 
 
 class HttpTest {
@@ -29,7 +33,7 @@ class HttpTest {
     })
     try {
       server.start()
-      val port = server.getConnectors.head.getLocalPort
+      val port = server.getConnectors.head.asInstanceOf[ServerConnector].getLocalPort
       requestF("http://localhost:" + port + "/")
     } finally {
       server.stop()
@@ -133,6 +137,20 @@ class HttpTest {
     assertEquals(http2.options.take(3), newOptions)
     assertEquals(origOptions.length, origOptionsLength)
   }
+
+  @Test
+  def lastUserAgentValueShouldWin: Unit = {
+    val newUserAgent = "super user agent"
+    makeRequest((req, resp) => {
+      assertEquals("Got user-agents" + req.getHeaders("User-Agent").asScala.toVector,
+        newUserAgent, req.getHeader("User-Agent"))
+      resp.setStatus(200)
+    })(url => {
+      val response = Http(url).header("User-Agent", newUserAgent).asString
+      assertTrue(response.is2xx)
+    })
+  }
+
 
   @Test
   def lastTimeoutValueShouldWin: Unit = {
