@@ -253,9 +253,13 @@ case class HttpRequest(
   def options(o: HttpOptions.HttpOption, rest: HttpOptions.HttpOption*): HttpRequest = options(o +: rest)
   /** Entry point for modifying the [[java.net.HttpURLConnection]] before the request is executed */
   def option(o: HttpOptions.HttpOption): HttpRequest = options(o)
-  
+
   /** Add a standard basic authorization header */
-  def auth(user: String, password: String) = header("Authorization", "Basic " + HttpConstants.base64(user + ":" + password))
+  def auth(user: String, password: String) = header("Authorization", HttpConstants.basicAuthValue(user, password))
+
+  /** Add a proxy basic authorization header */
+  def proxyAuth(user: String, password: String) = header("Proxy-Authorization", HttpConstants.basicAuthValue(user, password))
+
   
   /** OAuth v1 sign the request with the consumer token */
   def oauth(consumer: Token): HttpRequest = oauth(consumer, None, None)
@@ -352,8 +356,8 @@ case class HttpRequest(
         }
         options.reverse.foreach(_(conn))
 
-        connectFunc(this, conn)
         try {
+          connectFunc(this, conn)
           toResponse(conn, parser, conn.getInputStream)
         } catch {
           case e: java.io.IOException if conn.getResponseCode > 0 =>
@@ -654,6 +658,9 @@ object HttpConstants {
   def urlDecode(name: String, charset: String): String = URLDecoder.decode(name, charset)
   def base64(bytes: Array[Byte]): String = new String(Base64.encode(bytes))
   def base64(in: String): String = base64(in.getBytes(utf8))
+  def basicAuthValue(user: String, password: String): String = {
+    "Basic " + base64(user + ":" + password)
+  }
   
   def toQs(params: Seq[(String,String)], charset: String): String = {
     params.map(p => urlEncode(p._1, charset) + "=" + urlEncode(p._2, charset)).mkString("&")

@@ -3,9 +3,12 @@ package scalaj.http
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import java.net.{HttpCookie, InetSocketAddress, Proxy}
 import java.util.zip.GZIPOutputStream
+import javax.servlet.{ServletRequest, ServletResponse}
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.eclipse.jetty.server.{Request, Server}
 import org.eclipse.jetty.server.handler.AbstractHandler
+import org.eclipse.jetty.servlet.ServletHandler
+import org.eclipse.jetty.servlets.ProxyServlet
 import org.junit.Assert._
 import org.junit.Test
 import scalaj.http.HttpConstants._
@@ -36,6 +39,21 @@ class HttpTest {
       server.stop()
     }
   }
+
+  def makeProxiedRequest(proxyF: (String, Int) => Unit): Unit = {
+    val server = new Server(0)
+    val servletHandler = new ServletHandler()
+    servletHandler.addServletWithMapping(classOf[AuthProxyServlet], "/*")
+    server.setHandler(servletHandler)
+    try {
+      server.start()
+      val port = server.getConnectors.head.getLocalPort
+      proxyF("localhost", port)
+    } finally {
+      server.stop()
+    }
+  }
+
   
   @Test
   def basicRequest: Unit = {
@@ -222,6 +240,48 @@ class HttpTest {
   }
 
   @Test
+  def proxyNoAuthTest {
+    val theExpectedBody = "hello hello"
+    makeProxiedRequest((proxyHost, proxyPort) => {
+      makeRequest((req, resp) => {
+        resp.setStatus(200)
+        resp.getWriter.print(theExpectedBody)
+      })(url => {
+        val result = Http(url).proxy(proxyHost, proxyPort).asString
+        assertEquals(theExpectedBody, result.body)
+        assertEquals(200, result.code)
+      })
+    })
+  }
+
+  @Test
+  def proxyBadAuthTest {
+    makeProxiedRequest((proxyHost, proxyPort) => {
+      makeRequest((req, resp) => {
+        resp.setStatus(200)
+      })(url => {
+        val result = Http(url).proxy(proxyHost, proxyPort).proxyAuth("test", "bad").asString
+        assertEquals(407, result.code)
+      })
+    })
+  }
+
+  @Test
+  def proxyCorrectAuthTest {
+    val theExpectedBody = "hello hello"
+    makeProxiedRequest((proxyHost, proxyPort) => {
+      makeRequest((req, resp) => {
+        resp.setStatus(200)
+        resp.getWriter.print(theExpectedBody)
+      })(url => {
+        val result = Http(url).proxy(proxyHost, proxyPort).proxyAuth("test", "test").asString
+        assertEquals(theExpectedBody, result.body)
+        assertEquals(200, result.code)
+      })
+    })
+  }
+
+  @Test
   def allModificationsAreAdditive: Unit = {
     val params = List("a" -> "b")
     val proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("host", 80))
@@ -297,5 +357,19 @@ class HttpTest {
   @Test
   def testPostEquals: Unit = {
     assertEquals(Http("http://foo.com/").postData("hi"), Http("http://foo.com/").postData("hi"))
+  }
+}
+
+class AuthProxyServlet extends ProxyServlet {
+  override def service(req: ServletRequest, res: ServletResponse): Unit = {
+    val httpReq = req.asInstanceOf[HttpServletRequest]
+    val httpRes = res.asInstanceOf[HttpServletResponse]
+    val proxyAuth = httpReq.getHeader("proxy-authorization")
+    if(proxyAuth == null || proxyAuth == HttpConstants.basicAuthValue("test", "test")){
+      super.service(req, res)
+    }
+    else {
+      httpRes.sendError(HttpServletResponse.SC_PROXY_AUTHENTICATION_REQUIRED, "invalid proxy auth")
+    }
   }
 }
