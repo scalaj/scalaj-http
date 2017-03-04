@@ -3,14 +3,19 @@ package scalaj.http
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import java.net.{HttpCookie, InetSocketAddress, Proxy}
 import java.util.zip.GZIPOutputStream
-import javax.servlet.{ServletRequest, ServletResponse}
-import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
+import javax.servlet.{Servlet, ServletRequest, ServletResponse}
+import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
+
+import org.eclipse.jetty.security.{ConstraintMapping, ConstraintSecurityHandler, HashLoginService}
+import org.eclipse.jetty.security.authentication.{BasicAuthenticator, DigestAuthenticator, LoginAuthenticator}
 import org.eclipse.jetty.server.{Request, Server}
 import org.eclipse.jetty.server.handler.AbstractHandler
-import org.eclipse.jetty.servlet.ServletHandler
+import org.eclipse.jetty.servlet.{ServletContextHandler, ServletHandler, ServletHolder}
 import org.eclipse.jetty.servlets.ProxyServlet
+import org.eclipse.jetty.util.security.{Constraint, Credential}
 import org.junit.Assert._
 import org.junit.Test
+
 import scalaj.http.HttpConstants._
 
 
@@ -40,6 +45,48 @@ class HttpTest {
     }
   }
 
+  def makeAuthenticatedRequest
+  (
+    authenticator: LoginAuthenticator,
+    username: String,
+    password: String,
+    response:String
+  )(requestF: String => Unit): Unit = {
+    val server = new Server(0)
+    val context = new ServletContextHandler(ServletContextHandler.SESSIONS)
+    val loginService = new HashLoginService()
+    val roles = Array("user")
+    loginService.putUser(username, Credential.getCredential(password), roles)
+    loginService.setName("Test Realm")
+    val constraint = new Constraint()
+    constraint.setName(loginService.getName)
+    constraint.setRoles(roles)
+    constraint.setAuthenticate(true)
+    val cm = new ConstraintMapping()
+    cm.setConstraint(constraint)
+    cm.setPathSpec("/*")
+    val csh = new ConstraintSecurityHandler()
+    csh.setAuthenticator(authenticator)
+    csh.setRealmName(loginService.getName)
+    csh.addConstraintMapping(cm)
+    csh.setLoginService(loginService)
+    context.setSecurityHandler(csh)
+    context.setContextPath("/")
+    server.setHandler(context)
+    context.addServlet(new ServletHolder(new HttpServlet(){
+      override def doGet(reg: HttpServletRequest, resp: HttpServletResponse): Unit = {
+        resp.getWriter.print(response)
+      }
+    }), "/*")
+    try {
+      server.start()
+      val port = server.getConnectors.head.getLocalPort
+      requestF("http://localhost:" + port + "/")
+    } finally {
+      server.stop()
+    }
+  }
+
   def makeProxiedRequest(proxyF: (String, Int) => Unit): Unit = {
     val server = new Server(0)
     val servletHandler = new ServletHandler()
@@ -54,6 +101,34 @@ class HttpTest {
     }
   }
 
+  @Test
+  def basicAuthRequest: Unit = {
+    val expectedBody = "Hello from authed servlet"
+    makeAuthenticatedRequest(new BasicAuthenticator(), "test", "test", expectedBody){url =>
+      val result = Http(url).auth("test", "test").asString
+      assertEquals(200, result.code)
+      assertEquals(expectedBody, result.body)
+    }
+  }
+
+  @Test
+  def digestAuthRequest: Unit = {
+    val expectedBody = "Hello from authed servlet"
+    makeAuthenticatedRequest(new DigestAuthenticator(), "test", "test", expectedBody){url =>
+      val result = Http(url).digestAuth("test", "test").asString
+      assertEquals("expecting success, but got " + result, 200, result.code)
+      assertEquals(expectedBody, result.body)
+    }
+  }
+
+  @Test
+  def digestAuthRequestBadCreds: Unit = {
+    // verify that we don't loop infinitely on bad creds
+    makeAuthenticatedRequest(new DigestAuthenticator(), "test", "test", "hi"){url =>
+      val result = Http(url).digestAuth("test", "wrong").asString
+      assertEquals("expecting failure, but got " + result, 401, result.code)
+    }
+  }
   
   @Test
   def basicRequest: Unit = {

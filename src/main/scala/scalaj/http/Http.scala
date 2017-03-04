@@ -217,7 +217,8 @@ case class HttpRequest(
   charset: String,
   sendBufferSize: Int,
   urlBuilder: (HttpRequest => String),
-  compress: Boolean
+  compress: Boolean,
+  digestCreds: Option[(String, String)]
 ) {
   /** Add params to the GET querystring or POST form request */
   def params(p: Map[String, String]): HttpRequest = params(p.toSeq)
@@ -259,6 +260,9 @@ case class HttpRequest(
 
   /** Add a proxy basic authorization header */
   def proxyAuth(user: String, password: String) = header("Proxy-Authorization", HttpConstants.basicAuthValue(user, password))
+
+  /** Add digest authentication credentials */
+  def digestAuth(user: String, password: String) = copy(digestCreds = Some(user -> password))
 
   
   /** OAuth v1 sign the request with the consumer token */
@@ -376,22 +380,48 @@ case class HttpRequest(
     val responseCode: Int = conn.getResponseCode
     val headers: Map[String, IndexedSeq[String]] = getResponseHeaders(conn)
     val encoding: Option[String] = headers.get("Content-Encoding").flatMap(_.headOption)
-    // HttpURLConnection won't redirect from https <-> http, so we handle manually here
-    (if (conn.getInstanceFollowRedirects && (responseCode == 301 || responseCode == 302)) {
-      headers.get("Location").flatMap(_.headOption).map(location => {
-        doConnection(parser, new URL(location), DefaultConnectFunc)
-      })
-    } else None).getOrElse{
-      val body: T = {
-        val shouldDecompress = compress && inputStream != null
-        val theStream = if (shouldDecompress && encoding.exists(_.equalsIgnoreCase("gzip"))) {
-          new GZIPInputStream(inputStream)
-        } else if(shouldDecompress && encoding.exists(_.equalsIgnoreCase("deflate"))) {
-          new InflaterInputStream(inputStream)
-        } else inputStream
-        parser(responseCode, headers, theStream)
+    // handle a WWW-Authenticate digest round-trip
+    // check if digest header already exists to prevent infinite loops
+    (if (responseCode == 401 && !this.headers.exists(p => p._1 == "Authorization" && p._2.startsWith("Digest"))) {
+      def toUri(url: URL): String = {
+        url.getPath + Option(url.getQuery).map(q => "?" + q).getOrElse("")
       }
-      HttpResponse[T](body, responseCode, headers)
+      for {
+        (username, password) <- digestCreds
+        authParams: WwwAuthenticate <- {
+          headers.get("WWW-Authenticate").flatMap(_.headOption).flatMap(DigestAuth.getAuthDetails)
+        }
+        if authParams.authType == "Digest"
+        url = new URL(urlBuilder(this))
+        digestResult <- DigestAuth.createHeaderValue(
+          username,
+          password,
+          method,
+          toUri(url),
+          HttpConstants.readBytes(inputStream),
+          authParams.params
+        )
+      } yield {
+        header("Authorization", digestResult).doConnection(parser, url, connectFunc)
+      }
+    } else None).getOrElse {
+      // HttpURLConnection won't redirect from https <-> http, so we handle manually here
+      (if (conn.getInstanceFollowRedirects && (responseCode == 301 || responseCode == 302)) {
+        headers.get("Location").flatMap(_.headOption).map(location => {
+          doConnection(parser, new URL(location), connectFunc)
+        })
+      } else None).getOrElse {
+        val body: T = {
+          val shouldDecompress = compress && inputStream != null
+          val theStream = if (shouldDecompress && encoding.exists(_.equalsIgnoreCase("gzip"))) {
+            new GZIPInputStream(inputStream)
+          } else if (shouldDecompress && encoding.exists(_.equalsIgnoreCase("deflate"))) {
+            new InflaterInputStream(inputStream)
+          } else inputStream
+          parser(responseCode, headers, theStream)
+        }
+        HttpResponse[T](body, responseCode, headers)
+      }
     }
   }
 
@@ -780,6 +810,7 @@ class BaseHttp (
     charset = charset,
     sendBufferSize = sendBufferSize,
     urlBuilder = QueryStringUrlFunc,
-    compress = compress
+    compress = compress,
+    digestCreds = None
   )  
 }
