@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VERSION=0.13.9
+VERSION=0.13.13
 LATEST=https://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/${VERSION}/sbt-launch.jar
 JAR=.sbtlib/sbt-launch-${VERSION}.jar
 
@@ -20,7 +20,6 @@ java \
 -Duser.timezone=UTC \
 -Djava.awt.headless=true \
 -Dfile.encoding=UTF-8 \
--XX:MaxPermSize=256m \
 -Xmx1g \
 -noverify \
 -jar ${JAR} \

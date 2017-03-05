@@ -1,33 +1,24 @@
 name := "scalaj-http"
 
-version := "2.3.0"
+version := "2.4.0"
 
 organization := "org.scalaj"
 
-scalaVersion := "2.10.5"
+scalaVersion := "2.11.8"
 
 libraryDependencies ++= Seq(
-  "junit"                % "junit"              % "4.11"             % "test",
+  "junit"                % "junit"              % "4.12"             % "test",
+  "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.8.7" % "test",
   "com.novocode"         % "junit-interface"    % "0.11"             % "test",
   "org.eclipse.jetty"    % "jetty-server"       % "8.1.19.v20160209" % "test",
   "org.eclipse.jetty"    % "jetty-servlet"      % "8.1.19.v20160209" % "test",
   "org.eclipse.jetty"    % "jetty-servlets"     % "8.1.19.v20160209" % "test"
 )
 
-libraryDependencies ++= {
-  CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((2, 9)) =>
-      Seq("com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.3.3" % "test")
-    case Some((2, 10 | 11)) =>
-      Seq("com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.4.2" % "test")
-    case _ =>
-      Seq("com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.8.4" % "test")
-  }
-}
 
-crossScalaVersions := Seq("2.9.3", "2.10.5", "2.11.7", "2.12.0")
+crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.1")
 
-javacOptions ++= Seq("-source", "1.6", "-target", "1.6")
+javacOptions ++= Seq("-source", "1.7", "-target", "1.7")
 
 scalacOptions in (Compile, doc) ++= Seq("-doc-root-content", baseDirectory.value+"/root-doc.txt")
 
