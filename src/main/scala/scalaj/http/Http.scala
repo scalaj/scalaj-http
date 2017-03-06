@@ -382,7 +382,8 @@ case class HttpRequest(
     val encoding: Option[String] = headers.get("Content-Encoding").flatMap(_.headOption)
     // handle a WWW-Authenticate digest round-trip
     // check if digest header already exists to prevent infinite loops
-    (if (responseCode == 401 && !this.headers.exists(p => p._1 == "Authorization" && p._2.startsWith("Digest"))) {
+    val AuthHeaderName = "Authorization"
+    (if (responseCode == 401 && !this.headers.exists(p => p._1 == AuthHeaderName && p._2.startsWith(DigestAuth.DigestPrefix))) {
       def toUri(url: URL): String = {
         url.getPath + Option(url.getQuery).map(q => "?" + q).getOrElse("")
       }
@@ -391,7 +392,7 @@ case class HttpRequest(
         authParams: WwwAuthenticate <- {
           headers.get("WWW-Authenticate").flatMap(_.headOption).flatMap(DigestAuth.getAuthDetails)
         }
-        if authParams.authType == "Digest"
+        if authParams.authType.equalsIgnoreCase(DigestAuth.DigestPrefix)
         url = new URL(urlBuilder(this))
         digestResult <- DigestAuth.createHeaderValue(
           username,
@@ -402,7 +403,7 @@ case class HttpRequest(
           authParams.params
         )
       } yield {
-        header("Authorization", digestResult).doConnection(parser, url, connectFunc)
+        header(AuthHeaderName, digestResult).doConnection(parser, url, connectFunc)
       }
     } else None).getOrElse {
       // HttpURLConnection won't redirect from https <-> http, so we handle manually here

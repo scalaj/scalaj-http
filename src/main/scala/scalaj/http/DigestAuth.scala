@@ -51,7 +51,7 @@ object DigestAuth {
       case indexOfSpace if indexOfSpace > 0 =>
         val authType = headerValue.substring(0, indexOfSpace)
         val params: Map[String, String] = splitParams(headerValue.substring(indexOfSpace + 1)).flatMap(param => {
-          param.split('=') match {
+          param.split("=", 2) match {
             case Array(key, value) => Some(key.trim.toLowerCase(Locale.ENGLISH) -> trimQuotes(value.trim))
             case _ => None
           }
@@ -74,6 +74,8 @@ object DigestAuth {
     }
     new String(hexChars)
   }
+
+  val DigestPrefix = "Digest"
 
   def createHeaderValue
   (
@@ -121,7 +123,7 @@ object DigestAuth {
           (None, None, hashA1 + ":" + nonce + ":" + hashA2)
       }
       val hashA3: String = hexDigest(a3)
-      val sb = new StringBuilder("Digest ")
+      val sb = new StringBuilder(DigestPrefix).append(" ")
       def appendQuoted(key: String, value: String): StringBuilder = {
         sb.append(key + "=\"").append(value).append("\"")
       }
