@@ -3,16 +3,16 @@ package scalaj.http
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import java.net.{HttpCookie, InetSocketAddress, Proxy}
 import java.util.zip.GZIPOutputStream
+import javax.servlet.{Servlet, ServletRequest, ServletResponse}
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 
-import org.eclipse.jetty.proxy.ProxyServlet
-import org.eclipse.jetty.security.AbstractLoginService.UserPrincipal
-import org.eclipse.jetty.security.{AbstractLoginService, ConstraintMapping, ConstraintSecurityHandler}
+import org.eclipse.jetty.security.{ConstraintMapping, ConstraintSecurityHandler, HashLoginService}
 import org.eclipse.jetty.security.authentication.{BasicAuthenticator, DigestAuthenticator, LoginAuthenticator}
-import org.eclipse.jetty.server.{Request, Server, ServerConnector}
+import org.eclipse.jetty.server.{Request, Server}
 import org.eclipse.jetty.server.handler.AbstractHandler
 import org.eclipse.jetty.servlet.{ServletContextHandler, ServletHandler, ServletHolder}
-import org.eclipse.jetty.util.security.{Constraint, Password}
+import org.eclipse.jetty.servlets.ProxyServlet
+import org.eclipse.jetty.util.security.{Constraint, Credential}
 import org.junit.Assert._
 import org.junit.Test
 
@@ -36,10 +36,9 @@ class HttpTest {
         baseRequest.setHandled(true)
       }
     })
-
     try {
       server.start()
-      val port = server.getConnectors.head.asInstanceOf[ServerConnector].getLocalPort
+      val port = server.getConnectors.head.getLocalPort
       requestF("http://localhost:" + port + "/")
     } finally {
       server.stop()
@@ -55,12 +54,9 @@ class HttpTest {
   )(requestF: String => Unit): Unit = {
     val server = new Server(0)
     val context = new ServletContextHandler(ServletContextHandler.SESSIONS)
+    val loginService = new HashLoginService()
     val roles = Array("user")
-    val userPrincipal = new AbstractLoginService.UserPrincipal(username, new Password(password))
-    val loginService = new AbstractLoginService(){
-      override def loadUserInfo(username: String): UserPrincipal = userPrincipal
-      override def loadRoleInfo(user: UserPrincipal): Array[String] = roles
-    }
+    loginService.putUser(username, Credential.getCredential(password), roles)
     loginService.setName("Test Realm")
     val constraint = new Constraint()
     constraint.setName(loginService.getName)
@@ -84,7 +80,7 @@ class HttpTest {
     }), "/*")
     try {
       server.start()
-      val port = server.getConnectors.head.asInstanceOf[ServerConnector].getLocalPort
+      val port = server.getConnectors.head.getLocalPort
       requestF("http://localhost:" + port + "/")
     } finally {
       server.stop()
@@ -94,13 +90,11 @@ class HttpTest {
   def makeProxiedRequest(proxyF: (String, Int) => Unit): Unit = {
     val server = new Server(0)
     val servletHandler = new ServletHandler()
-    val servletHolder = new ServletHolder(new AuthProxyServlet())
-    servletHolder.setInitParameter("maxThreads", "8")
-    servletHandler.addServletWithMapping(servletHolder, "/*")
+    servletHandler.addServletWithMapping(classOf[AuthProxyServlet], "/*")
     server.setHandler(servletHandler)
     try {
       server.start()
-      val port = server.getConnectors.head.asInstanceOf[ServerConnector].getLocalPort
+      val port = server.getConnectors.head.getLocalPort
       proxyF("localhost", port)
     } finally {
       server.stop()
@@ -442,13 +436,15 @@ class HttpTest {
 }
 
 class AuthProxyServlet extends ProxyServlet {
-  override def service(req: HttpServletRequest, res: HttpServletResponse): Unit = {
-    val proxyAuth = req.getHeader("proxy-authorization")
+  override def service(req: ServletRequest, res: ServletResponse): Unit = {
+    val httpReq = req.asInstanceOf[HttpServletRequest]
+    val httpRes = res.asInstanceOf[HttpServletResponse]
+    val proxyAuth = httpReq.getHeader("proxy-authorization")
     if(proxyAuth == null || proxyAuth == HttpConstants.basicAuthValue("test", "test")){
       super.service(req, res)
     }
     else {
-      res.sendError(HttpServletResponse.SC_PROXY_AUTHENTICATION_REQUIRED, "invalid proxy auth")
+      httpRes.sendError(HttpServletResponse.SC_PROXY_AUTHENTICATION_REQUIRED, "invalid proxy auth")
     }
   }
 }

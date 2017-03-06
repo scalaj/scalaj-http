@@ -6,15 +6,13 @@ organization := "org.scalaj"
 
 scalaVersion := "2.11.8"
 
-val jettyVersion = "9.4.2.v20170220"
-
 libraryDependencies ++= Seq(
   "junit"                % "junit"              % "4.12"             % "test",
   "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.8.7" % "test",
   "com.novocode"         % "junit-interface"    % "0.11"             % "test",
-  "org.eclipse.jetty"    % "jetty-proxy"        % jettyVersion % "test",
-  "org.eclipse.jetty"    % "jetty-server"       % jettyVersion % "test",
-  "org.eclipse.jetty"    % "jetty-servlet"      % jettyVersion % "test"
+  "org.eclipse.jetty"    % "jetty-server"       % "8.1.19.v20160209" % "test",
+  "org.eclipse.jetty"    % "jetty-servlet"      % "8.1.19.v20160209" % "test",
+  "org.eclipse.jetty"    % "jetty-servlets"     % "8.1.19.v20160209" % "test"
 )
 
 
