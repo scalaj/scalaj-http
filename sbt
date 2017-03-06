@@ -21,6 +21,7 @@ java \
 -Djava.awt.headless=true \
 -Dfile.encoding=UTF-8 \
 -Xmx1g \
+-XX:MaxPermSize=256m \
 -noverify \
 -jar ${JAR} \
 "$@"
