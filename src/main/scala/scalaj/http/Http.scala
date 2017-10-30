@@ -37,7 +37,7 @@ import scala.util.matching.Regex
 object HttpOptions {
   type HttpOption = HttpURLConnection => Unit
 
-  val officalHttpMethods = Set("GET", "POST", "HEAD", "OPTIONS", "PUT", "DELETE", "TRACE")
+  val officialHttpMethods = Set("GET", "POST", "HEAD", "OPTIONS", "PUT", "DELETE", "TRACE")
   
   private lazy val methodField: Field = {
     val m = classOf[HttpURLConnection].getDeclaredField("method")
@@ -47,7 +47,7 @@ object HttpOptions {
   
   def method(methodOrig: String): HttpOption = c => {
     val method = methodOrig.toUpperCase
-    if (officalHttpMethods.contains(method)) {
+    if (officialHttpMethods.contains(method)) {
       c.setRequestMethod(method)
     } else {
       // HttpURLConnection enforces a list of official http METHODs, but not everyone abides by the spec
