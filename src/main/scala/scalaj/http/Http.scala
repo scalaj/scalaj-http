@@ -18,9 +18,8 @@ package scalaj.http
 
 import collection.immutable.TreeMap
 import java.lang.reflect.Field
-import java.net.{HttpCookie, HttpURLConnection, InetSocketAddress, Proxy, URL, URLEncoder, URLDecoder}
-import java.io.{DataOutputStream, InputStream, BufferedReader, InputStreamReader, ByteArrayInputStream, 
-  ByteArrayOutputStream}
+import java.net.{HttpCookie, HttpURLConnection, InetSocketAddress, Proxy, URL, URLDecoder, URLEncoder}
+import java.io.{BufferedReader, ByteArrayInputStream, ByteArrayOutputStream, DataOutputStream, InputStream, InputStreamReader}
 import java.security.cert.X509Certificate
 import javax.net.ssl.HttpsURLConnection
 import javax.net.ssl.SSLContext
@@ -30,6 +29,7 @@ import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 import javax.net.ssl.HostnameVerifier
 import java.util.zip.{GZIPInputStream, InflaterInputStream}
+
 import scala.collection.JavaConverters._
 import scala.util.matching.Regex
 
@@ -37,7 +37,7 @@ import scala.util.matching.Regex
 object HttpOptions {
   type HttpOption = HttpURLConnection => Unit
 
-  val officalHttpMethods = Set("GET", "POST", "HEAD", "OPTIONS", "PUT", "DELETE", "TRACE")
+  val officialHttpMethods = Set("GET", "POST", "HEAD", "OPTIONS", "PUT", "DELETE", "TRACE")
   
   private lazy val methodField: Field = {
     val m = classOf[HttpURLConnection].getDeclaredField("method")
@@ -47,7 +47,7 @@ object HttpOptions {
   
   def method(methodOrig: String): HttpOption = c => {
     val method = methodOrig.toUpperCase
-    if (officalHttpMethods.contains(method)) {
+    if (officialHttpMethods.contains(method)) {
       c.setRequestMethod(method)
     } else {
       // HttpURLConnection enforces a list of official http METHODs, but not everyone abides by the spec
@@ -264,7 +264,6 @@ case class HttpRequest(
   /** Add digest authentication credentials */
   def digestAuth(user: String, password: String) = copy(digestCreds = Some(user -> password))
 
-  
   /** OAuth v1 sign the request with the consumer token */
   def oauth(consumer: Token): HttpRequest = oauth(consumer, None, None)
   /** OAuth v1 sign the request with with both the consumer and client token */
@@ -468,10 +467,21 @@ case class HttpRequest(
   def postData(data: Array[Byte]): HttpRequest = body(data).method("POST")
 
   /** Raw data PUT request. String bytes written out using configured charset */
-  def put(data: String): HttpRequest = body(data).method("PUT")
+  def putData(data: String): HttpRequest = body(data).method("PUT")
 
   /** Raw byte data PUT request */
-  def put(data: Array[Byte]): HttpRequest = body(data).method("PUT")
+  def putData(data: Array[Byte]): HttpRequest = body(data).method("PUT")
+
+  private val allowedDataMethods = Set("POST", "PUT")
+
+  /** Add body to a POST/PUT request */
+  def withBody(data : String, method : String) = {
+    if(allowedDataMethods.contains(method.toUpperCase)){
+      body(data).method(method)
+    } else {
+      throw new IllegalArgumentException("Please use only POST or PUT when you want to attach a body to HttpRequest")
+    }
+  }
 
   private def body(data: String): HttpRequest = copy(connectFunc=StringBodyConnectFunc(data))
   private def body(data: Array[Byte]): HttpRequest = copy(connectFunc=ByteBodyConnectFunc(data))
