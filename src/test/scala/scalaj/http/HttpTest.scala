@@ -433,6 +433,22 @@ class HttpTest {
   def testPostEquals: Unit = {
     assertEquals(Http("http://foo.com/").postData("hi"), Http("http://foo.com/").postData("hi"))
   }
+
+  @Test
+  def testPutEquals: Unit = {
+    assertEquals(Http("http://foo.com").putData("hi"), Http("http://foo.com").putData("hi"))
+  }
+
+  @Test
+  def withBodyEquals: Unit = {
+    assertEquals(Http("http://foo.com").withBody("hi", "PUT"), Http("http://foo.com").putData("hi"))
+  }
+
+  @Test(expected = classOf[java.lang.IllegalArgumentException])
+  def withBodyThrowsNoSuchElementException : Unit = {
+    Http("http://foo.com").withBody("hi", "DELETE")
+  }
+
 }
 
 class AuthProxyServlet extends ProxyServlet {
