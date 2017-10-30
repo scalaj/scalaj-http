@@ -474,7 +474,7 @@ case class HttpRequest(
 
   private val allowedDataMethods = Set("POST", "PUT")
 
-  /** Add body to any type of request */
+  /** Add body to a POST/PUT request */
   def withBody(data : String, method : String) = {
     if(allowedDataMethods.contains(method.toUpperCase)){
       body(data).method(methodName)
