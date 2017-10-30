@@ -445,7 +445,7 @@ class HttpTest {
   }
 
   @Test(expected = classOf[java.lang.IllegalArgumentException])
-  def withBodyThrowsNoSuchElementException : Unit = {
+  def withBodyThrowsIllegalArgumentException : Unit = {
     Http("http://foo.com").withBody("hi", "DELETE")
   }
 
