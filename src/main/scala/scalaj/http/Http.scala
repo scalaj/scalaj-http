@@ -491,22 +491,38 @@ case class HttpRequest(
   /** get the authority component of the URL */
   def getAuthority: String = URI.getAuthority
 
-
+  /** get the contents of the URL */
   def getContent: AnyRef = URI.getContent
 
+  /**
+    * get the path component of this URL.
+    * if url = "http://test.com/testapp/test.do?test_id=1&test_name=SS"
+    * then getPath will be "/testapp/test.do"
+    * */
   def getPath: String = URI.getPath
 
+  /**
+    * gets the port number component of the URL. The getPort method returns an integer that is the port number.
+    * If the port is not set, getPort returns -1
+    * */
   def getPort: Int = URI.getPort
 
+  /** get the protocol identifier component of the URL. */
   def getProtocal: String = URI.getProtocol
 
+  /** get query string send
+    * This can be achieved using one of the above query method also.
+    * for example it will return: "test_id=1&test_name=SS" as query string.
+    * */
   def getQuery: String = URI.getQuery
 
   /** get the reference component of the URL. */
   def getRef: String = URI.getRef
 
+  /** get the userInfo part of this URL. */
   def getUserInfo: String = URI.getUserInfo
 
+  /** get a URI equivalent to this URL. */
   def toURI: URI = URI.toURI
 
 }
