@@ -195,8 +195,6 @@ case class HttpResponse[T](body: T, code: Int, headers: Map[String, IndexedSeq[S
 
   /** Get the parsed cookies from the "Set-Cookie" header **/
   def cookies: IndexedSeq[HttpCookie] = headerSeq("Set-Cookie").flatMap(HttpCookie.parse(_).asScala)
-
-
 }
 
 /** Immutable builder for creating an http request
