@@ -32,6 +32,7 @@ import javax.net.ssl.HostnameVerifier
 import java.util.zip.{GZIPInputStream, InflaterInputStream}
 import scala.collection.JavaConverters._
 import scala.util.matching.Regex
+import java.net._
 
 /** Helper functions for modifying the underlying HttpURLConnection */
 object HttpOptions {
@@ -194,6 +195,12 @@ case class HttpResponse[T](body: T, code: Int, headers: Map[String, IndexedSeq[S
 
   /** Get the parsed cookies from the "Set-Cookie" header **/
   def cookies: IndexedSeq[HttpCookie] = headerSeq("Set-Cookie").flatMap(HttpCookie.parse(_).asScala)
+
+  /**
+    * This is wrapper over java.net.URL for easy access of basic parameters of a url.
+    */
+
+
 }
 
 /** Immutable builder for creating an http request
@@ -464,6 +471,44 @@ case class HttpRequest(
   def asParamMap: HttpResponse[Map[String, String]] = execute(HttpConstants.readParamMap(_, charset))
   /** Execute this request and parse http body as a querystring containing oauth_token and oauth_token_secret tupple */
   def asToken: HttpResponse[Token] = execute(HttpConstants.readToken)
+
+  private def URI: URL = new URL(url)
+
+  /**
+    * Creating a wrapper over java.net.URL.
+    * This will help in easy access of various frequent utilities of URL.
+    */
+
+  /** Host value*/
+  def getHost: String = URI.getHost
+
+  /** getFile */
+  def getFile: String = URI.getFile
+
+  /** get default port. If port in not defined then it will return 80 as default http port. */
+  def getDefaultPort: Int = URI.getDefaultPort
+
+  /** get the authority component of the URL */
+  def getAuthority: String = URI.getAuthority
+
+
+  def getContent: AnyRef = URI.getContent
+
+  def getPath: String = URI.getPath
+
+  def getPort: Int = URI.getPort
+
+  def getProtocal: String = URI.getProtocol
+
+  def getQuery: String = URI.getQuery
+
+  /** get the reference component of the URL. */
+  def getRef: String = URI.getRef
+
+  def getUserInfo: String = URI.getUserInfo
+
+  def toURI: URI = URI.toURI
+
 }
 
 case object DefaultConnectFunc extends Function2[HttpRequest, HttpURLConnection, Unit] {
