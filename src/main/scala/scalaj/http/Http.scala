@@ -551,7 +551,8 @@ case class MultiPartConnectFunc(parts: Seq[MultiPart]) extends Function2[HttpReq
     conn.setDoOutput(true)
     conn.setDoInput(true)
     conn.setUseCaches(false)
-    conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + Boundary)
+    val contentType = req.headers.find(_._1 == "Content-Type").map(_._2).getOrElse("multipart/form-data")
+    conn.setRequestProperty("Content-Type", contentType + "; boundary=" + Boundary)
     conn.setRequestProperty("MIME-Version", "1.0")
 
     // encode params up front for the length calculation
