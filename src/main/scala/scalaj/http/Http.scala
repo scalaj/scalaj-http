@@ -32,6 +32,7 @@ import javax.net.ssl.HostnameVerifier
 import java.util.zip.{GZIPInputStream, InflaterInputStream}
 import scala.collection.JavaConverters._
 import scala.util.matching.Regex
+import java.net._
 
 /** Helper functions for modifying the underlying HttpURLConnection */
 object HttpOptions {
@@ -499,6 +500,60 @@ case class HttpRequest(
   def asParamMap: HttpResponse[Map[String, String]] = execute(HttpConstants.readParamMap(_, charset))
   /** Execute this request and parse http body as a querystring containing oauth_token and oauth_token_secret tupple */
   def asToken: HttpResponse[Token] = execute(HttpConstants.readToken)
+
+  private def URI: URL = new URL(url)
+
+  /**
+    * Creating a wrapper over java.net.URL.
+    * This will help in easy access of various frequent utilities of URL.
+    */
+
+  /** Host value*/
+  def getHost: String = URI.getHost
+
+  /** getFile */
+  def getFile: String = URI.getFile
+
+  /** get default port. If port in not defined then it will return 80 as default http port. */
+  def getDefaultPort: Int = URI.getDefaultPort
+
+  /** get the authority component of the URL */
+  def getAuthority: String = URI.getAuthority
+
+  /** get the contents of the URL */
+  def getContent: AnyRef = URI.getContent
+
+  /**
+    * get the path component of this URL.
+    * if url = "http://test.com/testapp/test.do?test_id=1&test_name=SS"
+    * then getPath will be "/testapp/test.do"
+    * */
+  def getPath: String = URI.getPath
+
+  /**
+    * gets the port number component of the URL. The getPort method returns an integer that is the port number.
+    * If the port is not set, getPort returns -1
+    * */
+  def getPort: Int = URI.getPort
+
+  /** get the protocol identifier component of the URL. */
+  def getProtocal: String = URI.getProtocol
+
+  /** get query string send
+    * This can be achieved using one of the above query method also.
+    * for example it will return: "test_id=1&test_name=SS" as query string.
+    * */
+  def getQuery: String = URI.getQuery
+
+  /** get the reference component of the URL. */
+  def getRef: String = URI.getRef
+
+  /** get the userInfo part of this URL. */
+  def getUserInfo: String = URI.getUserInfo
+
+  /** get a URI equivalent to this URL. */
+  def toURI: URI = URI.toURI
+
 }
 
 case object DefaultConnectFunc extends Function2[HttpRequest, HttpURLConnection, Unit] {
