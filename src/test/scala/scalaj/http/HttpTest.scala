@@ -315,7 +315,7 @@ class HttpTest {
   }
 
   @Test
-  def proxyNoAuthTest {
+  def proxyNoAuthTest: Unit = {
     val theExpectedBody = "hello hello"
     makeProxiedRequest((proxyHost, proxyPort) => {
       makeRequest((req, resp) => {
@@ -330,7 +330,7 @@ class HttpTest {
   }
 
   @Test
-  def proxyBadAuthTest {
+  def proxyBadAuthTest: Unit = {
     makeProxiedRequest((proxyHost, proxyPort) => {
       makeRequest((req, resp) => {
         resp.setStatus(200)
@@ -342,7 +342,7 @@ class HttpTest {
   }
 
   @Test
-  def proxyCorrectAuthTest {
+  def proxyCorrectAuthTest: Unit = {
     val theExpectedBody = "hello hello"
     makeProxiedRequest((proxyHost, proxyPort) => {
       makeRequest((req, resp) => {
