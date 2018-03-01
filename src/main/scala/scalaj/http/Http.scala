@@ -218,7 +218,8 @@ case class HttpRequest(
   sendBufferSize: Int,
   urlBuilder: (HttpRequest => String),
   compress: Boolean,
-  digestCreds: Option[(String, String)]
+  digestCreds: Option[(String, String)],
+  signatureCreds: Option[(Token, Option[Token], Option[String])]
 ) {
   /** Add params to the GET querystring or POST form request */
   def params(p: Map[String, String]): HttpRequest = params(p.toSeq)
@@ -273,7 +274,7 @@ case class HttpRequest(
   def oauth(consumer: Token, token: Token, verifier: String): HttpRequest = oauth(consumer, Some(token), Some(verifier))
   /** OAuth v1 sign the request with with both the consumer and client token and a verifier*/
   def oauth(consumer: Token, token: Option[Token], verifier: Option[String]): HttpRequest = {
-    OAuth.sign(this, consumer, token, verifier)
+    copy(signatureCreds=Some(consumer, token, verifier))
   }
 
   /** Change the http request method. 
@@ -359,6 +360,7 @@ case class HttpRequest(
           conn.setRequestProperty(name, value)
         }
         options.reverse.foreach(_(conn))
+        signatureCreds.collect { case (consumer, token, verifier) => OAuth.sign(this, conn, consumer, token, verifier) }
 
         try {
           connectFunc(this, conn)
@@ -812,6 +814,7 @@ class BaseHttp (
     sendBufferSize = sendBufferSize,
     urlBuilder = QueryStringUrlFunc,
     compress = compress,
-    digestCreds = None
-  )  
+    digestCreds = None,
+    signatureCreds = None
+  )
 }
