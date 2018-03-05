@@ -407,7 +407,7 @@ case class HttpRequest(
       }
     } else None).getOrElse {
       // HttpURLConnection won't redirect from https <-> http, so we handle manually here
-      (if (conn.getInstanceFollowRedirects && (responseCode == 301 || responseCode == 302)) {
+      (if (conn.getInstanceFollowRedirects && (responseCode == 301 || responseCode == 302 || responseCode == 307)) {
         headers.get("Location").flatMap(_.headOption).map(location => {
           doConnection(parser, new URL(location), connectFunc)
         })

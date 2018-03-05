@@ -1,9 +1,9 @@
 package scalaj.http
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
-import java.net.{HttpCookie, InetSocketAddress, Proxy}
+import java.net.{HttpCookie, InetSocketAddress, Proxy, UnknownHostException}
 import java.util.zip.GZIPOutputStream
-import javax.servlet.{Servlet, ServletRequest, ServletResponse}
+import javax.servlet.{ServletRequest, ServletResponse}
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 
 import org.eclipse.jetty.security.{ConstraintMapping, ConstraintSecurityHandler, HashLoginService}
@@ -173,12 +173,30 @@ class HttpTest {
   def redirectShouldNotFollowByDefault: Unit = {
     makeRequest((req, resp) => {
       resp.setStatus(301)
-      resp.setHeader("Location", "https://www.google.com/")
+      resp.setHeader("Location", "http://www.google.com/")
       resp.getWriter.print("moved")
     })(url => {
       val response: HttpResponse[String] = Http(url).execute()
       assertEquals(301, response.code)
       assertEquals("moved", response.body)
+    })
+  }
+
+  @Test
+  def shouldFollowRedirectOnProtocolSwitch: Unit = {
+    List(301, 302, 307).foreach(status => {
+      makeRequest((_, resp) => {
+        resp.setStatus(status)
+        resp.setHeader("Location", "https://foobar.foobar")
+        resp.getWriter.print("moved")
+      })(url => {
+        try {
+          Http(url).option(HttpOptions.followRedirects(true)).execute()
+          fail("Did not redirect as expected! "+status)
+        } catch {
+          case _: UnknownHostException =>
+        }
+      })
     })
   }
 
