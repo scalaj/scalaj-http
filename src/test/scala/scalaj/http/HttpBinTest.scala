@@ -15,34 +15,34 @@ case class BinResponse(
 class HttpBinTest {
 
   @Test
-  def headRequest {
+  def headRequest: Unit = {
     val response = Http("http://httpbin.org/status/200").method("HEAD").asString
     assertEquals(200, response.code)
   }
 
   @Test
-  def overrideAcceptHeader {
+  def overrideAcceptHeader: Unit = {
     val response = Http("http://httpbin.org/get").header("Accept", "foo/bar").asString
     val binResponse = Json.parse[BinResponse](response.body)
     assertEquals(Some("foo/bar"), binResponse.headers.get("Accept"))
   }
 
   @Test
-  def redirectShouldNotFollow {
+  def redirectShouldNotFollow: Unit = {
     val response = Http("http://httpbin.org/redirect-to?url=http://foo.org").asString
     assertEquals(302, response.code)
     assertEquals(Some("http://foo.org"), response.header("Location"))
   }
 
   @Test
-  def shouldFollowHttpsRedirect {
+  def shouldFollowHttpsRedirect: Unit = {
     val response = Http("http://httpbin.org/redirect-to?url=https://httpbin.org/get")
       .option(HttpOptions.followRedirects(true)).asString
     assertEquals(200, response.code)
   }
 
   @Test
-  def errorHasHeaders {
+  def errorHasHeaders: Unit = {
     val response = Http("http://httpbin.org/status/500").asString
     assertEquals("HTTP/1.1 500 INTERNAL SERVER ERROR", response.statusLine)
     assertEquals(500, response.code)
@@ -50,46 +50,46 @@ class HttpBinTest {
   }
 
   @Test 
-  def gzipWithHead {
+  def gzipWithHead: Unit = {
     val response = Http("http://httpbin.org/gzip").method("HEAD").asString
     assertEquals(200, response.code)
   }
 
   @Test
-  def gzipDecode {
+  def gzipDecode: Unit = {
     val response = Http("http://httpbin.org/gzip").asString
     assertEquals(200, response.code)
     assertEquals("{", response.body.substring(0,1))
   }
 
   @Test
-  def gzipDecodeNoCompress {
+  def gzipDecodeNoCompress: Unit = {
     val response = Http("http://httpbin.org/gzip").compress(false).asString
     assertEquals(200, response.code)
     assertNotEquals("{", response.body.substring(0,1))
   }
 
   @Test 
-  def deflateWithHead {
+  def deflateWithHead: Unit = {
     val response = Http("http://httpbin.org/deflate").method("HEAD").asString
     assertEquals(200, response.code)
   }
 
   @Test
-  def deflateDecode {
+  def deflateDecode: Unit = {
     val response = Http("http://httpbin.org/deflate").asString
     assertEquals(200, response.code)
     assertEquals("{", response.body.substring(0,1))
   }
 
   @Test
-  def streamingResponse {
+  def streamingResponse: Unit = {
     val response = Http("http://httpbin.org/stream/5").asString
     assertEquals("should have 5 lines", 5, response.body.split("\n").length)
   }
 
   @Test
-  def postMulti {
+  def postMulti: Unit = {
     val response = Http("http://httpbin.org/post")
       .postMulti(
         MultiPart(name="file1", filename="foo.txt", mime="text/text", data="Hello!"),
@@ -105,7 +105,7 @@ class HttpBinTest {
   }
 
   @Test
-  def postForm {
+  def postForm: Unit = {
     val response = Http("http://httpbin.org/post").postForm.param("param1", "a").param("param2", "b").asString
     val binResponse = Json.parse[BinResponse](response.body)
     assertEquals(Some("a"), binResponse.form.get("param1"))
@@ -113,7 +113,7 @@ class HttpBinTest {
   }
 
   @Test
-  def postData {
+  def postData: Unit = {
     val response = Http("http://httpbin.org/post").param("param1", "a").param("param2", "b").postData("foo").asString
     val binResponse = Json.parse[BinResponse](response.body)
     assertEquals(Some("a"), binResponse.args.get("param1"))
@@ -121,14 +121,14 @@ class HttpBinTest {
   }
 
   @Test
-  def cookie {
+  def cookie: Unit = {
     val response = Http("http://httpbin.org/cookies").cookie("foo", "bar").asString
     val binResponse = Json.parse[BinResponse](response.body)
     assertEquals(Some("bar"), binResponse.cookies.get("foo"))
   }
 
   @Test
-  def cookies {
+  def cookies: Unit = {
     val response = Http("http://httpbin.org/cookies").cookies(
       Seq(new HttpCookie("foo", "bar"), new HttpCookie("baz", "biz"))
     ).asString
