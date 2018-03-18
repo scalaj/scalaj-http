@@ -489,6 +489,53 @@ class HttpTest {
   def testPostEquals: Unit = {
     assertEquals(Http("http://foo.com/").postData("hi"), Http("http://foo.com/").postData("hi"))
   }
+
+  @Test
+  def testShouldCallRequestLoggerAndResponseLoggerOnSuccess: Unit = {
+    val expectedCode = HttpServletResponse.SC_OK
+    makeRequest((req, resp) => {
+      resp.setStatus(expectedCode)
+    })(url => {
+      var counter = 0
+      var responseResult = false
+      val requestLogger: HttpRequest => Unit = (x: HttpRequest) => {
+        counter = counter + 1
+      }
+      val responseLogger: HttpResponse[_] => Unit = (x: HttpResponse[_]) => {
+        responseResult = x.is2xx
+      }
+      val response = Http(url)
+        .logRequest(requestLogger)
+        .logResponse(responseLogger)
+        .asString
+      assertEquals(response.code, expectedCode)
+      assertEquals(counter, 1)
+      assertEquals(responseResult, response.is2xx)
+    })
+  }
+
+  @Test
+  def testShouldCallRequestLoggerAndResponseLoggerOnStatusFailed: Unit = {
+    makeRequest((req, resp) => {
+      resp.setStatus(500)
+    })(url => {
+      var counter = 0
+      var responseResult = false
+      val requestLogger: HttpRequest => Unit = (x: HttpRequest) => {
+        counter = counter + 1
+      }
+      val responseLogger: HttpResponse[_] => Unit = (x: HttpResponse[_]) => {
+        responseResult = x.is5xx
+      }
+      val response: HttpResponse[String] = Http(url)
+        .logRequest(requestLogger)
+        .logResponse(responseLogger)
+        .execute()
+      assertEquals(500, response.code)
+      assertEquals(counter, 1)
+      assertEquals(responseResult, response.is5xx)
+    })
+  }
 }
 
 class AuthProxyServlet extends ProxyServlet {
