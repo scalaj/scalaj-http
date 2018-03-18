@@ -30,8 +30,8 @@ class HttpBinTest {
     // would like to do something here to merge or replace system certs with developer provided certs
     val trustAllCerts = Array[TrustManager](new X509TrustManager() {
       def getAcceptedIssuers: Array[X509Certificate] = null
-      def checkClientTrusted(certs: Array[X509Certificate], authType: String){}
-      def checkServerTrusted(certs: Array[X509Certificate], authType: String){}
+      def checkClientTrusted(certs: Array[X509Certificate], authType: String): Unit = {}
+      def checkServerTrusted(certs: Array[X509Certificate], authType: String): Unit = {}
     })
 
     val sc = SSLContext.getInstance("SSL")
