@@ -218,7 +218,9 @@ case class HttpRequest(
   sendBufferSize: Int,
   urlBuilder: (HttpRequest => String),
   compress: Boolean,
-  digestCreds: Option[(String, String)]
+  digestCreds: Option[(String, String)],
+  requestLogger: HttpRequest => Unit = HttpRequest.defaultRequestLogger,
+  responseLogger: HttpResponse[_] => Unit = HttpRequest.defaultResponseLogger
 ) {
   /** Add params to the GET querystring or POST form request */
   def params(p: Map[String, String]): HttpRequest = params(p.toSeq)
@@ -274,6 +276,20 @@ case class HttpRequest(
   /** OAuth v1 sign the request with with both the consumer and client token and a verifier*/
   def oauth(consumer: Token, token: Option[Token], verifier: Option[String]): HttpRequest = {
     OAuth.sign(this, consumer, token, verifier)
+  }
+
+  /**
+    * Add request logger
+    */
+  def logRequest(logger: HttpRequest => Unit): HttpRequest = {
+    copy(requestLogger = logger)
+  }
+
+  /**
+    * Add response logger
+    */
+  def logResponse[_](logger: HttpResponse[_] => Unit): HttpRequest = {
+    copy(responseLogger = logger)
   }
 
   /** Change the http request method. 
@@ -361,6 +377,7 @@ case class HttpRequest(
         options.reverse.foreach(_(conn))
 
         try {
+          requestLogger.apply(this)
           connectFunc(this, conn)
           toResponse(conn, parser, conn.getInputStream)
         } catch {
@@ -421,7 +438,9 @@ case class HttpRequest(
           } else inputStream
           parser(responseCode, headers, theStream)
         }
-        HttpResponse[T](body, responseCode, headers)
+        val result = HttpResponse[T](body, responseCode, headers)
+        responseLogger.apply(result)
+        result
       }
     }
   }
@@ -499,6 +518,12 @@ case class HttpRequest(
   def asParamMap: HttpResponse[Map[String, String]] = execute(HttpConstants.readParamMap(_, charset))
   /** Execute this request and parse http body as a querystring containing oauth_token and oauth_token_secret tupple */
   def asToken: HttpResponse[Token] = execute(HttpConstants.readToken)
+}
+
+object HttpRequest {
+  val defaultRequestLogger: HttpRequest => Unit = _ => ()
+
+  val defaultResponseLogger: HttpResponse[_] => Unit = _ => ()
 }
 
 case object DefaultConnectFunc extends Function2[HttpRequest, HttpURLConnection, Unit] {
