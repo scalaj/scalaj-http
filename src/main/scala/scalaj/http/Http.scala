@@ -650,7 +650,7 @@ case object QueryStringUrlFunc extends Function1[HttpRequest, String] {
 case object PlainUrlFunc extends Function1[HttpRequest, String] {
   def apply(req: HttpRequest): String = req.url
 
-  override def toString = "QueryStringUrlFunc"
+  override def toString = "PlainUrlFunc"
 }
 
 /**
