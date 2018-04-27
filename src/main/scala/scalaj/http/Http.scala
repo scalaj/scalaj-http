@@ -448,6 +448,7 @@ case class HttpRequest(
     try {
       conn.getErrorStream.close
     } catch {
+      case npe: NullPointerException => // ignore
       case e: Exception => //ignore
     }
   }
