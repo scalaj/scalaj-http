@@ -1,9 +1,9 @@
 package scalaj.http
 
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream, IOException}
 import java.net.{HttpCookie, InetSocketAddress, Proxy}
 import java.util.zip.GZIPOutputStream
-import javax.servlet.{Servlet, ServletRequest, ServletResponse}
+import javax.servlet.{ServletRequest, ServletResponse}
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 
 import org.eclipse.jetty.security.{ConstraintMapping, ConstraintSecurityHandler, HashLoginService}
@@ -154,6 +154,45 @@ class HttpTest {
     })
   }
 
+
+  // TODO: .oauth currently must be the last method to be called because it captures the state of the request.
+  // see https://github.com/scalaj/scalaj-http/pull/156
+  @Test
+  def oauthRequestShouldHaveCorrectAuthHeader: Unit = {
+    val consumerToken = Token("dpf43f3p2l4k3l03","kd94hf93k423kf44")
+    val userToken = Token("nnch734d00sl2jdk","pfkkdhi9sl3r4s00")
+
+    object MyHttp extends BaseHttp(options = Seq(HttpOptions.readTimeout(1234)))
+    makeRequest((req, resp) => {
+      resp.setContentType("text/text;charset=utf-8")
+      resp.setStatus(HttpServletResponse.SC_OK)
+      resp.getWriter.print(req.getHeader("Authorization"))
+    })(url => {
+      val request: HttpRequest = MyHttp(url).param("file", "vacation.jpg").oauth(
+        consumerToken,
+        userToken
+      )
+      val response: HttpResponse[String] = request.execute()
+      // Authorizaiton header is prefixed with "OAuth ", comma separated, quoted values
+      val oauthHeaderParams: Map[String, String] = response.body.substring(6).split(",").flatMap(_.split("=") match {
+        case Array(k,v) => Some(
+          HttpConstants.urlDecode(k, "utf-8") ->
+          HttpConstants.urlDecode(v.substring(1, v.length -1 ), "utf-8")
+        )
+        case _ => None
+      }).toMap
+
+      val (_, expectedSignature) = OAuth.getSig(
+        oauthHeaderParams.filterKeys(Set("oauth_timestamp", "oauth_nonce")).toSeq,
+        request,
+        consumerToken,
+        Some(userToken),
+        None
+      )
+      assertEquals(Some(expectedSignature), oauthHeaderParams.get("oauth_signature"))
+    })
+  }
+
   @Test
   def serverError: Unit = {
     makeRequest((req, resp) => {
@@ -173,12 +212,29 @@ class HttpTest {
   def redirectShouldNotFollowByDefault: Unit = {
     makeRequest((req, resp) => {
       resp.setStatus(301)
-      resp.setHeader("Location", "https://www.google.com/")
+      resp.setHeader("Location", "http://www.google.com/")
       resp.getWriter.print("moved")
     })(url => {
       val response: HttpResponse[String] = Http(url).execute()
       assertEquals(301, response.code)
       assertEquals("moved", response.body)
+    })
+  }
+
+  @Test
+  def shouldFollowRedirectOnProtocolSwitch: Unit = {
+    List(301, 302, 307).foreach(status => {
+      makeRequest((_, resp) => {
+        resp.setStatus(status)
+        resp.setHeader("Location", "https://foobar.foobar")
+      })(url => {
+        try {
+          val response = Http(url).option(HttpOptions.followRedirects(true)).execute()
+          fail(s"Expecting redirect to throw IOException for $status status, but got $response")
+        } catch {
+          case _: IOException =>
+        }
+      })
     })
   }
 
@@ -315,7 +371,7 @@ class HttpTest {
   }
 
   @Test
-  def proxyNoAuthTest {
+  def proxyNoAuthTest: Unit = {
     val theExpectedBody = "hello hello"
     makeProxiedRequest((proxyHost, proxyPort) => {
       makeRequest((req, resp) => {
@@ -330,7 +386,7 @@ class HttpTest {
   }
 
   @Test
-  def proxyBadAuthTest {
+  def proxyBadAuthTest: Unit = {
     makeProxiedRequest((proxyHost, proxyPort) => {
       makeRequest((req, resp) => {
         resp.setStatus(200)
@@ -342,7 +398,7 @@ class HttpTest {
   }
 
   @Test
-  def proxyCorrectAuthTest {
+  def proxyCorrectAuthTest: Unit = {
     val theExpectedBody = "hello hello"
     makeProxiedRequest((proxyHost, proxyPort) => {
       makeRequest((req, resp) => {

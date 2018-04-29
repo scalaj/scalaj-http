@@ -44,11 +44,11 @@ object OAuth {
     var oauthParams = ("oauth_version", "1.0") +: ("oauth_consumer_key", consumer.key) +: ("oauth_signature_method", "HMAC-SHA1") +: baseParams
     
     token.foreach{t =>
-      oauthParams +:= ("oauth_token", t.key)
+      oauthParams +:= (("oauth_token", t.key))
     }
     
     verifier.foreach{v =>
-      oauthParams +:= ("oauth_verifier", v)
+      oauthParams +:= (("oauth_verifier", v))
     }
     
     val baseString = Seq(req.method.toUpperCase,normalizeUrl(new URL(req.url)),normalizeParams(req.params ++ oauthParams)).map(percentEncode).mkString("&")

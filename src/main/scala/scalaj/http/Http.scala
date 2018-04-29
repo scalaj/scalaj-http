@@ -79,8 +79,8 @@ object HttpOptions {
       
       val trustAllCerts = Array[TrustManager](new X509TrustManager() {
         def getAcceptedIssuers: Array[X509Certificate] = null
-        def checkClientTrusted(certs: Array[X509Certificate], authType: String){}
-        def checkServerTrusted(certs: Array[X509Certificate], authType: String){}
+        def checkClientTrusted(certs: Array[X509Certificate], authType: String) = {}
+        def checkServerTrusted(certs: Array[X509Certificate], authType: String) = {}
       })
 
       val sc = SSLContext.getInstance("SSL")
@@ -409,7 +409,7 @@ case class HttpRequest(
       }
     } else None).getOrElse {
       // HttpURLConnection won't redirect from https <-> http, so we handle manually here
-      (if (conn.getInstanceFollowRedirects && (responseCode == 301 || responseCode == 302)) {
+      (if (conn.getInstanceFollowRedirects && (responseCode == 301 || responseCode == 302 || responseCode == 307)) {
         headers.get("Location").flatMap(_.headOption).map(location => {
           doConnection(parser, new URL(location), connectFunc)
         })
@@ -441,7 +441,7 @@ case class HttpRequest(
     }
   }
   
-  private def closeStreams(conn: HttpURLConnection) {
+  private def closeStreams(conn: HttpURLConnection): Unit = {
     try {
       conn.getInputStream.close
     } catch {
@@ -553,7 +553,8 @@ case class MultiPartConnectFunc(parts: Seq[MultiPart]) extends Function2[HttpReq
     conn.setDoOutput(true)
     conn.setDoInput(true)
     conn.setUseCaches(false)
-    conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + Boundary)
+    val contentType = req.headers.find(_._1 == "Content-Type").map(_._2).getOrElse("multipart/form-data")
+    conn.setRequestProperty("Content-Type", contentType + "; boundary=" + Boundary)
     conn.setRequestProperty("MIME-Version", "1.0")
 
     // encode params up front for the length calculation
@@ -584,7 +585,7 @@ case class MultiPartConnectFunc(parts: Seq[MultiPart]) extends Function2[HttpReq
 
     val out = conn.getOutputStream()
 
-    def writeBytes(s: String) {
+    def writeBytes(s: String): Unit = {
       // this is only used for the structural pieces, not user input, so should be plain old ascii
       out.write(s.getBytes(HttpConstants.utf8))
     }
@@ -613,7 +614,7 @@ case class MultiPartConnectFunc(parts: Seq[MultiPart]) extends Function2[HttpReq
         writeBytes(ContentType + part.mime + CrLf + CrLf)
 
         var bytesWritten: Long = 0L
-        def readOnce {
+        def readOnce(): Unit = {
           val len = part.data.read(buffer)
           if (len > 0) {
             out.write(buffer, 0, len)
@@ -622,11 +623,11 @@ case class MultiPartConnectFunc(parts: Seq[MultiPart]) extends Function2[HttpReq
           }
 
           if (len >= 0) {
-            readOnce
+            readOnce()
           }
         }
 
-        readOnce
+        readOnce()
 
         writeBytes(CrLf)
     }
@@ -717,13 +718,13 @@ object HttpConstants {
       val bos = new StringBuilder
       val ba = new Array[Char](4096)
 
-      def readOnce {
+      def readOnce(): Unit = {
         val len = in.read(ba)
         if (len > 0) bos.appendAll(ba, 0, len)
-        if (len >= 0) readOnce
+        if (len >= 0) readOnce()
       }
 
-      readOnce
+      readOnce()
       bos.toString
     }
   }
@@ -740,13 +741,13 @@ object HttpConstants {
       val bos = new ByteArrayOutputStream
       val ba = new Array[Byte](4096)
 
-      def readOnce {
+      def readOnce(): Unit = {
         val len = in.read(ba)
         if (len > 0) bos.write(ba, 0, len)
-        if (len >= 0) readOnce
+        if (len >= 0) readOnce()
       }
 
-      readOnce
+      readOnce()
 
       bos.toByteArray
     }
@@ -754,7 +755,7 @@ object HttpConstants {
 
   def readParams(in: InputStream, charset: String = utf8): Seq[(String,String)] = {
     readString(in, charset).split("&").flatMap(_.split("=") match {
-      case Array(k,v) => Some(urlDecode(k, charset), urlDecode(v, charset))
+      case Array(k,v) => Some((urlDecode(k, charset), urlDecode(v, charset)))
       case _ => None
     }).toList
   }
