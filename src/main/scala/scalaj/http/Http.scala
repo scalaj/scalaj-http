@@ -122,7 +122,7 @@ case class HttpStatusException(
   * @param headers the response headers
  */
 case class HttpResponse[T](body: T, code: Int, headers: Map[String, IndexedSeq[String]]) {
-  /** test if code is in beteween lower and upper inclusive */
+  /** test if code is in between lower and upper inclusive */
   def isCodeInRange(lower: Int, upper: Int): Boolean = lower <= code && code <= upper
 
   /** is response code 2xx */
