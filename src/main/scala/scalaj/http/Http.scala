@@ -793,7 +793,7 @@ class BaseHttp (
   options: Seq[HttpOptions.HttpOption] = HttpConstants.defaultOptions,
   charset: String = HttpConstants.utf8,
   sendBufferSize: Int = 4096,
-  userAgent: String = "scalaj-http/1.0",
+  userAgent: String = s"scalaj-http/${BuildInfo.version}",
   compress: Boolean = true
 ) {
 

@@ -23,6 +23,10 @@ libraryDependencies ++= {
   }
 }
 
+enablePlugins(BuildInfoPlugin)
+buildInfoKeys := Seq[BuildInfoKey](version)
+buildInfoPackage := "scalaj.http"
+
 // TODO enable all tests when released jackson-module-scala for Scala 2.13
 sources in Test := {
   val testSources = (sources in Test).value
