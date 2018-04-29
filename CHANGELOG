@@ -1,3 +1,13 @@
+2.4.0
+------
+release: 29 April 2018
+
+ - Suport for digest authentication via .digestAuth method on HttpRequest
+ - Support for proxy authentication via .proxyAuth method on HttpRequest
+ - Honor explicitly set Content-Type header on multipart requests. Thanks @pelamfi
+ - Follow 307 redirects. Thanks @dmaicher
+ - A bunch of of documenation, formatting, typo, and library version updates (including scala 2.13 support) from @xuwei-k. Thank you!
+
 2.3.0
 ------
 release: 2 April 2016

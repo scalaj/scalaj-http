@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/scalaj/scalaj-http.png)](https://travis-ci.org/scalaj/scalaj-http)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.scalaj/scalaj-http_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.scalaj/scalaj-http_2.11)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.scalaj/scalaj-http_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.scalaj/scalaj-http_2.12)
 [![Javadocs](https://javadoc.io/badge/org.scalaj/scalaj-http_2.12.svg)](https://javadoc.io/doc/org.scalaj/scalaj-http_2.12)
 
 # Simplified Http
@@ -8,7 +8,7 @@ This is a fully featured http client for Scala which wraps [java.net.HttpURLConn
 
 Features:
 * Zero dependencies
-* Cross compiled for Scala 2.9.3, 2.10, 2.11, and 2.12
+* Cross compiled for Scala 2.10, 2.11, 2.12, and 2.13-M3
 * OAuth v1 request signing
 * Automatic support of gzip and deflate encodings from server
 * Easy to add querystring or form params. URL encoding is handled for you.
@@ -37,7 +37,7 @@ Big differences:
 ### in your build.sbt
 
 ```scala
-libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "2.3.0"
+libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "2.4.0"
 ```
 
 ### maven
@@ -46,7 +46,7 @@ libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "2.3.0"
 <dependency>
   <groupId>org.scalaj</groupId>
   <artifactId>scalaj-http_${scala.version}</artifactId>
-  <version>2.3.0</version>
+  <version>2.4.0</version>
 </dependency>  
 ```
 
@@ -219,7 +219,7 @@ object MyHttp extends BaseHttp (
 
 ### Full API documentation
 
-[scaladocs here](http://scalaj.github.io/scalaj-http/2.0.0)
+[scaladocs here](https://javadoc.io/doc/org.scalaj/scalaj-http_2.12)
 
 ## Dealing with annoying java library issues
 #### Overriding the `Access-Control, Content-Length, Content-Transfer-Encoding, Host, Keep-Alive, Origin, Trailer, Transfer-Encoding, Upgrade, Via` headers
