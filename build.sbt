@@ -49,11 +49,6 @@ scalacOptions ++= Seq(
   "-Xfuture"
 )
 
-scalacOptions ++= PartialFunction.condOpt(CrossVersion.partialVersion(scalaVersion.value)) {
-  case Some((2, v)) if v <= 12 =>
-    "-Yno-adapted-args"
-}.toList
-
 scalacOptions in (Compile, doc) ++= Seq("-doc-root-content", baseDirectory.value+"/root-doc.txt")
 
 publishTo := {
