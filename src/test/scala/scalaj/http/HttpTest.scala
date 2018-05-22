@@ -22,16 +22,17 @@ import scalaj.http.HttpConstants._
 class HttpTest {
 
   def makeRequest(
-    reqHandler: (HttpServletRequest, HttpServletResponse) => Unit
-  )(requestF: String => Unit): Unit = {
+                   reqHandler: (HttpServletRequest, HttpServletResponse) => Unit,
+                   url: String = "http://localhost"
+                 )(requestF: String => Unit): Unit = {
     val server = new Server(0)
-    server.setHandler(new AbstractHandler(){
+    server.setHandler(new AbstractHandler() {
       def handle(
-        target: String,
-        baseRequest: Request,
-        request: HttpServletRequest,
-        response: HttpServletResponse
-      ): Unit = {
+                  target: String,
+                  baseRequest: Request,
+                  request: HttpServletRequest,
+                  response: HttpServletResponse
+                ): Unit = {
         reqHandler(request, response)
         baseRequest.setHandled(true)
       }
@@ -39,7 +40,7 @@ class HttpTest {
     try {
       server.start()
       val port = server.getConnectors.head.getLocalPort
-      requestF("http://localhost:" + port + "/")
+      requestF(s"$url:$port/")
     } finally {
       server.stop()
     }
@@ -50,7 +51,7 @@ class HttpTest {
     authenticator: LoginAuthenticator,
     username: String,
     password: String,
-    response:String
+    response: String
   )(requestF: String => Unit): Unit = {
     val server = new Server(0)
     val context = new ServletContextHandler(ServletContextHandler.SESSIONS)
@@ -73,7 +74,7 @@ class HttpTest {
     context.setSecurityHandler(csh)
     context.setContextPath("/")
     server.setHandler(context)
-    context.addServlet(new ServletHolder(new HttpServlet(){
+    context.addServlet(new ServletHolder(new HttpServlet() {
       override def doGet(reg: HttpServletRequest, resp: HttpServletResponse): Unit = {
         resp.getWriter.print(response)
       }
@@ -104,7 +105,7 @@ class HttpTest {
   @Test
   def basicAuthRequest: Unit = {
     val expectedBody = "Hello from authed servlet"
-    makeAuthenticatedRequest(new BasicAuthenticator(), "test", "test", expectedBody){url =>
+    makeAuthenticatedRequest(new BasicAuthenticator(), "test", "test", expectedBody) { url =>
       val result = Http(url).auth("test", "test").asString
       assertEquals(200, result.code)
       assertEquals(expectedBody, result.body)
@@ -114,7 +115,7 @@ class HttpTest {
   @Test
   def digestAuthRequest: Unit = {
     val expectedBody = "Hello from authed servlet"
-    makeAuthenticatedRequest(new DigestAuthenticator(), "test", "test", expectedBody){url =>
+    makeAuthenticatedRequest(new DigestAuthenticator(), "test", "test", expectedBody) { url =>
       val result = Http(url).digestAuth("test", "test").asString
       assertEquals("expecting success, but got " + result, 200, result.code)
       assertEquals(expectedBody, result.body)
@@ -124,12 +125,12 @@ class HttpTest {
   @Test
   def digestAuthRequestBadCreds: Unit = {
     // verify that we don't loop infinitely on bad creds
-    makeAuthenticatedRequest(new DigestAuthenticator(), "test", "test", "hi"){url =>
+    makeAuthenticatedRequest(new DigestAuthenticator(), "test", "test", "hi") { url =>
       val result = Http(url).digestAuth("test", "wrong").asString
       assertEquals("expecting failure, but got " + result, 401, result.code)
     }
   }
-  
+
   @Test
   def basicRequest: Unit = {
     val expectedCode = HttpServletResponse.SC_OK
@@ -159,8 +160,8 @@ class HttpTest {
   // see https://github.com/scalaj/scalaj-http/pull/156
   @Test
   def oauthRequestShouldHaveCorrectAuthHeader: Unit = {
-    val consumerToken = Token("dpf43f3p2l4k3l03","kd94hf93k423kf44")
-    val userToken = Token("nnch734d00sl2jdk","pfkkdhi9sl3r4s00")
+    val consumerToken = Token("dpf43f3p2l4k3l03", "kd94hf93k423kf44")
+    val userToken = Token("nnch734d00sl2jdk", "pfkkdhi9sl3r4s00")
 
     object MyHttp extends BaseHttp(options = Seq(HttpOptions.readTimeout(1234)))
     makeRequest((req, resp) => {
@@ -175,9 +176,9 @@ class HttpTest {
       val response: HttpResponse[String] = request.execute()
       // Authorizaiton header is prefixed with "OAuth ", comma separated, quoted values
       val oauthHeaderParams: Map[String, String] = response.body.substring(6).split(",").flatMap(_.split("=") match {
-        case Array(k,v) => Some(
+        case Array(k, v) => Some(
           HttpConstants.urlDecode(k, "utf-8") ->
-          HttpConstants.urlDecode(v.substring(1, v.length -1 ), "utf-8")
+            HttpConstants.urlDecode(v.substring(1, v.length - 1), "utf-8")
         )
         case _ => None
       }).toMap
@@ -205,6 +206,20 @@ class HttpTest {
       assertTrue(response.is5xx)
       assertTrue(response.isServerError)
       assertTrue(response.isError)
+    })
+  }
+
+  @Test
+  def badProtocol: Unit = {
+
+    makeRequest((req, resp) => {}, url = "ftp://theendofinternets.ftp")(url => {
+      try {
+        val response: HttpResponse[String] = Http(url).execute()
+        fail("was supposed to fail")
+      } catch {
+        case ex: Throwable =>
+          assert(ex.getMessage.startsWith("Failed to establish http connection"))
+      }
     })
   }
 
@@ -257,7 +272,7 @@ class HttpTest {
       assertEquals(Some("foobar"), response.header("x-FOO"))
     })
   }
-  
+
   @Test
   def asParams: Unit = {
     makeRequest((req, resp) => {
@@ -289,16 +304,16 @@ class HttpTest {
       val response = Http(url).asBytes
       assertEquals("hi", new String(response.body, HttpConstants.utf8))
     })
-  }  
+  }
 
   @Test
   def shouldPrependOptions: Unit = {
     val http = Http("http://foo.com/")
     val origOptions = http.options
     val origOptionsLength = origOptions.length
-    val newOptions: List[HttpOptions.HttpOption] = List(c => { }, c=> { }, c => {})
+    val newOptions: List[HttpOptions.HttpOption] = List(c => {}, c => {}, c => {})
     val http2 = http.options(newOptions)
-    
+
     assertEquals(http2.options.length, origOptionsLength + 3)
     assertEquals(http2.options.take(3), newOptions)
     assertEquals(origOptions.length, origOptionsLength)
@@ -449,8 +464,8 @@ class HttpTest {
   @Test
   def varargs: Unit = {
     val req = Http("http://foo.com/").params("a" -> "b", "b" -> "a")
-                       .headers("a" -> "b", "b" -> "a")
-                       .options(HttpOptions.connTimeout(100), HttpOptions.readTimeout(100))
+      .headers("a" -> "b", "b" -> "a")
+      .options(HttpOptions.connTimeout(100), HttpOptions.readTimeout(100))
     assertEquals(2, req.params.size)
   }
 
@@ -496,7 +511,7 @@ class AuthProxyServlet extends ProxyServlet {
     val httpReq = req.asInstanceOf[HttpServletRequest]
     val httpRes = res.asInstanceOf[HttpServletResponse]
     val proxyAuth = httpReq.getHeader("proxy-authorization")
-    if(proxyAuth == null || proxyAuth == HttpConstants.basicAuthValue("test", "test")){
+    if (proxyAuth == null || proxyAuth == HttpConstants.basicAuthValue("test", "test")) {
       super.service(req, res)
     }
     else {
