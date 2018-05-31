@@ -11,6 +11,8 @@ class HttpRealWorldTest {
       asString
     assertEquals(200, response.code)
     assertEquals(Some("gzip"), response.header("content-encoding"))
-    assertEquals("<?xml version=", response.body.substring(0, 14))
+    val expectedVariants = Set("<!DOCTYPE htm", "<?xml version")
+    val chunk = response.body.substring(0, 13)
+    assertTrue(s"Received $chunk...", expectedVariants contains chunk)
   }
 }
