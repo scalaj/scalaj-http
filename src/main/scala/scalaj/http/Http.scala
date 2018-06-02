@@ -14,12 +14,12 @@ package scalaj.http
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-  */
+ */
 
 import collection.immutable.TreeMap
 import java.lang.reflect.Field
 import java.net.{HttpCookie, HttpURLConnection, InetSocketAddress, Proxy, URL, URLEncoder, URLDecoder}
-import java.io.{DataOutputStream, InputStream, BufferedReader, InputStreamReader, ByteArrayInputStream,
+import java.io.{DataOutputStream, InputStream, BufferedReader, InputStreamReader, ByteArrayInputStream, 
   ByteArrayOutputStream}
 import java.security.cert.X509Certificate
 import javax.net.ssl.HttpsURLConnection
@@ -38,7 +38,7 @@ object HttpOptions {
   type HttpOption = HttpURLConnection => Unit
 
   val officialHttpMethods = Set("GET", "POST", "HEAD", "OPTIONS", "PUT", "DELETE", "TRACE")
-
+  
   private lazy val methodField: Field = {
     val m = classOf[HttpURLConnection].getDeclaredField("method")
     m.setAccessible(true)
@@ -58,25 +58,25 @@ object HttpOptions {
             del.setAccessible(true)
             methodField.set(del.get(cs), method)
           }
-        case c =>
+        case c => 
           methodField.set(c, method)
       }
     }
   }
   def connTimeout(timeout: Int): HttpOption = c => c.setConnectTimeout(timeout)
-
+  
   def readTimeout(timeout: Int): HttpOption = c => c.setReadTimeout(timeout)
-
+  
   def followRedirects(shouldFollow: Boolean): HttpOption = c => c.setInstanceFollowRedirects(shouldFollow)
 
   /** Ignore the cert chain */
   def allowUnsafeSSL: HttpOption = c => c match {
-    case httpsConn: HttpsURLConnection =>
+    case httpsConn: HttpsURLConnection => 
       val hv = new HostnameVerifier() {
         def verify(urlHostName: String, session: SSLSession) = true
       }
       httpsConn.setHostnameVerifier(hv)
-
+      
       val trustAllCerts = Array[TrustManager](new X509TrustManager() {
         def getAcceptedIssuers: Array[X509Certificate] = null
         def checkClientTrusted(certs: Array[X509Certificate], authType: String) = {}
@@ -92,7 +92,7 @@ object HttpOptions {
   /** Add your own SSLSocketFactory to do certificate authorization or pinning */
   def sslSocketFactory(sslSocketFactory: SSLSocketFactory): HttpOption = c => c match {
     case httpsConn: HttpsURLConnection =>
-      httpsConn.setSSLSocketFactory(sslSocketFactory)
+      httpsConn.setSSLSocketFactory(sslSocketFactory) 
     case _ => // do nothing
   }
 }
@@ -107,20 +107,20 @@ object MultiPart {
 }
 
 case class MultiPart(val name: String, val filename: String, val mime: String, val data: InputStream, val numBytes: Long,
-                     val writeCallBack: Long => Unit)
+  val writeCallBack: Long => Unit)
 
 case class HttpStatusException(
-                                code: Int,
-                                statusLine: String,
-                                body: String
-                              ) extends RuntimeException(code + " Error: " + statusLine)
+  code: Int,
+  statusLine: String,
+  body: String
+) extends RuntimeException(code + " Error: " + statusLine)
 
 /** Result of executing a [[scalaj.http.HttpRequest]]
   * @tparam T the body response since it can be parsed directly to things other than String
   * @param body the Http response body
   * @param code the http response code from the status line
   * @param headers the response headers
-  */
+*/
 case class HttpResponse[T](body: T, code: Int, headers: Map[String, IndexedSeq[String]]) {
   /** test if code is in between lower and upper inclusive */
   def isCodeInRange(lower: Int, upper: Int): Boolean = lower <= code && code <= upper
@@ -159,21 +159,21 @@ case class HttpResponse[T](body: T, code: Int, headers: Map[String, IndexedSeq[S
   }
 
   /** Throw a {{{scalaj.http.HttpStatusException}} if {{{isError}}} is true. Otherwise returns reference to self
-    *
-    * Useful if you don't want to handle 4xx or 5xx error codes from the server and just want bubble up an Exception
-    * instead. HttpException.body will just be body.toString.
-    *
-    * Allows for chaining like this: {{{val result: String = Http(url).asString.throwError.body}}}
-    */
+   *
+   * Useful if you don't want to handle 4xx or 5xx error codes from the server and just want bubble up an Exception
+   * instead. HttpException.body will just be body.toString.
+   *
+   * Allows for chaining like this: {{{val result: String = Http(url).asString.throwError.body}}}
+   */
   def throwError: HttpResponse[T] = throwIf(isError)
 
   /** Throw a {{{scalaj.http.HttpStatusException}} if {{{isServerError}}} is true. Otherwise returns reference to self
-    *
-    * Useful if you don't want to 5xx error codes from the server and just want bubble up an Exception instead.
-    * HttpException.body will just be body.toString.
-    *
-    * Allows for chaining like this: {{{val result: String = Http(url).asString.throwServerError.body}}}
-    */
+   *
+   * Useful if you don't want to 5xx error codes from the server and just want bubble up an Exception instead.
+   * HttpException.body will just be body.toString.
+   *
+   * Allows for chaining like this: {{{val result: String = Http(url).asString.throwServerError.body}}}
+   */
   def throwServerError: HttpResponse[T] = throwIf(isServerError)
 
   /** Get the response header value for a key */
@@ -207,19 +207,19 @@ case class HttpResponse[T](body: T, code: Int, headers: Map[String, IndexedSeq[S
   *
   */
 case class HttpRequest(
-                        url: String,
-                        method: String,
-                        connectFunc: HttpConstants.HttpExec,
-                        params: Seq[(String,String)],
-                        headers: Seq[(String,String)],
-                        options: Seq[HttpOptions.HttpOption],
-                        proxyConfig: Option[Proxy],
-                        charset: String,
-                        sendBufferSize: Int,
-                        urlBuilder: (HttpRequest => String),
-                        compress: Boolean,
-                        digestCreds: Option[(String, String)]
-                      ) {
+  url: String,
+  method: String,
+  connectFunc: HttpConstants.HttpExec,
+  params: Seq[(String,String)],
+  headers: Seq[(String,String)],
+  options: Seq[HttpOptions.HttpOption],
+  proxyConfig: Option[Proxy],
+  charset: String,
+  sendBufferSize: Int,
+  urlBuilder: (HttpRequest => String),
+  compress: Boolean,
+  digestCreds: Option[(String, String)]
+) {
   /** Add params to the GET querystring or POST form request */
   def params(p: Map[String, String]): HttpRequest = params(p.toSeq)
   /** Add params to the GET querystring or POST form request */
@@ -264,7 +264,7 @@ case class HttpRequest(
   /** Add digest authentication credentials */
   def digestAuth(user: String, password: String) = copy(digestCreds = Some(user -> password))
 
-
+  
   /** OAuth v1 sign the request with the consumer token */
   def oauth(consumer: Token): HttpRequest = oauth(consumer, None, None)
   /** OAuth v1 sign the request with with both the consumer and client token */
@@ -305,7 +305,7 @@ case class HttpRequest(
   def proxy(proxy: Proxy): HttpRequest = {
     copy(proxyConfig = Some(proxy))
   }
-
+  
   /** Change the charset used to encode the request and decode the response. UTF-8 by default */
   def charset(cs: String): HttpRequest = copy(charset = cs)
 
@@ -316,7 +316,7 @@ case class HttpRequest(
   def timeout(connTimeoutMs: Int, readTimeoutMs: Int): HttpRequest = options(
     Seq(HttpOptions.connTimeout(connTimeoutMs), HttpOptions.readTimeout(readTimeoutMs))
   )
-
+  
   /** Executes this request
     *
     * Keep in mind that if you're parsing the response to something other than String, you may hit parsing error if
@@ -326,8 +326,8 @@ case class HttpRequest(
     * @param parser function to process the response body InputStream. Will be used for all response codes
     */
   def execute[T](
-                  parser: InputStream => T = (is: InputStream) => HttpConstants.readString(is, charset)
-                ): HttpResponse[T] = {
+    parser: InputStream => T = (is: InputStream) => HttpConstants.readString(is, charset)
+  ): HttpResponse[T] = {
     exec((code: Int, headers: Map[String, IndexedSeq[String]], is: InputStream) => parser(is))
   }
 
@@ -344,10 +344,10 @@ case class HttpRequest(
   }
 
   private def doConnection[T](
-                               parser: (Int, Map[String, IndexedSeq[String]], InputStream) => T,
-                               urlToFetch: URL,
-                               connectFunc: (HttpRequest, HttpURLConnection) => Unit
-                             ): HttpResponse[T] = {
+    parser: (Int, Map[String, IndexedSeq[String]], InputStream) => T,
+    urlToFetch: URL,
+    connectFunc: (HttpRequest, HttpURLConnection) => Unit
+  ): HttpResponse[T] = {
     proxyConfig.map(urlToFetch.openConnection).getOrElse(urlToFetch.openConnection) match {
       case conn: HttpURLConnection =>
         conn.setInstanceFollowRedirects(false)
@@ -355,7 +355,7 @@ case class HttpRequest(
         if (compress) {
           conn.setRequestProperty("Accept-Encoding", "gzip,deflate")
         }
-        headers.reverse.foreach{ case (name, value) =>
+        headers.reverse.foreach{ case (name, value) => 
           conn.setRequestProperty(name, value)
         }
         options.reverse.foreach(_(conn))
@@ -375,10 +375,10 @@ case class HttpRequest(
   }
 
   private def toResponse[T](
-                             conn: HttpURLConnection,
-                             parser: (Int, Map[String, IndexedSeq[String]], InputStream) => T,
-                             inputStream: InputStream
-                           ): HttpResponse[T] = {
+    conn: HttpURLConnection,
+    parser: (Int, Map[String, IndexedSeq[String]], InputStream) => T,
+    inputStream: InputStream
+  ): HttpResponse[T] = {
     val responseCode: Int = conn.getResponseCode
     val headers: Map[String, IndexedSeq[String]] = getResponseHeaders(conn)
     val encoding: Option[String] = headers.get("Content-Encoding").flatMap(_.headOption)
@@ -440,7 +440,7 @@ case class HttpRequest(
       }.groupBy(_._1).mapValues(_.map(_._2).toIndexedSeq)
     }
   }
-
+  
   private def closeStreams(conn: HttpURLConnection): Unit = {
     try {
       conn.getInputStream.close
@@ -486,7 +486,7 @@ case class HttpRequest(
   def postMulti(parts: MultiPart*): HttpRequest = {
     copy(method="POST", connectFunc=MultiPartConnectFunc(parts), urlBuilder=PlainUrlFunc)
   }
-
+  
   /** Execute this request and parse http body as Array[Byte] */
   def asBytes: HttpResponse[Array[Byte]] = execute(HttpConstants.readBytes)
   /** Execute this request and parse http body as String using server charset or configured charset*/
@@ -562,8 +562,8 @@ case class MultiPartConnectFunc(parts: Seq[MultiPart]) extends Function2[HttpReq
     val paramBytes = req.params.map(p => (p._1.getBytes(req.charset) -> p._2.getBytes(req.charset)))
 
     val partBytes = parts.map(p => (p.name.getBytes(req.charset),
-      p.filename.getBytes(req.charset),
-      p))
+                                    p.filename.getBytes(req.charset),
+                                    p))
 
     // we need to pre-calculate the Content-Length of this HttpRequest because most servers don't
     // support chunked transfer
@@ -592,14 +592,14 @@ case class MultiPartConnectFunc(parts: Seq[MultiPart]) extends Function2[HttpReq
     }
 
     paramBytes.foreach {
-      case (name, value) =>
-        writeBytes(Pref + Boundary + CrLf)
-        writeBytes(ContentDisposition)
-        out.write(name)
-        writeBytes("\"" + CrLf)
-        writeBytes(CrLf)
-        out.write(value)
-        writeBytes(CrLf)
+     case (name, value) =>
+       writeBytes(Pref + Boundary + CrLf)
+       writeBytes(ContentDisposition)
+       out.write(name)
+       writeBytes("\"" + CrLf)
+       writeBytes(CrLf)
+       out.write(value)
+       writeBytes(CrLf)
     }
 
     val buffer = new Array[Byte](req.sendBufferSize)
@@ -678,7 +678,7 @@ object HttpConstants {
       case e: NoSuchMethodException =>
         false -> connClass.getDeclaredMethod("setFixedLengthStreamingMode", java.lang.Integer.TYPE)
     }
-    (conn, length) =>
+    (conn, length) => 
       if (isLong) {
         theMethod.invoke(conn, length: java.lang.Long)
       } else {
@@ -696,7 +696,7 @@ object HttpConstants {
   def basicAuthValue(user: String, password: String): String = {
     "Basic " + base64(user + ":" + password)
   }
-
+  
   def toQs(params: Seq[(String,String)], charset: String): String = {
     params.map(p => urlEncode(p._1, charset) + "=" + urlEncode(p._2, charset)).mkString("&")
   }
@@ -706,11 +706,11 @@ object HttpConstants {
       (if(url.contains("?")) "&" else "?") + toQs(params, charset)
     })
   }
-
+  
   def readString(is: InputStream): String = readString(is, utf8)
   /**
-    * [lifted from lift]
-    */
+   * [lifted from lift]
+   */
   def readString(is: InputStream, charset: String): String = {
     if (is == null) {
       ""
@@ -729,12 +729,12 @@ object HttpConstants {
       bos.toString
     }
   }
-
-
+  
+  
   /**
-    * [lifted from lift]
-    * Read all data from a stream into an Array[Byte]
-    */
+   * [lifted from lift]
+   * Read all data from a stream into an Array[Byte]
+   */
   def readBytes(in: InputStream): Array[Byte] = {
     if (in == null) {
       Array[Byte]()
@@ -783,8 +783,8 @@ object Http extends BaseHttp
   * Extends and override this class to setup your own defaults
   *
   * @param proxyConfig http proxy; defaults to the Java default proxy (see http://docs.oracle.com/javase/8/docs/technotes/guides/net/proxies.html).
-  *              You can use [[scalaj.http.HttpConstants.proxy]] to specify an alternate proxy, or specify
-  *              [[java.net.Proxy.NO_PROXY]] to explicitly use not use a proxy.
+ *              You can use [[scalaj.http.HttpConstants.proxy]] to specify an alternate proxy, or specify
+ *              [[java.net.Proxy.NO_PROXY]] to explicitly use not use a proxy.
   * @param options set things like timeouts, ssl handling, redirect following
   * @param charset charset to use for encoding request and decoding response
   * @param sendBufferSize buffer size for multipart posts
@@ -792,18 +792,18 @@ object Http extends BaseHttp
   * @param compress use HTTP Compression
   */
 class BaseHttp (
-                 proxyConfig: Option[Proxy] = None,
-                 options: Seq[HttpOptions.HttpOption] = HttpConstants.defaultOptions,
-                 charset: String = HttpConstants.utf8,
-                 sendBufferSize: Int = 4096,
-                 userAgent: String = s"scalaj-http/${BuildInfo.version}",
-                 compress: Boolean = true
-               ) {
+  proxyConfig: Option[Proxy] = None,
+  options: Seq[HttpOptions.HttpOption] = HttpConstants.defaultOptions,
+  charset: String = HttpConstants.utf8,
+  sendBufferSize: Int = 4096,
+  userAgent: String = s"scalaj-http/${BuildInfo.version}",
+  compress: Boolean = true
+) {
 
   /** Create a new [[scalaj.http.HttpRequest]]
-    *
-    * @param url the full url of the request. Querystring params can be added to a get request with the .params methods
-    */
+   *
+   * @param url the full url of the request. Querystring params can be added to a get request with the .params methods
+   */
   def apply(url: String): HttpRequest = HttpRequest(
     url = url,
     method = "GET",
@@ -817,5 +817,5 @@ class BaseHttp (
     urlBuilder = QueryStringUrlFunc,
     compress = compress,
     digestCreds = None
-  )
+  )  
 }
