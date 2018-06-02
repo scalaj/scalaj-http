@@ -44,7 +44,7 @@ object HttpOptions {
     m.setAccessible(true)
     m
   }
-
+  
   def method(methodOrig: String): HttpOption = c => {
     val method = methodOrig.toUpperCase
     if (officialHttpMethods.contains(method)) {
@@ -120,7 +120,7 @@ case class HttpStatusException(
   * @param body the Http response body
   * @param code the http response code from the status line
   * @param headers the response headers
-*/
+ */
 case class HttpResponse[T](body: T, code: Int, headers: Map[String, IndexedSeq[String]]) {
   /** test if code is in between lower and upper inclusive */
   def isCodeInRange(lower: Int, upper: Int): Boolean = lower <= code && code <= upper
@@ -210,7 +210,7 @@ case class HttpRequest(
   url: String,
   method: String,
   connectFunc: HttpConstants.HttpExec,
-  params: Seq[(String,String)],
+  params: Seq[(String,String)], 
   headers: Seq[(String,String)],
   options: Seq[HttpOptions.HttpOption],
   proxyConfig: Option[Proxy],

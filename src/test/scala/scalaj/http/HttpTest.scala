@@ -26,7 +26,7 @@ class HttpTest {
     url: String = "http://localhost"
   )(requestF: String => Unit): Unit = {
     val server = new Server(0)
-    server.setHandler(new AbstractHandler() {
+    server.setHandler(new AbstractHandler(){
       def handle(
         target: String,
         baseRequest: Request,
@@ -105,7 +105,7 @@ class HttpTest {
   @Test
   def basicAuthRequest: Unit = {
     val expectedBody = "Hello from authed servlet"
-    makeAuthenticatedRequest(new BasicAuthenticator(), "test", "test", expectedBody){ url =>
+    makeAuthenticatedRequest(new BasicAuthenticator(), "test", "test", expectedBody){url =>
       val result = Http(url).auth("test", "test").asString
       assertEquals(200, result.code)
       assertEquals(expectedBody, result.body)
@@ -115,7 +115,7 @@ class HttpTest {
   @Test
   def digestAuthRequest: Unit = {
     val expectedBody = "Hello from authed servlet"
-    makeAuthenticatedRequest(new DigestAuthenticator(), "test", "test", expectedBody){ url =>
+    makeAuthenticatedRequest(new DigestAuthenticator(), "test", "test", expectedBody){url =>
       val result = Http(url).digestAuth("test", "test").asString
       assertEquals("expecting success, but got " + result, 200, result.code)
       assertEquals(expectedBody, result.body)
@@ -125,7 +125,7 @@ class HttpTest {
   @Test
   def digestAuthRequestBadCreds: Unit = {
     // verify that we don't loop infinitely on bad creds
-    makeAuthenticatedRequest(new DigestAuthenticator(), "test", "test", "hi"){ url =>
+    makeAuthenticatedRequest(new DigestAuthenticator(), "test", "test", "hi"){url =>
       val result = Http(url).digestAuth("test", "wrong").asString
       assertEquals("expecting failure, but got " + result, 401, result.code)
     }
@@ -313,7 +313,7 @@ class HttpTest {
     val origOptionsLength = origOptions.length
     val newOptions: List[HttpOptions.HttpOption] = List(c => { }, c=> { }, c => {})
     val http2 = http.options(newOptions)
-
+    
     assertEquals(http2.options.length, origOptionsLength + 3)
     assertEquals(http2.options.take(3), newOptions)
     assertEquals(origOptions.length, origOptionsLength)
