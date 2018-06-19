@@ -12,33 +12,15 @@ case class BinResponse(
   cookies: Map[String, String]
 )
 
+
+
 class HttpBinTest {
 
 
-  // temporary helper method to work around ssl everywhere cert missing from
-  // local dev machine's cacerts file
+  // add lets encrypt to the chain since it's often missing from JVM cacerts
   def sslLeniency(httpReq: HttpRequest):HttpRequest = {
-    import java.security.cert.X509Certificate
-    import javax.net.ssl.SSLContext
-    import javax.net.ssl.TrustManager
-    import javax.net.ssl.X509TrustManager
-    import java.security.cert.X509Certificate
-    import javax.net.ssl.SSLSession
-    import javax.net.ssl.HostnameVerifier
-    import javax.net.ssl.HttpsURLConnection
-
-    // would like to do something here to merge or replace system certs with developer provided certs
-    val trustAllCerts = Array[TrustManager](new X509TrustManager() {
-      def getAcceptedIssuers: Array[X509Certificate] = null
-      def checkClientTrusted(certs: Array[X509Certificate], authType: String): Unit = {}
-      def checkServerTrusted(certs: Array[X509Certificate], authType: String): Unit = {}
-    })
-
-    val sc = SSLContext.getInstance("SSL")
-    sc.init(null, trustAllCerts, new java.security.SecureRandom())
-    httpReq.option(HttpOptions.sslSocketFactory(sc.getSocketFactory()))
+    httpReq.option(HttpOptions.sslSocketFactory(UnifiedTrustManager.createSocketFactory("lets-encrypt-x3-cross-signed.der")))
   }
-
 
   @Test
   def headRequest: Unit = {
