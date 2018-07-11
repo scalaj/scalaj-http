@@ -498,7 +498,7 @@ case class HttpRequest(
   def asParams: HttpResponse[Seq[(String, String)]] = execute(HttpConstants.readParams(_, charset))
   /** Execute this request and parse http body as query string key-value pairs */
   def asParamMap: HttpResponse[Map[String, String]] = execute(HttpConstants.readParamMap(_, charset))
-  /** Execute this request and parse http body as a querystring containing oauth_token and oauth_token_secret tupple */
+  /** Execute this request and parse http body as a querystring containing oauth_token and oauth_token_secret tuple */
   def asToken: HttpResponse[Token] = execute(HttpConstants.readToken)
 }
 
