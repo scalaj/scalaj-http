@@ -3,9 +3,9 @@ package scalaj.http
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, IOException}
 import java.net.{HttpCookie, InetSocketAddress, Proxy}
 import java.util.zip.GZIPOutputStream
+
 import javax.servlet.{ServletRequest, ServletResponse}
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
-
 import org.eclipse.jetty.security.{ConstraintMapping, ConstraintSecurityHandler, HashLoginService}
 import org.eclipse.jetty.security.authentication.{BasicAuthenticator, DigestAuthenticator, LoginAuthenticator}
 import org.eclipse.jetty.server.{Request, Server}
@@ -15,8 +15,9 @@ import org.eclipse.jetty.servlets.ProxyServlet
 import org.eclipse.jetty.util.security.{Constraint, Credential}
 import org.junit.Assert._
 import org.junit.Test
-
 import scalaj.http.HttpConstants._
+
+import scala.util.Try
 
 
 class HttpTest {
@@ -468,6 +469,14 @@ class HttpTest {
   @Test(expected = classOf[scalaj.http.HttpStatusException])
   def throwServerErrorThrowsWith400: Unit = {
     HttpResponse("hi", 400, Map.empty).throwError
+  }
+
+  @Test
+  def throwServerErrorThrowsWithStatusAndBody: Unit = {
+    val httpResp = HttpResponse("stacktrace", 400, Map("Status" -> IndexedSeq("HTTP/1.1 400 Bad Request")))
+    val statusException = Try(httpResp.throwError).failed.get
+    assertEquals(s"${httpResp.code} Error: ${httpResp.headers("Status")(0)} Details: ${httpResp.body}",
+      statusException.getMessage)
   }
 
   @Test
