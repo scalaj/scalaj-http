@@ -1,3 +1,9 @@
+2.4.1
+------
+release: 29 July 2018
+
+ - Fix for oauth signing of multi-part posts
+
 2.4.0
 ------
 release: 29 April 2018
