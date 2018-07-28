@@ -52,8 +52,15 @@ object OAuth {
     verifier.foreach{v =>
       oauthParams +:= (("oauth_verifier", v))
     }
-    
-    val baseString = Seq(req.method.toUpperCase,normalizeUrl(new URL(req.url)),normalizeParams(req.params ++ oauthParams)).map(percentEncode).mkString("&")
+    // oauth1.0 specifies that only querystring and x-www-form-urlencoded body parameters should be included in signature
+    // req.params from multi-part requests are included in the multi-part request body and should NOT be included
+    val allTheParams = if (req.connectFunc.isInstanceOf[MultiPartConnectFunc]) {
+      oauthParams
+    } else {
+      req.params ++ oauthParams
+    }
+
+    val baseString = Seq(req.method.toUpperCase,normalizeUrl(new URL(req.url)),normalizeParams(allTheParams)).map(percentEncode).mkString("&")
     
     val keyString = percentEncode(consumer.secret) + "&" + token.map(t => percentEncode(t.secret)).getOrElse("")
     val key = new SecretKeySpec(keyString.getBytes(HttpConstants.utf8), MAC)
