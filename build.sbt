@@ -7,37 +7,17 @@ organization := "org.scalaj"
 scalaVersion := "2.12.6"
 
 libraryDependencies ++= Seq(
-  "junit"                % "junit"              % "4.12"             % "test",
-  "com.novocode"         % "junit-interface"    % "0.11"             % "test",
-  "org.eclipse.jetty"    % "jetty-server"       % "8.1.19.v20160209" % "test",
-  "org.eclipse.jetty"    % "jetty-servlet"      % "8.1.19.v20160209" % "test",
-  "org.eclipse.jetty"    % "jetty-servlets"     % "8.1.19.v20160209" % "test"
+  "junit"                         % "junit"                % "4.12"             % "test",
+  "com.novocode"                  % "junit-interface"      % "0.11"             % "test",
+  "org.eclipse.jetty"             % "jetty-server"         % "8.1.19.v20160209" % "test",
+  "org.eclipse.jetty"             % "jetty-servlet"        % "8.1.19.v20160209" % "test",
+  "org.eclipse.jetty"             % "jetty-servlets"       % "8.1.19.v20160209" % "test",
+  "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.9.6"            % "test"
 )
-
-libraryDependencies ++= {
-  CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((2, v)) if v <= 12 =>
-      Seq("com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.8.7" % "test")
-    case _ =>
-      Nil
-  }
-}
 
 enablePlugins(BuildInfoPlugin)
 buildInfoKeys := Seq[BuildInfoKey](version)
 buildInfoPackage := "scalaj.http"
-
-// TODO enable all tests when released jackson-module-scala for Scala 2.13
-sources in Test := {
-  val testSources = (sources in Test).value
-  CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((2, v)) if v <= 12 =>
-      testSources
-    case _ =>
-      val excludeTests = Set("HttpBinTest.scala", "Json.scala")
-      testSources.filterNot(f => excludeTests(f.getName))
-  }
-}
 
 crossScalaVersions := Seq("2.10.7", "2.11.12", "2.12.6", "2.13.0-M4")
 
