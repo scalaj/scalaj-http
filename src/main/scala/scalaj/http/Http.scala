@@ -113,7 +113,7 @@ case class HttpStatusException(
   code: Int,
   statusLine: String,
   body: String
-) extends RuntimeException(code + " Error: " + statusLine)
+) extends RuntimeException(s"${code} Error: ${statusLine}")
 
 /** Result of executing a [[scalaj.http.HttpRequest]]
   * @tparam T the body response since it can be parsed directly to things other than String
