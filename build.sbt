@@ -4,7 +4,7 @@ version := "2.4.1"
 
 organization := "org.scalaj"
 
-scalaVersion := "2.12.6"
+scalaVersion := "2.12.7"
 
 libraryDependencies ++= Seq(
   "junit"                         % "junit"                % "4.12"             % "test",
@@ -19,7 +19,7 @@ enablePlugins(BuildInfoPlugin)
 buildInfoKeys := Seq[BuildInfoKey](version)
 buildInfoPackage := "scalaj.http"
 
-crossScalaVersions := Seq("2.10.7", "2.11.12", "2.12.6", "2.13.0-M4")
+crossScalaVersions := Seq("2.10.7", "2.11.12", "2.12.7", "2.13.0-M4")
 
 javacOptions ++= Seq("-source", "1.7", "-target", "1.7")
 
