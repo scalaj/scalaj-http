@@ -12,7 +12,7 @@ libraryDependencies ++= Seq(
   "org.eclipse.jetty"             % "jetty-server"         % "8.1.19.v20160209" % "test",
   "org.eclipse.jetty"             % "jetty-servlet"        % "8.1.19.v20160209" % "test",
   "org.eclipse.jetty"             % "jetty-servlets"       % "8.1.19.v20160209" % "test",
-  "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.9.6"            % "test"
+  "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.9.7"            % "test"
 )
 
 enablePlugins(BuildInfoPlugin)
