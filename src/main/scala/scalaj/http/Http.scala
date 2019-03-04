@@ -30,6 +30,7 @@ import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 import javax.net.ssl.HostnameVerifier
 import java.util.zip.{GZIPInputStream, InflaterInputStream}
+import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 import scala.util.matching.Regex
 
@@ -469,14 +470,21 @@ case class HttpRequest(
   /** Raw byte data POST request */
   def postData(data: Array[Byte]): HttpRequest = body(data).method("POST")
 
+  /** POST request with body served from an inputstream */
+  def postData(data: InputStream): HttpRequest = body(data).method("POST")
+
   /** Raw data PUT request. String bytes written out using configured charset */
   def put(data: String): HttpRequest = body(data).method("PUT")
 
   /** Raw byte data PUT request */
   def put(data: Array[Byte]): HttpRequest = body(data).method("PUT")
 
+  /** PUT request with body served from an inputstream */
+  def put(data: InputStream): HttpRequest = body(data).method("PUT")
+
   private def body(data: String): HttpRequest = copy(connectFunc=StringBodyConnectFunc(data))
   private def body(data: Array[Byte]): HttpRequest = copy(connectFunc=ByteBodyConnectFunc(data))
+  private def body(data: InputStream): HttpRequest = copy(connectFunc=InputStreamBodyConnectFunc(data))
 
   /** Multipart POST request.
     *
@@ -539,6 +547,30 @@ case class StringBodyConnectFunc(data: String) extends Function2[HttpRequest, Ht
   }
 
   override def toString = "StringBodyConnectFunc(" + data + ")"
+}
+
+case class InputStreamBodyConnectFunc(inputStream: InputStream) extends Function2[HttpRequest, HttpURLConnection, Unit] {
+  def apply(req: HttpRequest, conn: HttpURLConnection): Unit = {
+    conn.setDoOutput(true)
+    conn.connect()
+
+    recursive(new Array[Byte](req.sendBufferSize), conn.getOutputStream, 0L)
+  }
+
+  @tailrec
+  private def recursive(buffer: Array[Byte], out: OutputStream, writtenBytes: Long): Unit = {
+    val len = inputStream.read(buffer)
+    var bytesWritten = writtenBytes
+    if (len > 0) {
+      out.write(buffer, 0, len)
+      bytesWritten += len
+    }
+
+    if (len >= 0)
+      recursive(buffer, out, bytesWritten)
+  }
+
+  override def toString = s"InputStreamBodyConnectFunc($inputStream)"
 }
 
 case class MultiPartConnectFunc(parts: Seq[MultiPart]) extends Function2[HttpRequest, HttpURLConnection, Unit] {
