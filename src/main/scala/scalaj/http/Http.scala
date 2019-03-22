@@ -670,22 +670,7 @@ object HttpConstants {
   )
 
   val setFixedLengthStreamingMode: (HttpURLConnection, Long) => Unit = {
-    val connClass = classOf[HttpURLConnection]
-    val (isLong, theMethod) = try {
-      true -> connClass.getDeclaredMethod("setFixedLengthStreamingMode", java.lang.Long.TYPE)
-    } catch {
-      case e: NoSuchMethodException =>
-        false -> connClass.getDeclaredMethod("setFixedLengthStreamingMode", java.lang.Integer.TYPE)
-    }
-    (conn, length) => 
-      if (isLong) {
-        theMethod.invoke(conn, length: java.lang.Long)
-      } else {
-        if (length > Int.MaxValue) {
-          throw new RuntimeException("Failing attempt to upload file greater than 2GB on java version < 1.7")
-        }
-        theMethod.invoke(conn, length.toInt: java.lang.Integer)
-      }
+    case (connection, contentLength) => connection.setFixedLengthStreamingMode(contentLength)
   }
 
   def urlEncode(name: String, charset: String): String = URLEncoder.encode(name, charset)
