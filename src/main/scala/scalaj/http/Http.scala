@@ -549,31 +549,44 @@ case class StringBodyConnectFunc(data: String) extends Function2[HttpRequest, Ht
   override def toString = "StringBodyConnectFunc(" + data + ")"
 }
 
-case class InputStreamBodyConnectFunc(inputStream: InputStream) extends Function2[HttpRequest, HttpURLConnection, Unit] {
+trait StreamUtils {
+  protected[http] def copyStream(inputStream: InputStream, outputStream: OutputStream, buffer: Array[Byte])
+                                (writeCallBack: Long => Unit): Unit = {
+    @tailrec
+    def recursive(writtenBytes: Long): Unit = {
+      val len = inputStream.read(buffer)
+      var bytesWritten = writtenBytes
+      if (len > 0) {
+        outputStream.write(buffer, 0, len)
+        bytesWritten += len
+        writeCallBack(bytesWritten)
+      }
+
+      if (len >= 0)
+        recursive(bytesWritten)
+    }
+
+    recursive(0L)
+  }
+
+  protected[http] def writeStructuralBytes(s: String)(implicit out: OutputStream): Unit = {
+    // this is only used for the structural pieces, not user input, so should be plain old ascii
+    out.write(s.getBytes(HttpConstants.utf8))
+  }
+}
+
+case class InputStreamBodyConnectFunc(inputStream: InputStream) extends Function2[HttpRequest, HttpURLConnection, Unit] with StreamUtils {
   def apply(req: HttpRequest, conn: HttpURLConnection): Unit = {
     conn.setDoOutput(true)
     conn.connect()
 
-    recursive(new Array[Byte](req.sendBufferSize), conn.getOutputStream, 0L)
-  }
-
-  @tailrec
-  private def recursive(buffer: Array[Byte], out: OutputStream, writtenBytes: Long): Unit = {
-    val len = inputStream.read(buffer)
-    var bytesWritten = writtenBytes
-    if (len > 0) {
-      out.write(buffer, 0, len)
-      bytesWritten += len
-    }
-
-    if (len >= 0)
-      recursive(buffer, out, bytesWritten)
+    copyStream(inputStream, conn.getOutputStream, new Array[Byte](req.sendBufferSize))(_ => ())
   }
 
   override def toString = s"InputStreamBodyConnectFunc($inputStream)"
 }
 
-case class MultiPartConnectFunc(parts: Seq[MultiPart]) extends Function2[HttpRequest, HttpURLConnection, Unit] {
+case class MultiPartConnectFunc(parts: Seq[MultiPart]) extends Function2[HttpRequest, HttpURLConnection, Unit] with StreamUtils {
   def apply(req: HttpRequest, conn: HttpURLConnection): Unit = {
     val CrLf = "\r\n"
     val Pref = "--"
@@ -615,56 +628,37 @@ case class MultiPartConnectFunc(parts: Seq[MultiPart]) extends Function2[HttpReq
 
     HttpConstants.setFixedLengthStreamingMode(conn, totalBytesToSend)
 
-    val out = conn.getOutputStream()
-
-    def writeBytes(s: String): Unit = {
-      // this is only used for the structural pieces, not user input, so should be plain old ascii
-      out.write(s.getBytes(HttpConstants.utf8))
-    }
+    implicit val out: OutputStream = conn.getOutputStream
 
     paramBytes.foreach {
      case (name, value) =>
-       writeBytes(Pref + Boundary + CrLf)
-       writeBytes(ContentDisposition)
+       writeStructuralBytes(Pref + Boundary + CrLf)
+       writeStructuralBytes(ContentDisposition)
        out.write(name)
-       writeBytes("\"" + CrLf)
-       writeBytes(CrLf)
+       writeStructuralBytes("\"" + CrLf)
+       writeStructuralBytes(CrLf)
        out.write(value)
-       writeBytes(CrLf)
+       writeStructuralBytes(CrLf)
     }
 
     val buffer = new Array[Byte](req.sendBufferSize)
 
     partBytes.foreach {
       case(name, filename, part) =>
-        writeBytes(Pref + Boundary + CrLf)
-        writeBytes(ContentDisposition)
+        writeStructuralBytes(Pref + Boundary + CrLf)
+        writeStructuralBytes(ContentDisposition)
         out.write(name)
-        writeBytes(Filename)
+        writeStructuralBytes(Filename)
         out.write(filename)
-        writeBytes("\"" + CrLf)
-        writeBytes(ContentType + part.mime + CrLf + CrLf)
+        writeStructuralBytes("\"" + CrLf)
+        writeStructuralBytes(ContentType + part.mime + CrLf + CrLf)
 
-        var bytesWritten: Long = 0L
-        def readOnce(): Unit = {
-          val len = part.data.read(buffer)
-          if (len > 0) {
-            out.write(buffer, 0, len)
-            bytesWritten += len
-            part.writeCallBack(bytesWritten)
-          }
+        copyStream(part.data, out, buffer)(part.writeCallBack)
 
-          if (len >= 0) {
-            readOnce()
-          }
-        }
-
-        readOnce()
-
-        writeBytes(CrLf)
+        writeStructuralBytes(CrLf)
     }
 
-    writeBytes(Pref + Boundary + Pref + CrLf)
+    writeStructuralBytes(Pref + Boundary + Pref + CrLf)
 
     out.flush()
     out.close()
