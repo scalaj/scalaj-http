@@ -471,7 +471,7 @@ case class HttpRequest(
   def postData(data: Array[Byte]): HttpRequest = body(data).method("POST")
 
   /** POST request with body served from an inputstream */
-  def postData(data: InputStream): HttpRequest = body(data).method("POST")
+  def postData(data: InputStream, writeCallBack: Long => Unit = _ => ()): HttpRequest = body(data, writeCallBack).method("POST")
 
   /** Raw data PUT request. String bytes written out using configured charset */
   def put(data: String): HttpRequest = body(data).method("PUT")
@@ -480,11 +480,11 @@ case class HttpRequest(
   def put(data: Array[Byte]): HttpRequest = body(data).method("PUT")
 
   /** PUT request with body served from an inputstream */
-  def put(data: InputStream): HttpRequest = body(data).method("PUT")
+  def put(data: InputStream, writeCallBack: Long => Unit = _ => ()): HttpRequest = body(data, writeCallBack).method("PUT")
 
   private def body(data: String): HttpRequest = copy(connectFunc=StringBodyConnectFunc(data))
   private def body(data: Array[Byte]): HttpRequest = copy(connectFunc=ByteBodyConnectFunc(data))
-  private def body(data: InputStream): HttpRequest = copy(connectFunc=InputStreamBodyConnectFunc(data))
+  private def body(data: InputStream, writeCallBack: Long => Unit = _ => ()): HttpRequest = copy(connectFunc=InputStreamBodyConnectFunc(data, writeCallBack))
 
   /** Multipart POST request.
     *
@@ -575,12 +575,13 @@ trait StreamUtils {
   }
 }
 
-case class InputStreamBodyConnectFunc(inputStream: InputStream) extends Function2[HttpRequest, HttpURLConnection, Unit] with StreamUtils {
+case class InputStreamBodyConnectFunc(inputStream: InputStream,
+                                      writeCallBack: Long => Unit = _ => ()) extends Function2[HttpRequest, HttpURLConnection, Unit] with StreamUtils {
   def apply(req: HttpRequest, conn: HttpURLConnection): Unit = {
     conn.setDoOutput(true)
     conn.connect()
 
-    copyStream(inputStream, conn.getOutputStream, new Array[Byte](req.sendBufferSize))(_ => ())
+    copyStream(inputStream, conn.getOutputStream, new Array[Byte](req.sendBufferSize))(writeCallBack)
   }
 
   override def toString = s"InputStreamBodyConnectFunc($inputStream)"
