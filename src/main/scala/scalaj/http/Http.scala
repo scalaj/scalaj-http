@@ -471,7 +471,7 @@ case class HttpRequest(
   def postData(data: Array[Byte]): HttpRequest = body(data).method("POST")
 
   /** POST request with body served from an inputstream */
-  def postData(data: InputStream, writeCallBack: Long => Unit = _ => ()): HttpRequest = body(data, writeCallBack).method("POST")
+  def postData(data: InputStream, streamLength: Option[Long] = None, writeCallBack: Long => Unit = _ => ()): HttpRequest = body(data, streamLength, writeCallBack).method("POST")
 
   /** Raw data PUT request. String bytes written out using configured charset */
   def put(data: String): HttpRequest = body(data).method("PUT")
@@ -480,11 +480,11 @@ case class HttpRequest(
   def put(data: Array[Byte]): HttpRequest = body(data).method("PUT")
 
   /** PUT request with body served from an inputstream */
-  def put(data: InputStream, writeCallBack: Long => Unit = _ => ()): HttpRequest = body(data, writeCallBack).method("PUT")
+  def put(data: InputStream, streamLength: Option[Long] = None, writeCallBack: Long => Unit = _ => ()): HttpRequest = body(data, streamLength, writeCallBack).method("PUT")
 
   private def body(data: String): HttpRequest = copy(connectFunc=StringBodyConnectFunc(data))
   private def body(data: Array[Byte]): HttpRequest = copy(connectFunc=ByteBodyConnectFunc(data))
-  private def body(data: InputStream, writeCallBack: Long => Unit = _ => ()): HttpRequest = copy(connectFunc=InputStreamBodyConnectFunc(data, writeCallBack))
+  private def body(data: InputStream, streamLength: Option[Long] = None, writeCallBack: Long => Unit = _ => ()): HttpRequest = copy(connectFunc=InputStreamBodyConnectFunc(data, streamLength, writeCallBack))
 
   /** Multipart POST request.
     *
@@ -576,12 +576,19 @@ trait StreamUtils {
 }
 
 case class InputStreamBodyConnectFunc(inputStream: InputStream,
+                                      streamLength: Option[Long] = None,
                                       writeCallBack: Long => Unit = _ => ()) extends Function2[HttpRequest, HttpURLConnection, Unit] with StreamUtils {
   def apply(req: HttpRequest, conn: HttpURLConnection): Unit = {
+    val bufferSize = req.sendBufferSize
+
+    streamLength match {
+      case Some(value) => conn.setFixedLengthStreamingMode(value)
+      case None => conn.setChunkedStreamingMode(bufferSize)
+    }
     conn.setDoOutput(true)
     conn.connect()
 
-    copyStream(inputStream, conn.getOutputStream, new Array[Byte](req.sendBufferSize))(writeCallBack)
+    copyStream(inputStream, conn.getOutputStream, new Array[Byte](bufferSize))(writeCallBack)
   }
 
   override def toString = s"InputStreamBodyConnectFunc($inputStream)"
