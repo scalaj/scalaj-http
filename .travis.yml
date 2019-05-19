@@ -13,5 +13,5 @@ matrix:
     jdk: oraclejdk11
   - scala: 2.12.8
     jdk: oraclejdk8
-  - scala: 2.13.0-M4
+  - scala: 2.13.0-RC2
     jdk: oraclejdk8
