@@ -11,15 +11,22 @@ libraryDependencies ++= Seq(
   "com.novocode"                  % "junit-interface"      % "0.11"             % "test",
   "org.eclipse.jetty"             % "jetty-server"         % "8.1.19.v20160209" % "test",
   "org.eclipse.jetty"             % "jetty-servlet"        % "8.1.19.v20160209" % "test",
-  "org.eclipse.jetty"             % "jetty-servlets"       % "8.1.19.v20160209" % "test",
-  "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.9.7"            % "test"
+  "org.eclipse.jetty"             % "jetty-servlets"       % "8.1.19.v20160209" % "test"
 )
+
+libraryDependencies += {
+  if (scalaVersion.value == "2.13.0-RC2") {
+    "com.fasterxml.jackson.module" % "jackson-module-scala_2.13.0-RC1" % "2.9.8"  % "test"
+  } else {
+    "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.9.7"            % "test"
+  }
+}
 
 enablePlugins(BuildInfoPlugin)
 buildInfoKeys := Seq[BuildInfoKey](version)
 buildInfoPackage := "scalaj.http"
 
-crossScalaVersions := Seq("2.10.7", "2.11.12", "2.12.8", "2.13.0-M4")
+crossScalaVersions := Seq("2.10.7", "2.11.12", "2.12.8", "2.13.0-RC2")
 
 javacOptions ++= Seq("-source", "1.7", "-target", "1.7")
 
