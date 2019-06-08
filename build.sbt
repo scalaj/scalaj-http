@@ -15,8 +15,8 @@ libraryDependencies ++= Seq(
 )
 
 libraryDependencies += {
-  if (scalaVersion.value == "2.13.0-RC2") {
-    "com.fasterxml.jackson.module" % "jackson-module-scala_2.13.0-RC1" % "2.9.8"  % "test"
+  if (scalaVersion.value == "2.13.0") {
+    "com.fasterxml.jackson.module" % "jackson-module-scala_2.13.0-RC3" % "2.9.9"  % "test"
   } else {
     "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.9.7"            % "test"
   }
@@ -26,7 +26,7 @@ enablePlugins(BuildInfoPlugin)
 buildInfoKeys := Seq[BuildInfoKey](version)
 buildInfoPackage := "scalaj.http"
 
-crossScalaVersions := Seq("2.10.7", "2.11.12", "2.12.8", "2.13.0-RC2")
+crossScalaVersions := Seq("2.10.7", "2.11.12", "2.12.8", "2.13.0")
 
 javacOptions ++= Seq("-source", "1.7", "-target", "1.7")
 
