@@ -15,11 +15,7 @@ libraryDependencies ++= Seq(
 )
 
 libraryDependencies += {
-  if (scalaVersion.value == "2.13.0") {
-    "com.fasterxml.jackson.module" % "jackson-module-scala_2.13.0-RC3" % "2.9.9"  % "test"
-  } else {
-    "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.9.7"            % "test"
-  }
+  "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.9.9"            % "test"
 }
 
 enablePlugins(BuildInfoPlugin)
