@@ -1,3 +1,11 @@
+2.4.2
+------
+release: 15 June 2019
+
+ - Scala 2.13 support
+ - Removed Java 1.6 workaround that was causing security manager issue (@odisseus)
+
+
 2.4.1
 ------
 release: 29 July 2018
