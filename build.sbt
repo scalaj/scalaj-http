@@ -9,9 +9,9 @@ scalaVersion := "2.12.8"
 libraryDependencies ++= Seq(
   "junit"                         % "junit"                % "4.12"             % "test",
   "com.novocode"                  % "junit-interface"      % "0.11"             % "test",
-  "org.eclipse.jetty"             % "jetty-server"         % "8.1.19.v20160209" % "test",
-  "org.eclipse.jetty"             % "jetty-servlet"        % "8.1.19.v20160209" % "test",
-  "org.eclipse.jetty"             % "jetty-servlets"       % "8.1.19.v20160209" % "test"
+  "org.eclipse.jetty"             % "jetty-server"         % "8.2.0.v20160908"  % "test",
+  "org.eclipse.jetty"             % "jetty-servlet"        % "8.2.0.v20160908"  % "test",
+  "org.eclipse.jetty"             % "jetty-servlets"       % "8.2.0.v20160908"  % "test"
 )
 
 libraryDependencies += {
