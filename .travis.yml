@@ -1,5 +1,6 @@
 language: scala
 sudo: false
+dist: trusty
 scala:
   - 2.10.7
   - 2.11.12
