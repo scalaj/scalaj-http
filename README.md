@@ -1,6 +1,7 @@
 [![Build Status](https://travis-ci.org/scalaj/scalaj-http.png)](https://travis-ci.org/scalaj/scalaj-http)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.scalaj/scalaj-http_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.scalaj/scalaj-http_2.12)
 [![Javadocs](https://javadoc.io/badge/org.scalaj/scalaj-http_2.12.svg)](https://javadoc.io/doc/org.scalaj/scalaj-http_2.12)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fscalaj%2Fscalaj-http.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fscalaj%2Fscalaj-http?ref=badge_shield)
 
 # Simplified Http
 
@@ -226,3 +227,7 @@ object MyHttp extends BaseHttp (
 Some of the headers are locked by the java library for "security" reasons and the behavior is that the library will just silently fail to set them. You can workaround by doing one of the following:
    * Start your JVM with this command line parameter: `-Dsun.net.http.allowRestrictedHeaders=true`
    * or, do this first thing at runtime: `System.setProperty("sun.net.http.allowRestrictedHeaders", "true")`
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fscalaj%2Fscalaj-http.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fscalaj%2Fscalaj-http?ref=badge_large)
