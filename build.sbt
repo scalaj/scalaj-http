@@ -4,7 +4,7 @@ version := "2.4.2"
 
 organization := "org.scalaj"
 
-scalaVersion := "2.12.8"
+scalaVersion := "2.13.6"
 
 libraryDependencies ++= Seq(
   "junit"                         % "junit"                % "4.12"             % "test",
