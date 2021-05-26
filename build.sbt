@@ -15,7 +15,7 @@ libraryDependencies ++= Seq(
 )
 
 libraryDependencies += {
-  "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.9.9"            % "test"
+  "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.13.0-SNAPSHOT"  % "test"
 }
 
 enablePlugins(BuildInfoPlugin)
@@ -33,6 +33,8 @@ scalacOptions ++= Seq(
 )
 
 scalacOptions in (Compile, doc) ++= Seq("-doc-root-content", baseDirectory.value+"/root-doc.txt")
+
+resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 
 publishTo := {
   val nexus = "https://oss.sonatype.org/"
