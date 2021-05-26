@@ -22,7 +22,7 @@ enablePlugins(BuildInfoPlugin)
 buildInfoKeys := Seq[BuildInfoKey](version)
 buildInfoPackage := "scalaj.http"
 
-crossScalaVersions := Seq("2.10.7", "2.11.12", "2.12.8", "2.13.0")
+crossScalaVersions := Seq("2.11.12", "2.12.13", "2.13.6", "3.0.0")
 
 javacOptions ++= Seq("-source", "1.7", "-target", "1.7")
 
