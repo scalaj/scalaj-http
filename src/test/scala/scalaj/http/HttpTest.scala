@@ -440,7 +440,7 @@ class HttpTest {
 
   }
 
-  @Test(expected = classOf[java.net.ConnectException])
+  @Test(expected = classOf[java.net.SocketTimeoutException])
   def serverDown: Unit = {
     val response = Http("http://localhost:9999/").execute()
     assertEquals("", response.body)
