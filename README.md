@@ -1,11 +1,23 @@
-[![Build Status](https://travis-ci.org/scalaj/scalaj-http.png)](https://travis-ci.org/scalaj/scalaj-http)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.scalaj/scalaj-http_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.scalaj/scalaj-http_2.12)
 [![Javadocs](https://javadoc.io/badge/org.scalaj/scalaj-http_2.12.svg)](https://javadoc.io/doc/org.scalaj/scalaj-http_2.12)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fscalaj%2Fscalaj-http.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fscalaj%2Fscalaj-http?ref=badge_shield)
 
+# THIS LIBRARY IS DEPRECATED
+
+As of April 2022, there are many better options for making HTTP calls in scala.
+
+- [sttp](https://github.com/softwaremill/sttp) or [http4s](https://github.com/http4s/http4s) might be good scala first options
+- Or just ise the built-in [HttpClient](https://docs.oracle.com/en/java/javase/12/docs/api/java.net.http/java/net/http/HttpClient.html) library if you're using JDK 11+ and want minimal deps
+
+If you've inherited a codebase that's using this library, I would suggest just copying the source code
+(it's only four files, and no depedencies) and make whatever fixes/changes you want.
+
+Good luck!
+
 # Simplified Http
 
 This is a fully featured http client for Scala which wraps [java.net.HttpURLConnection](https://docs.oracle.com/javase/8/docs/api/java/net/HttpURLConnection.html)
+
 
 Features:
 * Zero dependencies
@@ -21,9 +33,6 @@ Non-Features:
 
 Works in Google AppEngine and Android environments.
 
-**_Note:_ 2.x.x is a new major version which is both syntactically and behaviorally different than the 0.x.x version.**
-
-Previous version is branched here: https://github.com/scalaj/scalaj-http/tree/0.3.x
 
 Big differences:
 * Executing the request always returns a HttpResponse[T] instance that contains the response-code, headers, and body
@@ -48,11 +57,11 @@ libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "2.4.2"
   <groupId>org.scalaj</groupId>
   <artifactId>scalaj-http_${scala.version}</artifactId>
   <version>2.4.2</version>
-</dependency>  
+</dependency>
 ```
 
 If you're including this in some other public library. Do your users a favor and change the fully qualified name
-so they don't have version conflicts if they're using a different version of this library. 
+so they don't have version conflicts if they're using a different version of this library.
 The easiest way to do that is just to copy the source into your project :)
 
 ## Usage
@@ -61,7 +70,7 @@ The easiest way to do that is just to copy the source into your project :)
 
 ```scala
 import scalaj.http._
-  
+
 val response: HttpResponse[String] = Http("http://foo.com/search").param("q","monkeys").asString
 response.body
 response.code
@@ -71,7 +80,7 @@ response.cookies
 
 ### Immutable Request
 
-```Http(url)``` is just shorthand for a ```Http.apply``` which returns an immutable instance of ```HttpRequest```.  
+```Http(url)``` is just shorthand for a ```Http.apply``` which returns an immutable instance of ```HttpRequest```.
 You can create a ```HttpRequest``` and reuse it:
 
 ```scala
@@ -83,8 +92,8 @@ val responseTwo = request.asString
 
 #### Additive Request
 
-All the "modification" methods of a ```HttpRequest``` are actually returning a new instance. The param(s), option(s), header(s) 
-methods always add to their respective sets. So calling ```.headers(newHeaders)``` will return a ```HttpRequest``` instance 
+All the "modification" methods of a ```HttpRequest``` are actually returning a new instance. The param(s), option(s), header(s)
+methods always add to their respective sets. So calling ```.headers(newHeaders)``` will return a ```HttpRequest``` instance
 that has ```newHeaders``` appended to the previous ```req.headers```
 
 
@@ -147,7 +156,7 @@ Http(url).postMulti(MultiPart("photo", "headshot.png", "image/png", fileBytes)).
 You can also stream uploads and get a callback on progress:
 
 ```scala
-Http(url).postMulti(MultiPart("photo", "headshot.png", "image/png", inputStream, bytesInStream, 
+Http(url).postMulti(MultiPart("photo", "headshot.png", "image/png", inputStream, bytesInStream,
   lenWritten => {
     println(s"Wrote $lenWritten bytes out of $bytesInStream total for headshot.png")
   })).asString
@@ -191,12 +200,12 @@ val response = Http(url).proxy(proxyHost, proxyPort).asString
 
 ### Other custom options
 
-The ```.option()``` method takes a function of type ```HttpURLConnection => Unit``` so 
+The ```.option()``` method takes a function of type ```HttpURLConnection => Unit``` so
 you can manipulate the connection in whatever way you want before the request executes.
 
 ### Change the Charset
 
-By default, the charset for all param encoding and string response parsing is UTF-8. You 
+By default, the charset for all param encoding and string response parsing is UTF-8. You
 can override with charset of your choice:
 
 ```scala

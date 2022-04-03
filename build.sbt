@@ -1,30 +1,30 @@
 name := "scalaj-http"
 
-version := "2.4.2"
+version := "2.5.0"
 
 organization := "org.scalaj"
 
-scalaVersion := "2.12.8"
+scalaVersion := "2.12.15"
 
 libraryDependencies ++= Seq(
-  "junit"                         % "junit"                % "4.12"             % "test",
-  "com.novocode"                  % "junit-interface"      % "0.11"             % "test",
-  "org.eclipse.jetty"             % "jetty-server"         % "8.2.0.v20160908"  % "test",
-  "org.eclipse.jetty"             % "jetty-servlet"        % "8.2.0.v20160908"  % "test",
-  "org.eclipse.jetty"             % "jetty-servlets"       % "8.2.0.v20160908"  % "test"
+  "junit"                         % "junit"                % "4.13.2"             % "test",
+  "com.github.sbt"                % "junit-interface"      % "0.13.3"             % "test",
+  "org.eclipse.jetty"             % "jetty-server"         % "8.2.0.v20160908"    % "test",
+  "org.eclipse.jetty"             % "jetty-servlet"        % "8.2.0.v20160908"    % "test",
+  "org.eclipse.jetty"             % "jetty-servlets"       % "8.2.0.v20160908"    % "test"
 )
 
 libraryDependencies += {
-  "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.9.9"            % "test"
+  "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.13.2"            % "test"
 }
 
 enablePlugins(BuildInfoPlugin)
 buildInfoKeys := Seq[BuildInfoKey](version)
 buildInfoPackage := "scalaj.http"
 
-crossScalaVersions := Seq("2.10.7", "2.11.12", "2.12.8", "2.13.0")
+crossScalaVersions := Seq("2.12.15", "2.13.7", "3.1.0")
 
-javacOptions ++= Seq("-source", "1.7", "-target", "1.7")
+javacOptions ++= Seq("-source", "1.8", "-target", "1.8")
 
 scalacOptions ++= Seq(
   "-deprecation",

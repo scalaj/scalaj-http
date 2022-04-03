@@ -17,6 +17,7 @@ import org.junit.Assert._
 import org.junit.Test
 
 import scalaj.http.HttpConstants._
+import java.util.concurrent.atomic.AtomicReference
 
 
 class HttpTest {
@@ -25,6 +26,7 @@ class HttpTest {
     reqHandler: (HttpServletRequest, HttpServletResponse) => Unit
   )(requestF: String => Unit): Unit = {
     val server = new Server(0)
+    val refHolder = new AtomicReference[Throwable]()
     server.setHandler(new AbstractHandler(){
       def handle(
         target: String,
@@ -32,7 +34,12 @@ class HttpTest {
         request: HttpServletRequest,
         response: HttpServletResponse
       ): Unit = {
-        reqHandler(request, response)
+        try {
+          reqHandler(request, response)
+        } catch {
+          case e: Throwable =>
+            refHolder.set(e)
+        }
         baseRequest.setHandled(true)
       }
     })
@@ -42,6 +49,9 @@ class HttpTest {
       requestF("http://localhost:" + port + "/")
     } finally {
       server.stop()
+    }
+    if (refHolder.get() != null) {
+      throw refHolder.get()
     }
   }
 
@@ -129,7 +139,7 @@ class HttpTest {
       assertEquals("expecting failure, but got " + result, 401, result.code)
     }
   }
-  
+
   @Test
   def basicRequest: Unit = {
     val expectedCode = HttpServletResponse.SC_OK
@@ -257,7 +267,7 @@ class HttpTest {
       assertEquals(Some("foobar"), response.header("x-FOO"))
     })
   }
-  
+
   @Test
   def asParams: Unit = {
     makeRequest((req, resp) => {
@@ -289,7 +299,7 @@ class HttpTest {
       val response = Http(url).asBytes
       assertEquals("hi", new String(response.body, HttpConstants.utf8))
     })
-  }  
+  }
 
   @Test
   def shouldPrependOptions: Unit = {
@@ -298,7 +308,7 @@ class HttpTest {
     val origOptionsLength = origOptions.length
     val newOptions: List[HttpOptions.HttpOption] = List(c => { }, c=> { }, c => {})
     val http2 = http.options(newOptions)
-    
+
     assertEquals(http2.options.length, origOptionsLength + 3)
     assertEquals(http2.options.take(3), newOptions)
     assertEquals(origOptions.length, origOptionsLength)
@@ -353,6 +363,18 @@ class HttpTest {
       } catch {
         case e: RuntimeException if e.getMessage == "FOO" => // ok
       }
+    })
+  }
+
+  @Test
+  def postDataOverrideMethod: Unit = {
+    makeRequest((req, resp) => {
+      assertEquals("GET", req.getMethod)
+      assertEquals("hi", req.getReader().readLine())
+      resp.setStatus(200)
+      resp.getWriter.print("")
+    })(url => {
+      Http(url).postData("hi").method("GET").asString
     })
   }
 
@@ -489,6 +511,8 @@ class HttpTest {
   def testPostEquals: Unit = {
     assertEquals(Http("http://foo.com/").postData("hi"), Http("http://foo.com/").postData("hi"))
   }
+
+
 }
 
 class AuthProxyServlet extends ProxyServlet {

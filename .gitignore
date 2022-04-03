@@ -9,3 +9,8 @@ log/*
 *.iml
 *.ipr
 .sbtlib
+.metals/
+.vscode/
+metals.sbt
+.bloop
+
