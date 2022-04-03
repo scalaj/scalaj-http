@@ -15,7 +15,7 @@ libraryDependencies ++= Seq(
 )
 
 libraryDependencies += {
-  "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.13.1"            % "test"
+  "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.13.2"            % "test"
 }
 
 enablePlugins(BuildInfoPlugin)

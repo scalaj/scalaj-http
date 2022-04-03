@@ -15,15 +15,18 @@ package scalaj.http
   See the License for the specific language governing permissions and
   limitations under the License.
  */
- 
+
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 import java.io.StringWriter
+import com.fasterxml.jackson.databind.json.JsonMapper
+import com.fasterxml.jackson.module.scala.ClassTagExtensions
 
 object Json {
-  private val mapper = new ObjectMapper() with ScalaObjectMapper
+  private val mapper = JsonMapper.builder()
+    .addModule(DefaultScalaModule)
+    .build() :: ClassTagExtensions
   mapper.registerModule(DefaultScalaModule)
   mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
   mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
@@ -37,4 +40,4 @@ object Json {
     mapper.writeValue(out, obj)
     out.toString
   }
-}   
+}
