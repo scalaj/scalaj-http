@@ -19,7 +19,7 @@ package scalaj.http
 import collection.immutable.TreeMap
 import java.lang.reflect.Field
 import java.net.{HttpCookie, HttpURLConnection, InetSocketAddress, Proxy, URL, URLEncoder, URLDecoder}
-import java.io.{DataOutputStream, InputStream, BufferedReader, InputStreamReader, ByteArrayInputStream, 
+import java.io.{DataOutputStream, InputStream, BufferedReader, InputStreamReader, ByteArrayInputStream,
   ByteArrayOutputStream}
 import java.security.cert.X509Certificate
 import javax.net.ssl.HttpsURLConnection
@@ -38,13 +38,28 @@ object HttpOptions {
   type HttpOption = HttpURLConnection => Unit
 
   val officialHttpMethods = Set("GET", "POST", "HEAD", "OPTIONS", "PUT", "DELETE", "TRACE")
-  
+
   private lazy val methodField: Field = {
     val m = classOf[HttpURLConnection].getDeclaredField("method")
     m.setAccessible(true)
     m
   }
-  
+
+  def forceMethod(methodOrig: String): HttpOption = c => {
+    val method = methodOrig.toUpperCase
+    // HttpURLConnection enforces a list of official http METHODs, but not everyone abides by the spec
+    // this hack allows us set an unofficial http method
+    c match {
+      case cs: HttpsURLConnection =>
+        cs.getClass.getDeclaredFields.find(_.getName == "delegate").foreach{ del =>
+          del.setAccessible(true)
+          methodField.set(del.get(cs), method)
+        }
+      case c =>
+        methodField.set(c, method)
+    }
+  }
+
   def method(methodOrig: String): HttpOption = c => {
     val method = methodOrig.toUpperCase
     if (officialHttpMethods.contains(method)) {
@@ -58,25 +73,25 @@ object HttpOptions {
             del.setAccessible(true)
             methodField.set(del.get(cs), method)
           }
-        case c => 
+        case c =>
           methodField.set(c, method)
       }
     }
   }
   def connTimeout(timeout: Int): HttpOption = c => c.setConnectTimeout(timeout)
-  
+
   def readTimeout(timeout: Int): HttpOption = c => c.setReadTimeout(timeout)
-  
+
   def followRedirects(shouldFollow: Boolean): HttpOption = c => c.setInstanceFollowRedirects(shouldFollow)
 
   /** Ignore the cert chain */
   def allowUnsafeSSL: HttpOption = c => c match {
-    case httpsConn: HttpsURLConnection => 
+    case httpsConn: HttpsURLConnection =>
       val hv = new HostnameVerifier() {
         def verify(urlHostName: String, session: SSLSession) = true
       }
       httpsConn.setHostnameVerifier(hv)
-      
+
       val trustAllCerts = Array[TrustManager](new X509TrustManager() {
         def getAcceptedIssuers: Array[X509Certificate] = null
         def checkClientTrusted(certs: Array[X509Certificate], authType: String) = {}
@@ -92,7 +107,7 @@ object HttpOptions {
   /** Add your own SSLSocketFactory to do certificate authorization or pinning */
   def sslSocketFactory(sslSocketFactory: SSLSocketFactory): HttpOption = c => c match {
     case httpsConn: HttpsURLConnection =>
-      httpsConn.setSSLSocketFactory(sslSocketFactory) 
+      httpsConn.setSSLSocketFactory(sslSocketFactory)
     case _ => // do nothing
   }
 }
@@ -202,7 +217,7 @@ case class HttpResponse[T](body: T, code: Int, headers: Map[String, IndexedSeq[S
   *
   * You shouldn't need to construct this manually. Use [[scalaj.http.Http.apply]] to get an instance
   *
-  * The params, headers and options methods are all additive. They will always add things to the request. If you want to 
+  * The params, headers and options methods are all additive. They will always add things to the request. If you want to
   * replace those things completely, you can do something like {{{.copy(params=newparams)}}}
   *
   */
@@ -210,7 +225,7 @@ case class HttpRequest(
   url: String,
   method: String,
   connectFunc: HttpConstants.HttpExec,
-  params: Seq[(String,String)], 
+  params: Seq[(String,String)],
   headers: Seq[(String,String)],
   options: Seq[HttpOptions.HttpOption],
   proxyConfig: Option[Proxy],
@@ -264,7 +279,7 @@ case class HttpRequest(
   /** Add digest authentication credentials */
   def digestAuth(user: String, password: String) = copy(digestCreds = Some(user -> password))
 
-  
+
   /** OAuth v1 sign the request with the consumer token */
   def oauth(consumer: Token): HttpRequest = oauth(consumer, None, None)
   /** OAuth v1 sign the request with with both the consumer and client token */
@@ -276,9 +291,9 @@ case class HttpRequest(
     OAuth.sign(this, consumer, token, verifier)
   }
 
-  /** Change the http request method. 
+  /** Change the http request method.
     * The library will allow you to set this to whatever you want. If you want to do a POST, just use the
-    * postData, postForm, or postMulti methods. If you want to setup your request as a form, data or multi request, but 
+    * postData, postForm, or postMulti methods. If you want to setup your request as a form, data or multi request, but
     * want to change the method type, call this method after the post method:
     *
     * {{{Http(url).postData(dataBytes).method("PUT").asString}}}
@@ -305,7 +320,7 @@ case class HttpRequest(
   def proxy(proxy: Proxy): HttpRequest = {
     copy(proxyConfig = Some(proxy))
   }
-  
+
   /** Change the charset used to encode the request and decode the response. UTF-8 by default */
   def charset(cs: String): HttpRequest = copy(charset = cs)
 
@@ -316,7 +331,7 @@ case class HttpRequest(
   def timeout(connTimeoutMs: Int, readTimeoutMs: Int): HttpRequest = options(
     Seq(HttpOptions.connTimeout(connTimeoutMs), HttpOptions.readTimeout(readTimeoutMs))
   )
-  
+
   /** Executes this request
     *
     * Keep in mind that if you're parsing the response to something other than String, you may hit parsing error if
@@ -355,7 +370,7 @@ case class HttpRequest(
         if (compress) {
           conn.setRequestProperty("Accept-Encoding", "gzip,deflate")
         }
-        headers.reverse.foreach{ case (name, value) => 
+        headers.reverse.foreach{ case (name, value) =>
           conn.setRequestProperty(name, value)
         }
         options.reverse.foreach(_(conn))
@@ -438,7 +453,7 @@ case class HttpRequest(
       }.groupBy(_._1).mapValues(_.map(_._2).toIndexedSeq)
     }
   }
-  
+
   private def closeStreams(conn: HttpURLConnection): Unit = {
     try {
       conn.getInputStream.close
@@ -485,7 +500,7 @@ case class HttpRequest(
   def postMulti(parts: MultiPart*): HttpRequest = {
     copy(method="POST", connectFunc=MultiPartConnectFunc(parts), urlBuilder=PlainUrlFunc)
   }
-  
+
   /** Execute this request and parse http body as Array[Byte] */
   def asBytes: HttpResponse[Array[Byte]] = execute(HttpConstants.readBytes)
   /** Execute this request and parse http body as String using server charset or configured charset*/
@@ -535,7 +550,11 @@ case class StringBodyConnectFunc(data: String) extends Function2[HttpRequest, Ht
   def apply(req: HttpRequest, conn: HttpURLConnection): Unit = {
     conn.setDoOutput(true)
     conn.connect
-    conn.getOutputStream.write(data.getBytes(req.charset))
+    val outputStream = conn.getOutputStream
+    if ("GET".equalsIgnoreCase(req.method)) {
+      HttpOptions.forceMethod(req.method)(conn)
+    }
+    outputStream.write(data.getBytes(req.charset))
   }
 
   override def toString = "StringBodyConnectFunc(" + data + ")"
@@ -680,7 +699,7 @@ object HttpConstants {
   def basicAuthValue(user: String, password: String): String = {
     "Basic " + base64(user + ":" + password)
   }
-  
+
   def toQs(params: Seq[(String,String)], charset: String): String = {
     params.map(p => urlEncode(p._1, charset) + "=" + urlEncode(p._2, charset)).mkString("&")
   }
@@ -690,7 +709,7 @@ object HttpConstants {
       (if(url.contains("?")) "&" else "?") + toQs(params, charset)
     })
   }
-  
+
   def readString(is: InputStream): String = readString(is, utf8)
   /**
    * [lifted from lift]
@@ -713,8 +732,8 @@ object HttpConstants {
       bos.toString
     }
   }
-  
-  
+
+
   /**
    * [lifted from lift]
    * Read all data from a stream into an Array[Byte]
@@ -801,5 +820,5 @@ class BaseHttp (
     urlBuilder = QueryStringUrlFunc,
     compress = compress,
     digestCreds = None
-  )  
+  )
 }

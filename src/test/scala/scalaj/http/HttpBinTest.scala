@@ -36,20 +36,6 @@ class HttpBinTest {
   }
 
   @Test
-  def redirectShouldNotFollow: Unit = {
-    val response = Http("http://httpbin.org/redirect-to?url=http://foo.org").asString
-    assertEquals(302, response.code)
-    assertEquals(Some("http://foo.org"), response.header("Location"))
-  }
-
-  @Test
-  def shouldFollowHttpsRedirect: Unit = {
-    val response = sslLeniency(Http("http://httpbin.org/redirect-to?url=https://httpbin.org/get"))
-      .option(HttpOptions.followRedirects(true)).asString
-    assertEquals(200, response.code)
-  }
-
-  @Test
   def shouldGetHttpsUrl: Unit = {
     val response = sslLeniency(Http("https://httpbin.org/get"))
       .asString
@@ -64,7 +50,7 @@ class HttpBinTest {
     assertTrue("Should have some headers", response.headers.contains("Date"))
   }
 
-  @Test 
+  @Test
   def gzipWithHead: Unit = {
     val response = Http("http://httpbin.org/gzip").method("HEAD").asString
     assertEquals(200, response.code)
@@ -84,7 +70,7 @@ class HttpBinTest {
     assertNotEquals("{", response.body.substring(0,1))
   }
 
-  @Test 
+  @Test
   def deflateWithHead: Unit = {
     val response = Http("http://httpbin.org/deflate").method("HEAD").asString
     assertEquals(200, response.code)
