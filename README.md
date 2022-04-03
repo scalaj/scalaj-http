@@ -4,10 +4,10 @@
 
 # THIS LIBRARY IS DEPRECATED
 
-As of April 2022, there are many better options for making HTTP calls in scala.
+As of April 2022 there are many supported options for making HTTP calls in scala:
 
 - [sttp](https://github.com/softwaremill/sttp) or [http4s](https://github.com/http4s/http4s) might be good scala first options
-- Or just ise the built-in [HttpClient](https://docs.oracle.com/en/java/javase/12/docs/api/java.net.http/java/net/http/HttpClient.html) library if you're using JDK 11+ and want minimal deps
+- The native [HttpClient](https://docs.oracle.com/en/java/javase/12/docs/api/java.net.http/java/net/http/HttpClient.html) library if you're using JDK 11+ and want minimal deps
 
 If you've inherited a codebase that's using this library, I would suggest just copying the source code
 (it's only four files, and no depedencies) and make whatever fixes/changes you want.
